@@ -190,7 +190,8 @@ public final class DexManager {
         inv.setItem(21, info("minecraft:lead", "Domesticar", s.eggTameOnly ? "Solo naciendo de un huevo."
                 : s.tameable() ? "Dándole " + s.diet().label + " (" + Math.round(s.tameChance * 100) + "% por bocado)."
                 : "No se domestica."));
-        inv.setItem(22, info("minecraft:saddle", "Montura", !s.rideable ? "No se puede montar."
+        inv.setItem(22, info("minecraft:saddle", "Montura", !s.rideable ? (s.perches ? "No se monta: va en tu hombro."
+                : "No se puede montar.")
                 : s.flies() ? "Sí: espacio despega, W vuela hacia donde mirás."
                 : s.roars ? "Sí: espacio ruge en vez de saltar."
                 : s.charges ? "Sí: corriendo arrolla lo que tenga adelante." : "Sí: rápido y salta alto."));
@@ -302,10 +303,15 @@ public final class DexManager {
             case HERBIVORE -> "Tranquilo, pero embiste si lo atacan.";
             case HOSTILE -> "Hostil: ataca a los jugadores que ve.";
             case PACK -> "Anda en manada y ataca a los heridos o si son muchos.";
+            case PREY -> "Huye en manada. Acercate agachado para darle de comer.";
         };
     }
 
     private static String ability(Species s) {
+        if (s.perches) return "Agachado + click derecho: se sube a tu hombro y chilla si hay monstruos cerca.";
+        if (s.tail == Species.TailAttack.SPIKES) return "Coletazo con púas al que le pega por atrás.";
+        if (s.tail == Species.TailAttack.CLUB) return "Maza en la cola que tira lejos; las flechas casi no le hacen daño.";
+        if (s.temper == Species.Temper.PREY) return "Si uno se asusta, avisa y sale corriendo toda la manada.";
         if (s.spits) return "Escupe veneno: ceguera y veneno.";
         if (s.roars) return "Rugido: lentitud y oscuridad a los que estén cerca.";
         if (s.charges) return "Embestida que tira lejos.";

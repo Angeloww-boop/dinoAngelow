@@ -14,16 +14,27 @@ import zlib
 
 import feeder
 import geometry as G
+import species_ankylosaurus
+import species_carnotaurus
 import species_compsognathus
 import species_dilophosaurus
+import species_dimorphodon
+import species_gallimimus
+import species_giganotosaurus
+import species_parasaurolophus
 import species_pteranodon
 import species_raptor
+import species_stegosaurus
 import species_trex
 import species_triceratops
 
 ALL_SPECIES = [species_raptor.SPECIES, species_triceratops.SPECIES,
                species_dilophosaurus.SPECIES, species_compsognathus.SPECIES,
-               species_trex.SPECIES, species_pteranodon.SPECIES]
+               species_trex.SPECIES, species_pteranodon.SPECIES,
+               species_parasaurolophus.SPECIES, species_gallimimus.SPECIES,
+               species_stegosaurus.SPECIES, species_ankylosaurus.SPECIES,
+               species_giganotosaurus.SPECIES, species_carnotaurus.SPECIES,
+               species_dimorphodon.SPECIES]
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACK_DIR = os.path.join(ROOT, "resourcepack")

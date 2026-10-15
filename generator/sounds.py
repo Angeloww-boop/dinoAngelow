@@ -125,7 +125,7 @@ def egg_hatch():
 
 
 # ---------------------------------------------------------------- salida
-from sounds_species import SPECIES_SOUNDS, SPECIES_SOUNDS_2  # noqa: E402
+from sounds_species import SPECIES_SOUNDS, SPECIES_SOUNDS_2, SPECIES_SOUNDS_3  # noqa: E402
 
 # grupo -> [(clave, generador, subtitulo es, subtitulo en)]
 SOUNDS = {
@@ -146,6 +146,7 @@ SOUNDS = {
     ],
     # despues de los huevos, asi los sonidos que ya existian no cambian (comparten el generador al azar)
     **SPECIES_SOUNDS_2,
+    **SPECIES_SOUNDS_3,
 }
 DRY = ("step", "crack", "flap")   # sin reverb
 

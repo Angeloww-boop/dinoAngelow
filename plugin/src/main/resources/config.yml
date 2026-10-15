@@ -87,3 +87,68 @@ species:
       jump: 0.55             # impulso al despegar (con espacio)
       fly-speed: 0.55        # volando con W
       fly-sprint-speed: 0.9  # volando con W + Ctrl
+  parasaurolophus:
+    hunger-minutes: 100
+    health: 60
+    damage: 6
+    speed: 0.3
+    tame-chance: 0.15        # por cada planta (huye: acercate agachado)
+    ride:
+      walk-speed: 0.27
+      sprint-speed: 0.42
+      jump: 0.5
+  gallimimus:
+    hunger-minutes: 70
+    health: 24
+    damage: 3
+    speed: 0.42
+    tame-chance: 0.15        # por cada planta (huye: acercate agachado)
+    ride:
+      walk-speed: 0.36
+      sprint-speed: 0.64     # la montura mas rapida
+      jump: 0.62
+  stegosaurus:
+    hunger-minutes: 110
+    health: 90
+    damage: 10
+    speed: 0.25
+    tame-chance: 0.15
+    ride:
+      walk-speed: 0.22
+      sprint-speed: 0.34
+      jump: 0.4
+  ankylosaurus:
+    hunger-minutes: 110
+    health: 110
+    damage: 8
+    speed: 0.22
+    tame-chance: 0.15
+    ride:
+      walk-speed: 0.2
+      sprint-speed: 0.3
+      jump: 0.35
+  giganotosaurus:
+    hunger-minutes: 65
+    health: 150
+    damage: 15
+    speed: 0.33
+    # como el T-Rex: solo se domestica desde el huevo. Montado, espacio = rugido
+    ride:
+      walk-speed: 0.28
+      sprint-speed: 0.46
+  carnotaurus:
+    hunger-minutes: 80
+    health: 45
+    damage: 8
+    speed: 0.4
+    tame-chance: 0.12        # por cada carne cruda
+    ride:
+      walk-speed: 0.34
+      sprint-speed: 0.56
+      jump: 0.55
+  dimorphodon:
+    hunger-minutes: 90
+    health: 10
+    damage: 2
+    speed: 0.32
+    tame-chance: 0.33        # por cada pescado crudo

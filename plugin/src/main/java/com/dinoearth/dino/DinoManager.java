@@ -129,6 +129,14 @@ public final class DinoManager {
         dying.removeIf(d -> !d.tick());
     }
 
+    /** El dino que va en el hombro de este jugador, o null. */
+    public Dino perchedOn(org.bukkit.entity.Player player) {
+        for (Dino d : active.values()) {
+            if (d.isPerchedOn(player)) return d;
+        }
+        return null;
+    }
+
     public int count() {
         return active.size();
     }

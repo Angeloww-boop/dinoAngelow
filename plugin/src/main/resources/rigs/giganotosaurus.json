@@ -1,0 +1,205 @@
+{
+  "species": "giganotosaurus",
+  "scale": 1.2,
+  "item": "dinoearth:giganotosaurus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "arena",
+      "name": "Arena",
+      "weight": 30
+    },
+    {
+      "id": "gris",
+      "name": "Gris",
+      "weight": 24
+    },
+    {
+      "id": "rojizo",
+      "name": "Rojizo",
+      "weight": 22
+    },
+    {
+      "id": "verde",
+      "name": "Verde",
+      "weight": 21
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 44.5,
+      "radius": 56.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            30.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            32.0,
+            21.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            36.5,
+            27.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            31.0,
+            -9.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            29.5,
+            -32.0
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            7.5,
+            30.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "shin_r",
+          "parent": "leg_r",
+          "joint": [
+            8.0,
+            19.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -7.5,
+            30.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "shin_l",
+          "parent": "leg_l",
+          "joint": [
+            -8.0,
+            19.0,
+            -4.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 19.5,
+      "radius": 18.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            10.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            11.5,
+            5.5
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            14.0,
+            9.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            11.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            10.0,
+            -10.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            3.5,
+            10.5,
+            -1.5
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -3.5,
+            10.5,
+            -1.5
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      30.0,
+      0.0
+    ],
+    "item": "dinoearth:giganotosaurus/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:giganotosaurus/egg/egg",
+    "cracked": "dinoearth:giganotosaurus/egg_cracked/egg",
+    "icon": "dinoearth:giganotosaurus/egg_item"
+  }
+}

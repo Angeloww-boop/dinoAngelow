@@ -12,6 +12,13 @@ Dinosaurios para la modalidad Earth (Paper 1.21.11; el pack funciona en clientes
 | **Compsognathus** | 0,6 × 1,4 bloques | Anda en grupos de 5; ataca si estás **herido** o si son 4 o más | — | No | No | verde, pardo, gris, albino |
 | **Tyrannosaurus rex** | 3,4 × 7,3 bloques | Salvaje **te caza** y **ruge**: lentitud + oscuridad a los que estén cerca | **Solo criándolo desde el huevo** | Sí; **espacio = rugido** (no salta) | Sí | pardo, oscuro, verde, rojizo, albino |
 | **Pteranodon** | 2 bloques de alto, 6,5 de envergadura | Neutral; sale a **volar en círculos** y aterriza; herido se escapa volando | Pescado crudo: bacalao, salmón, pez tropical (20 %) | Sí, **vuela** | Sí | gaviota, pardo, pizarra, celeste, albino |
+| **Parasaurolophus** | 2,4 × 5,2 bloques | **Presa**: anda en manada y huye; el que se asusta **trompetea** y corren todos | Plantas (15 %), acercándote **agachado** | Sí | Sí | verde, pardo, azul, rojizo, albino |
+| **Gallimimus** | 2,2 × 3,7 bloques | **Presa**: huye en bandada | Plantas (15 %), acercándote **agachado** | Sí, **la más rápida** | Sí | arena, gris, verde, naranja, albino |
+| **Stegosaurus** | 2,4 × 4,5 bloques | Herbívoro; **coletazo con púas** al que le pega por atrás | Plantas (15 %) | Sí, lenta | Sí | oliva, pardo, gris, rojizo, albino |
+| **Ankylosaurus** | 1,6 × 4,3 bloques | Herbívoro **acorazado** (las flechas le hacen 35 %); **maza** en la cola que tira lejos | Plantas (15 %) | Sí, muy lenta | Sí | pardo, musgo, piedra, arcilla, albino |
+| **Giganotosaurus** | 3,3 × 7,6 bloques | Como el T-Rex: salvaje te caza y ruge; un poco más rápido | **Solo criándolo desde el huevo** | Sí; espacio = rugido | Sí | arena, gris, rojizo, verde, albino |
+| **Carnotaurus** | 2,4 × 4,4 bloques | Carnívoro neutral, muy rápido; montado y corriendo **embiste** | Carne cruda (12 %) | Sí, rápida | Sí | rojo, pardo, gris, verde, albino |
+| **Dimorphodon** | 0,7 bloques, 2 de ala a ala | Pterosaurio chiquito; vuela y aterriza | Pescado crudo (33 %) | No: **va en tu hombro** y chilla si hay monstruos cerca | Sí | loro, tucán, pardo, cielo, albino |
 
 El albino es raro (3 %). Los machos son un poco más grandes y más coloridos
 (cresta en el raptor, cuernos más largos y gola con rayos en el triceratops, crestas más altas en el dilophosaurus,
@@ -27,8 +34,10 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 |---|---|
 | Domesticar | Click derecho con su comida (ver tabla) |
 | Sentar / parar | Click derecho (agachado si tiene montura) |
-| Curar | Raptor y T-Rex: carne · Triceratops y pteranodon: su comida |
+| Curar | Con su comida (carnívoros: carne; herbívoros y presas: plantas; pteranodon y dimorphodon: pescado) |
 | Montura | Click derecho con una montura (adulto, solo el dueño). Click derecho para subir. WASD, Ctrl corre, espacio salta, Shift baja. Tijeras: sacar la montura |
+| Presas | El parasaurolophus y el gallimimus salvajes huyen si te acercás. **Agachado** podés llegar hasta ellos y darles de comer |
+| Hombro (dimorphodon) | Domesticado: **agachado + click derecho con la mano vacía** y se sube a tu hombro. Agachado + click izquierdo (o lo mismo de nuevo) y se baja. Si hay monstruos a 12 bloques, chilla y te avisa |
 | Volar (pteranodon) | En el suelo, **espacio despega**. En el aire: **W vuela hacia donde mirás** (mirar abajo = picada, arriba = trepar), Ctrl más rápido, **espacio aletea para subir**, sin W planea bajando. Aterriza solo al tocar el suelo. Si te bajás (Shift) en el aire caés con caída lenta |
 | T-Rex | Los salvajes no se domestican: hay que conseguir un huevo (`/dino egg trex` o vendido con Shopkeepers), criarlo y esperar a que sea adulto |
 | Hambre | Los domesticados se van quedando con hambre (1–2 h de juego de lleno a vacío). Se les da su comida con click derecho. **Muertos de hambre se echan, se ven mal y no se dejan montar** (no se mueren); con hambre tampoco crían |
@@ -53,7 +62,8 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 ```
 
 Especies: `raptor`, `triceratops` (`trike`), `dilophosaurus` (`dilo`), `compsognathus` (`compy`), `trex` (`rex`),
-`pteranodon` (`ptera`, `pterodactilo`).
+`pteranodon` (`ptera`, `pterodactilo`), `parasaurolophus` (`para`), `gallimimus` (`galli`), `stegosaurus` (`stego`),
+`ankylosaurus` (`anky`), `giganotosaurus` (`giga`), `carnotaurus` (`carno`), `dimorphodon` (`dimo`).
 
 ## Rendimiento
 

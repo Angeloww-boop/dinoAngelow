@@ -25,8 +25,13 @@ public final class Species {
         /** Ataca a los jugadores que ve. No se domestica. */
         HOSTILE,
         /** Anda en grupo y ataca a jugadores heridos o cuando son muchos. No se domestica. */
-        PACK
+        PACK,
+        /** Presa: herbivoro en manada que huye de los jugadores (agachado te podes acercar). Se domestica con plantas. */
+        PREY
     }
+
+    /** Arma de la cola contra el que le pega por atras. */
+    public enum TailAttack { NONE, SPIKES, CLUB }
 
     public record Drop(Material item, int min, int max) {
     }
@@ -111,6 +116,11 @@ public final class Species {
     public double flySpeed;
     public double flySprint;
     private final Set<Material> food;
+    public final TailAttack tail;
+    /** Las flechas y otros proyectiles le hacen mucho menos daño. */
+    public final boolean armored;
+    /** Domesticado se sube al hombro del dueño (agachado + click derecho con la mano vacia). */
+    public final boolean perches;
     /** Minutos que tarda en pasar de lleno a muerto de hambre (0 = no tiene hambre). */
     public double hungerMinutes;
     /** Puntos de comida que le entran de vacio a lleno. */
@@ -152,6 +162,9 @@ public final class Species {
         flySpeed = b.flySpeed;
         flySprint = b.flySprint;
         food = b.food;
+        tail = b.tail;
+        armored = b.armored;
+        perches = b.perches;
         hungerMinutes = b.hungerMinutes;
         stomach = b.stomach;
         size = b.size;
@@ -162,7 +175,12 @@ public final class Species {
     }
 
     public boolean tameable() {
-        return temper == Temper.CARNIVORE || temper == Temper.HERBIVORE;
+        return temper == Temper.CARNIVORE || temper == Temper.HERBIVORE || temper == Temper.PREY;
+    }
+
+    /** Come plantas (herbivoro o presa). */
+    public boolean herbivore() {
+        return temper == Temper.HERBIVORE || temper == Temper.PREY;
     }
 
     public boolean hostile() {
@@ -172,7 +190,7 @@ public final class Species {
     /** Comida para domesticar, curar, criar y hacer crecer a las crias. */
     public Set<Material> food() {
         if (food != null) return food;
-        return temper == Temper.HERBIVORE ? PLANTS : MEAT;
+        return herbivore() ? PLANTS : MEAT;
     }
 
     public boolean flies() {
@@ -244,7 +262,51 @@ public final class Species {
             .drops(new Drop(Material.FEATHER, 1, 3), new Drop(Material.CHICKEN, 1, 2), new Drop(Material.BONE, 0, 2))
             .build();
 
-    public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS, TREX, PTERANODON);
+    public static final Species PARASAUROLOPHUS = new Builder("parasaurolophus", "Parasaurolophus", Body.QUADRUPED, Temper.PREY)
+            .aliases("para", "parasaurio").stats(60, 6, 0.3).hitbox(2.2).stride(1.8).group(4).view(1.5)
+            .tame(0.15).ride(0.27, 0.42, 0.5).hunger(100, 80)
+            .about("2,4 × 5,2 bloques", "Anda en manada y huye. Cuando uno se asusta trompetea con la cresta y salen todos corriendo.")
+            .drops(new Drop(Material.LEATHER, 1, 3), new Drop(Material.BEEF, 2, 3)).build();
+
+    public static final Species GALLIMIMUS = new Builder("gallimimus", "Gallimimus", Body.BIPED, Temper.PREY)
+            .aliases("galli", "gallimimo").stats(24, 3, 0.42).hitbox(1.95).stride(2.0).swing(46).group(5)
+            .tame(0.15).ride(0.36, 0.64, 0.62).hunger(70, 40)
+            .about("2,2 × 3,7 bloques", "El \"avestruz\" de los dinosaurios: huye en bandada y domesticado es la montura más rápida.")
+            .drops(new Drop(Material.CHICKEN, 1, 2), new Drop(Material.FEATHER, 1, 3)).build();
+
+    public static final Species STEGOSAURUS = new Builder("stegosaurus", "Stegosaurus", Body.QUADRUPED, Temper.HERBIVORE)
+            .aliases("stego", "estegosaurio").stats(90, 10, 0.25).hitbox(2.2).knockback(0.8).stride(1.7).view(1.5)
+            .tame(0.15).ride(0.22, 0.34, 0.4).tail(TailAttack.SPIKES).hunger(110, 90)
+            .about("2,4 × 4,5 bloques", "Placas en el lomo y púas en la cola: al que le pega por atrás le da un coletazo.")
+            .drops(new Drop(Material.LEATHER, 2, 4), new Drop(Material.BEEF, 2, 4)).build();
+
+    public static final Species ANKYLOSAURUS = new Builder("ankylosaurus", "Ankylosaurus", Body.QUADRUPED, Temper.HERBIVORE)
+            .aliases("anky", "anquilosaurio").stats(110, 8, 0.22).hitbox(2.0).knockback(1.5).stride(2.2).view(1.5)
+            .tame(0.15).ride(0.2, 0.3, 0.35).tail(TailAttack.CLUB).armored().hunger(110, 90)
+            .about("1,6 × 4,3 bloques", "Un tanque acorazado: las flechas casi no le hacen nada y la maza de la cola tira lejos.")
+            .drops(new Drop(Material.LEATHER, 2, 5), new Drop(Material.BEEF, 2, 4)).build();
+
+    public static final Species GIGANOTOSAURUS = new Builder("giganotosaurus", "Giganotosaurus", Body.BIPED, Temper.CARNIVORE)
+            .aliases("giga", "giganotosaurio").stats(150, 15, 0.33).hitbox(3.35).knockback(1.2).stride(1.3).swing(28)
+            .territorial().eggTameOnly().roars().ride(0.28, 0.46, 0).view(2).hunger(65, 120)
+            .about("3,3 × 7,6 bloques", "El gigante argentino, rival del T-Rex: un poco más rápido y más largo. Solo se cría desde el huevo.")
+            .drops(new Drop(Material.BEEF, 4, 8), new Drop(Material.BONE, 3, 6), new Drop(Material.LEATHER, 2, 4))
+            .build();
+
+    public static final Species CARNOTAURUS = new Builder("carnotaurus", "Carnotaurus", Body.BIPED, Temper.CARNIVORE)
+            .aliases("carno", "carnotauro").stats(45, 8, 0.4).hitbox(2.25).knockback(0.8).stride(2.0).swing(40)
+            .tame(0.12).ride(0.34, 0.56, 0.55).charges().view(1.5).hunger(80, 50)
+            .about("2,4 × 4,4 bloques", "El \"toro carnívoro\" argentino: cuernos sobre los ojos y patas largas. Montado y corriendo embiste.")
+            .drops(new Drop(Material.BEEF, 2, 4), new Drop(Material.BONE, 1, 3)).build();
+
+    public static final Species DIMORPHODON = new Builder("dimorphodon", "Dimorphodon", Body.FLYER, Temper.CARNIVORE)
+            .aliases("dimo", "dimorfodonte").stats(10, 2, 0.32).hitbox(0.75).stride(5).group(2).view(0.8)
+            .food(FISH).tame(0.33).perches().hunger(90, 16)
+            .about("0,7 bloques, 2 de ala a ala", "Pterosaurio chiquito y cabezón. Domesticado viaja en tu hombro y chilla si hay monstruos cerca.")
+            .drops(new Drop(Material.FEATHER, 0, 2)).build();
+
+    public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS, TREX, PTERANODON,
+            PARASAUROLOPHUS, GALLIMIMUS, STEGOSAURUS, ANKYLOSAURUS, GIGANOTOSAURUS, CARNOTAURUS, DIMORPHODON);
 
     public static Species byId(String id) {
         if (id == null) return null;
@@ -263,7 +325,8 @@ public final class Species {
         double health = 20, damage = 4, speed = 0.3, hitbox = 1, knockback = 0, tameChance = 0, viewRange = 1;
         double rideWalk, rideSprint, rideJump, flySpeed, flySprint;
         float maleScale = 1.06f, stride = 2.4f, swing = 38;
-        boolean rideable, spits, charges, roars, territorial, eggTameOnly;
+        boolean rideable, spits, charges, roars, territorial, eggTameOnly, armored, perches;
+        TailAttack tail = TailAttack.NONE;
         Set<Material> food;
         double hungerMinutes;
         int stomach = 40;
@@ -355,6 +418,21 @@ public final class Species {
 
         Builder food(Set<Material> items) {
             food = items;
+            return this;
+        }
+
+        Builder tail(TailAttack attack) {
+            tail = attack;
+            return this;
+        }
+
+        Builder armored() {
+            armored = true;
+            return this;
+        }
+
+        Builder perches() {
+            perches = true;
             return this;
         }
 

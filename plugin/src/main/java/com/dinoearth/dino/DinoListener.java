@@ -102,17 +102,24 @@ public final class DinoListener implements Listener {
         // si no, el dino se guardaria "adentro" del jugador al desconectarse
         Player p = event.getPlayer();
         if (p.getVehicle() != null && dinos.isDino(p.getVehicle())) p.leaveVehicle();
+        Dino perched = dinos.perchedOn(p);
+        if (perched != null) perched.unperch();
     }
 
     // ------------------------------------------------------------ combate
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamage(EntityDamageEvent event) {
         Dino d = dinos.get(event.getEntity());
-        if (d != null) d.onHurt();
+        if (d != null) d.onHurt(event);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onHit(EntityDamageByEntityEvent event) {
+        Dino victim = dinos.get(event.getEntity());
+        if (victim != null) {
+            victim.onStruck(event);
+            if (event.isCancelled()) return;
+        }
         Dino d = dinos.get(event.getDamager());
         if (d != null) {
             d.onAttack();
@@ -296,7 +303,7 @@ public final class DinoListener implements Listener {
         }
         if (species.food() != Species.MEAT) {
             // el lobo solo entiende la carne: a los que comen otra cosa los curamos y ponemos en celo nosotros
-            if (species.temper == Species.Temper.HERBIVORE && Species.MEAT.contains(type)) {
+            if (species.herbivore() && Species.MEAT.contains(type)) {
                 event.setCancelled(true);
                 return;
             }
@@ -315,6 +322,19 @@ public final class DinoListener implements Listener {
                 wolf.getWorld().playSound(wolf.getLocation(), "minecraft:entity.generic.eat", SoundCategory.NEUTRAL, 0.9f, 0.8f);
                 return;
             }
+        }
+        if (species.perches && player.isSneaking() && type == Material.AIR && d.isAdult()) {
+            // agachado y con la mano vacia: se sube (o se baja) del hombro
+            event.setCancelled(true);
+            handled.put(player.getUniqueId(), now);
+            if (d.isPerchedOn(player)) {
+                d.unperch();
+            } else {
+                Dino other = dinos.perchedOn(player);
+                if (other != null) other.unperch();
+                d.perch(player);
+            }
+            return;
         }
         if (d.canRide() && !player.isSneaking() && !food && d.rider() == null) {
             event.setCancelled(true);
@@ -398,6 +418,15 @@ public final class DinoListener implements Listener {
     }
 
     // ------------------------------------------------------------ comederos y dinopedia
+    /** Agachado + click izquierdo: el que va en el hombro se baja. */
+    @EventHandler
+    public void onPunchAir(PlayerInteractEvent event) {
+        Action a = event.getAction();
+        if ((a != Action.LEFT_CLICK_AIR && a != Action.LEFT_CLICK_BLOCK) || !event.getPlayer().isSneaking()) return;
+        Dino perched = dinos.perchedOn(event.getPlayer());
+        if (perched != null) perched.unperch();
+    }
+
     @EventHandler(priority = EventPriority.HIGH)
     public void onUseItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();

@@ -10,7 +10,7 @@ from preview import dino, mat_t, render
 SIZE = 64
 CANVAS = 300
 # pose y angulo de camara (yaw, pitch) de cada especie; el resto usa la de reposo
-POSE = {"pteranodon": ("vuelo", 120, 28)}
+POSE = {"pteranodon": ("vuelo", 120, 28), "dimorphodon": ("vuelo", 120, 28)}
 SILHOUETTE = (46, 50, 58)
 
 

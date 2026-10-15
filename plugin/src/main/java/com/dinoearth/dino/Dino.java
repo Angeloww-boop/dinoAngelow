@@ -24,10 +24,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.LlamaSpit;
 import org.bukkit.entity.Mob;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -53,6 +56,7 @@ public final class Dino {
     private static final int SPIT_TICKS = 16;
     private static final int ROAR_COOLDOWN = 140;
     private static final int EAT_TICKS = 40;
+    private static final int TAIL_TICKS = 10;
 
     private final Wolf wolf;
     private final Species species;
@@ -103,6 +107,16 @@ public final class Dino {
     private FeederManager.Feeder feeder;  // comedero al que va a comer
     private int seekTicks;
     private int eating = -1;
+
+    // presas, cola, hombro
+    private int fleeTicks;
+    private Location fleeFrom;
+    private Location lastAttacker;   // de donde vino el ultimo golpe
+    private int tailSwing = -1;
+    private int tailCooldown;
+    private float tailSide = 1;
+    private Player perch;            // jugador en cuyo hombro va (dimorphodon)
+    private int alertCooldown;
     private int age;
     private int attack = -1;
     private int roar = -1;
@@ -161,7 +175,7 @@ public final class Dino {
     private void adjustGoals() {
         MobGoals goals = Bukkit.getMobGoals();
         GoalKey[] remove = switch (species.temper) {
-            case HERBIVORE -> new GoalKey[]{VanillaGoal.NON_TAME_RANDOM, VanillaGoal.NEAREST_ATTACKABLE,
+            case HERBIVORE, PREY -> new GoalKey[]{VanillaGoal.NON_TAME_RANDOM, VanillaGoal.NEAREST_ATTACKABLE,
                     VanillaGoal.LEAP_AT, VanillaGoal.WOLF_BEG, VanillaGoal.WOLF_AVOID_ENTITY};
             case HOSTILE, PACK -> new GoalKey[]{VanillaGoal.WOLF_BEG, VanillaGoal.WOLF_AVOID_ENTITY};
             case CARNIVORE -> new GoalKey[]{VanillaGoal.WOLF_AVOID_ENTITY};
@@ -427,7 +441,7 @@ public final class Dino {
             if (seekTicks > 400) feeder = null;   // no llega: se rinde (si no hay hambre extrema, vuelve a probar)
             return;
         }
-        if (age % 40 != 0 || hunger >= 0.6f || rider != null || flying || wolf.isLeashed()) return;
+        if (age % 40 != 0 || hunger >= 0.6f || rider != null || flying || perch != null || wolf.isLeashed()) return;
         if (wolf.isSitting() && !starvingSit) return;   // el dueño lo dejo sentado: espera
         FeederManager.Feeder near = manager.feeders().nearest(wolf.getLocation(), species.diet(), 16);
         if (near == null) return;
@@ -481,9 +495,160 @@ public final class Dino {
         play("attack", 0.8f, 1f);
     }
 
-    public void onHurt() {
+    public void onHurt(EntityDamageEvent event) {
         hurt = 7;
         play("hurt", 0.8f, 1f);
+        if (event instanceof EntityDamageByEntityEvent by) {
+            Entity src = by.getDamager();
+            if (src instanceof Projectile p && p.getShooter() instanceof Entity shooter) src = shooter;
+            lastAttacker = src.getLocation();
+        } else {
+            lastAttacker = null;
+        }
+        // presa salvaje: avisa a la manada y salen corriendo
+        if (species.temper == Species.Temper.PREY && !wolf.isTamed()) {
+            alarm(lastAttacker != null ? lastAttacker : wolf.getLocation().add(
+                    ThreadLocalRandom.current().nextGaussian(), 0, ThreadLocalRandom.current().nextGaussian()));
+        }
+    }
+
+    /**
+     * Le pegaron: la armadura frena proyectiles; con cola de puas o maza contesta con un coletazo
+     * al que le pego por atras (la maza tambien a los costados).
+     */
+    public void onStruck(EntityDamageByEntityEvent event) {
+        Entity src = event.getDamager();
+        if (perch != null && src == perch) {
+            event.setCancelled(true);   // el dueño no le pega sin querer al que lleva en el hombro
+            return;
+        }
+        if (species.armored && src instanceof Projectile) event.setDamage(event.getDamage() * 0.35);
+        if (species.tail == Species.TailAttack.NONE || tailCooldown > 0 || isBabyForm() || dying >= 0) return;
+        Entity attacker = src instanceof Projectile p && p.getShooter() instanceof Entity shooter ? shooter : src;
+        if (!(attacker instanceof LivingEntity le) || attacker == rider()) return;
+        if (wolf.isTamed() && attacker.getUniqueId().equals(wolf.getOwnerUniqueId())) return;
+        Location me = wolf.getLocation();
+        if (le.getWorld() != me.getWorld()) return;
+        Vector to = le.getLocation().toVector().subtract(me.toVector()).setY(0);
+        double dist = to.length();
+        if (dist > 2.5 + 3.5 * visualScale() || dist < 1e-3) return;
+        double yaw = Math.toRadians(rider() != null ? rideYaw : wolf.getBodyYaw());
+        Vector fwd = new Vector(-Math.sin(yaw), 0, Math.cos(yaw));
+        to.multiply(1 / dist);
+        boolean club = species.tail == Species.TailAttack.CLUB;
+        if (to.dot(fwd) > (club ? 0.3 : -0.2)) return;   // tiene que estar atras
+        // de que lado gira la cola (signo del producto vectorial)
+        tailSide = fwd.getX() * to.getZ() - fwd.getZ() * to.getX() > 0 ? 1 : -1;
+        tailSwing = 0;
+        tailCooldown = 30;
+        le.damage(species.damage * (club ? 0.6 : 0.9), wolf);
+        le.setVelocity(to.multiply(club ? 1.6 : 0.7).setY(club ? 0.55 : 0.3));
+        play("attack", 1f, 1f);
+    }
+
+    // ------------------------------------------------------------ presas
+    /** Salvaje: si un jugador se acerca sin agacharse, se asusta. Mientras huye no pelea. */
+    private void tickPrey(Location loc) {
+        if (fleeTicks > 0) {
+            fleeTicks--;
+            if (wolf.getTarget() != null) wolf.setTarget(null);
+            if (wolf.isAngry()) wolf.setAngry(false);
+            if (fleeTicks % 15 == 0) runFrom(loc);
+            return;
+        }
+        if (age % 10 != 0 || wolf.isLeashed()) return;
+        for (Player p : loc.getNearbyPlayers(10)) {
+            if (!huntable(p)) continue;
+            if (p.isSneaking() && p.getLocation().distanceSquared(loc) > 2.5 * 2.5) continue;   // agachado te acercas
+            if (!wolf.hasLineOfSight(p)) continue;
+            alarm(p.getLocation());
+            return;
+        }
+    }
+
+    /** Se asusta, avisa (trompetazo/grito) y sale corriendo con toda la manada. */
+    public void alarm(Location from) {
+        if (fleeTicks <= 0) {
+            roar = 0;
+            play("roar", 1f, 1f);
+        }
+        for (Wolf w : wolf.getLocation().getNearbyEntitiesByType(Wolf.class, 14, 6, 14)) {
+            Dino other = manager.get(w);
+            if (other != null && other != this && other.species == species && !w.isTamed()) other.flee(from);
+        }
+        flee(from);
+    }
+
+    private void flee(Location from) {
+        fleeFrom = from.clone();
+        fleeTicks = 100;
+        if (wolf.isSitting()) wolf.setSitting(false);
+        runFrom(wolf.getLocation());
+    }
+
+    private void runFrom(Location loc) {
+        if (fleeFrom == null || fleeFrom.getWorld() != loc.getWorld()) return;
+        Vector away = loc.toVector().subtract(fleeFrom.toVector()).setY(0);
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        if (away.lengthSquared() < 1e-3) away = new Vector(r.nextDouble() - 0.5, 0, r.nextDouble() - 0.5);
+        away.normalize().multiply(14).add(new Vector(r.nextDouble(-3, 3), 0, r.nextDouble(-3, 3)));
+        wolf.getPathfinder().moveTo(loc.clone().add(away), 1.8);
+    }
+
+    // ------------------------------------------------------------ hombro
+    public boolean isPerchedOn(Player p) {
+        return perch != null && perch.getUniqueId().equals(p.getUniqueId());
+    }
+
+    /** Se sube al hombro derecho del jugador: no es pasajero (eso trabaria los teleports), lo seguimos a mano. */
+    public void perch(Player p) {
+        perch = p;
+        wolf.setSitting(false);
+        wolf.setTarget(null);
+        wolf.setAware(false);
+        wolf.setGravity(false);
+        wolf.setCollidable(false);
+        if (flying) land();
+        play("ambient", 0.6f, 1.2f);
+    }
+
+    public void unperch() {
+        Player p = perch;
+        if (p == null) return;
+        perch = null;
+        wolf.setGravity(true);
+        wolf.setCollidable(true);
+        wolf.setFallDistance(0);
+        if (rider() == null) wolf.setAware(true);
+        double yaw = Math.toRadians(p.getYaw());
+        wolf.setVelocity(new Vector(-Math.sin(yaw) * 0.35, 0.25, Math.cos(yaw) * 0.35));
+    }
+
+    private void tickPerch() {
+        Player p = perch;
+        if (!p.isOnline() || p.isDead() || p.getWorld() != wolf.getWorld()
+                || p.getLocation().distanceSquared(wolf.getLocation()) > 36 || isStarving()) {
+            unperch();
+            return;
+        }
+        float yaw = p.getBodyYaw();
+        double rad = Math.toRadians(yaw);
+        // hombro derecho: mirando a +Z (yaw 0) la derecha es -X
+        Location target = p.getLocation().add(-Math.cos(rad) * 0.42, p.getHeight() * 0.78, -Math.sin(rad) * 0.42);
+        wolf.setVelocity(target.toVector().subtract(wolf.getLocation().toVector()));
+        wolf.setFallDistance(0);
+        rideYaw = yaw;
+        wolf.setRotation(yaw, 0);
+        wolf.setBodyYaw(yaw);
+        // avisa si hay monstruos cerca
+        if (alertCooldown > 0) alertCooldown--;
+        if (age % 40 == 0 && alertCooldown == 0
+                && !p.getLocation().getNearbyEntitiesByType(Monster.class, 12).isEmpty()) {
+            alertCooldown = 400;
+            roar = 0;
+            play("roar", 0.7f, 1.2f);
+            p.sendActionBar(Component.text("¡Tu " + species.name + " chilla: hay monstruos cerca!", NamedTextColor.GOLD));
+        }
     }
 
     public void onDeath() {
@@ -499,8 +664,11 @@ public final class Dino {
     }
 
     public void remove() {
-        // que no quede flotando si se descarga el chunk en pleno vuelo
-        if (flying && wolf.isValid()) wolf.setGravity(true);
+        // que no quede flotando si se descarga el chunk en pleno vuelo (o yendo en un hombro)
+        if ((flying || perch != null) && wolf.isValid()) {
+            wolf.setGravity(true);
+            wolf.setCollidable(true);
+        }
         save();
         model.remove();
     }
@@ -536,7 +704,10 @@ public final class Dino {
         lastRider = rider;
         tickHunger(rider);
         if (rider != null && rider() == null) rider = null;   // lo bajo el hambre
-        if (rider != null) ride(rider);
+        if (tailSwing >= 0 && ++tailSwing > TAIL_TICKS) tailSwing = -1;
+        if (tailCooldown > 0) tailCooldown--;
+        if (perch != null) tickPerch();
+        else if (rider != null) ride(rider);
         else if (flying) flyAlone();
         else {
             if (!wolf.isAware()) wolf.setAware(true);
@@ -544,7 +715,7 @@ public final class Dino {
         }
 
         Location loc = wolf.getLocation();
-        float bodyYaw = rider != null || flying ? rideYaw : wolf.getBodyYaw();
+        float bodyYaw = rider != null || flying || perch != null ? rideYaw : wolf.getBodyYaw();
 
         // velocidad horizontal real -> ciclo de pasos
         Vector delta = loc.toVector().subtract(last.toVector()).setY(0);
@@ -574,12 +745,12 @@ public final class Dino {
         }
 
         // la pose solo se calcula y se manda cuando alguien la puede ver, y menos seguido de lejos
-        if (rider != null) poseEvery = 1;
+        if (rider != null || perch != null) poseEvery = 1;
         else if (age % 10 == 0 || poseEvery == 1) poseEvery = poseRate(loc);
         if (poseEvery > 0 && age - lastPose >= poseEvery) {
             lastPose = age;
             animate();
-            boolean free = rider == null && !flying;   // mira para donde mira el lobo
+            boolean free = rider == null && !flying && perch == null;   // mira para donde mira el lobo
             float headYaw = free ? wrap(loc.getYaw() - bodyYaw) : 0;
             model.pose(head).ry += -clamp(headYaw, -50, 50) * 0.8f;
             model.pose(head).rx += clamp(free ? loc.getPitch() : 0, -35, 35) * 0.7f;
@@ -615,6 +786,7 @@ public final class Dino {
         LivingEntity target = wolf.getTarget();
         if (target != null && (!target.isValid() || target.isDead())) target = null;
 
+        if (species.temper == Species.Temper.PREY && !wolf.isTamed() && rider == null && !flying) tickPrey(loc);
         boolean hunts = species.temper == Species.Temper.HOSTILE || species.territorial && !wolf.isTamed();
         if (hunts && age % 10 == 0 && rider == null && !flying) hunt(loc);
         if (species.temper == Species.Temper.PACK && age % 20 == 0 && rider == null) packHunt(loc);
@@ -892,9 +1064,9 @@ public final class Dino {
         if (!scared && (wolf.getTarget() != null || r.nextInt(wolf.isTamed() ? 3600 : 1400) != 0)) return;
         Location at = wolf.getLocation();
         flightCenter = at.clone();
-        if (scared && wolf.getLastDamageCause() instanceof EntityDamageByEntityEvent ev) {
+        if (scared && lastAttacker != null && lastAttacker.getWorld() == at.getWorld()) {
             // el centro de las vueltas queda lejos del que lo ataco
-            Vector away = at.toVector().subtract(ev.getDamager().getLocation().toVector()).setY(0);
+            Vector away = at.toVector().subtract(lastAttacker.toVector()).setY(0);
             if (away.lengthSquared() > 1e-4) flightCenter.add(away.normalize().multiply(24));
         }
         flightAngle = r.nextDouble(Math.PI * 2);
@@ -1031,7 +1203,7 @@ public final class Dino {
         pBody.dy += -Math.abs(cosP) * 1.2f * s * k;
         pBody.rx = 4 * s;
         pBody.rz = sinP * 2.5f * s;
-        pHead.rx = -4 * s + (float) Math.sin(phase * 2) * 3 * s;
+        pHead.rx = -4 * s + (float) Math.sin(phase * 2) * 3 * s + 18 * charge;   // embestida: cabeza baja
 
         // cola: balanceo lento en reposo, mas rapido caminando
         pT1.ry = (float) Math.sin(t * 0.06f) * 7 * (1 - s) + sinP * 6 * s;
@@ -1115,6 +1287,13 @@ public final class Dino {
         pT1.rx = breath * 1.2f;
 
         pHead.rx += 18 * charge;   // embestida: cabeza baja, cuernos al frente
+        if (tailSwing >= 0) {
+            // coletazo: la cola barre para un lado y vuelve
+            float p = tailSwing / (float) TAIL_TICKS;
+            float sw = (float) Math.sin(p * Math.PI * 2) * (1 - p * 0.5f);
+            pT1.ry += 35 * sw * tailSide;
+            pT2.ry += 45 * sw * tailSide;
+        }
 
         if (attack >= 0) {
             // cabezazo: baja y levanta la cabeza

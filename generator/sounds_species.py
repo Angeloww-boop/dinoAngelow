@@ -319,3 +319,255 @@ SPECIES_SOUNDS_2 = {
         ("baby_hurt", ptera_baby_hurt, "Cría de pteranodon herida", "Baby pteranodon hurts"),
     ],
 }
+
+
+# ---------------------------------------------------------------- parasaurolophus
+def trumpet(dur, f, rise=1.12):
+    """Trompetazo resonante: la cresta hueca funciona como un tubo."""
+    return voice(dur, [(0, f * 0.9), (0.2, f * rise), (0.8, f), (1, f * 0.85)],
+                 [(0, 0), (0.1, 1), (0.75, 0.85), (1, 0)], harmonics=40, tilt=0.95, sub=0.2, rough=0.12,
+                 rough_hz=20, vib=(4.5, 0.02), peaks=((f * 2, 1.0, 120), (f * 4, 0.6, 200), (f * 6, 0.3, 300)),
+                 breath=0.15, breath_band=(200, 1500), drive=1.6)
+
+
+def para_ambient():
+    return [trumpet(1.1, 160), seq([trumpet(0.5, 150), trumpet(0.8, 170)], [0.15]),
+            low(0.6, [(0, 120), (1, 105)], [(0, 0), (0.3, 1), (1, 0)], rough=0.3)]
+
+
+def para_roar():
+    return [trumpet(1.8, 180, 1.2), seq([trumpet(0.4, 190), trumpet(1.3, 175, 1.18)], [0.1])]
+
+
+def para_hurt():
+    return [trumpet(0.45, 240, 1.25) for _ in range(2)]
+
+
+def para_death():
+    return [voice(2.0, [(0, 220), (0.2, 240), (1, 90)], [(0, 0), (0.08, 1), (0.6, 0.6), (1, 0)], harmonics=40,
+                  tilt=0.9, sub=0.3, rough=0.4, rough_hz=18, peaks=((400, 1.0, 150), (800, 0.6, 250)), breath=0.3,
+                  drive=1.8)]
+
+
+def para_attack():
+    return [place(0.5, [(0, huff(0.3), 0.8), (0.15, thump(0.25, (110, 45), 0.9), 1.0)])]
+
+
+# ---------------------------------------------------------------- gallimimus
+def boom(dur, f):
+    """Retumbo grave de ave grande (como el avestruz)."""
+    return voice(dur, [(0, f), (0.5, f * 1.05), (1, f * 0.9)], [(0, 0), (0.25, 1), (1, 0)], harmonics=20, tilt=1.4,
+                 sub=0.6, rough=0.2, vib=(3, 0.02), peaks=((f * 2, 1.0, 80), (f * 3, 0.4, 120)), breath=0.1,
+                 breath_band=(100, 800), drive=1.5)
+
+
+def galli_ambient():
+    return [seq([boom(0.35, 95), boom(0.45, 90)], [0.12]),
+            seq([caw(0.12, 900, 0.3), caw(0.12, 950, 0.3), caw(0.16, 880, 0.3)], [0.05, 0.06]),
+            boom(0.6, 85)]
+
+
+def galli_roar():
+    return [seq([caw(0.15, 1100, 0.5) for _ in range(5)], [0.04] * 4)]
+
+
+def galli_hurt():
+    return [caw(0.22, 1250, 0.7), caw(0.2, 1150, 0.7)]
+
+
+def galli_death():
+    return [voice(1.0, [(0, 1100), (0.2, 1200), (1, 400)], [(0, 0), (0.08, 1), (1, 0)], harmonics=20, sub=0.2,
+                  rough=0.6, peaks=((1200, 1.0, 400),), breath=0.3, drive=2.2)]
+
+
+def galli_attack():
+    return [place(0.3, [(0, caw(0.15, 1000, 0.8), 0.7), (0.12, click(0.012, 800, 7000), 1.0)])]
+
+
+def galli_step():
+    return [thump(0.12, (90, 50), 0.5), thump(0.1, (100, 55), 0.4)]
+
+
+# ---------------------------------------------------------------- stegosaurus y ankylosaurus
+def stego_ambient():
+    return [low(0.9, [(0, 70), (0.4, 88), (1, 64)], [(0, 0), (0.2, 1), (1, 0)], rough=0.6, rough_hz=16),
+            place(1.0, [(0, huff(0.5), 0.6), (0.4, low(0.5, [(0, 76), (1, 68)], [(0, 0), (0.3, 1), (1, 0)]), 1.0)])]
+
+
+def stego_roar():
+    return [low(1.3, [(0, 64), (0.3, 104), (1, 70)], [(0, 0), (0.1, 1), (0.75, 0.9), (1, 0)], rough=0.85,
+                rough_hz=20, breath=0.45, drive=2.6)]
+
+
+def stego_hurt():
+    return [low(0.4, [(0, 130), (0.3, 150), (1, 90)], [(0, 0), (0.1, 1), (1, 0)], rough=0.7, drive=2.6)]
+
+
+def stego_death():
+    return [low(2.0, [(0, 110), (0.2, 125), (1, 42)], [(0, 0), (0.08, 1), (0.6, 0.6), (1, 0)], rough=0.9,
+                rough_hz=16, breath=0.45, drive=2.4)]
+
+
+def tail_whack():
+    """Coletazo: silbido del aire + golpe seco."""
+    n = int(0.25 * SR)
+    swish = norm(spectral(noise(n), band(300, 3000))) * curve([(0, 0), (0.6, 1), (1, 0)], n)
+    return [place(0.5, [(0, swish, 0.6), (0.22, thump(0.25, (120, 50), 1.0), 1.0)])]
+
+
+def anky_ambient():
+    return [place(0.8, [(0, huff(0.35, 1.0), 0.8), (0.3, huff(0.3, 1.0), 0.6)]),
+            low(0.7, [(0, 82), (1, 70)], [(0, 0), (0.3, 1), (1, 0)], rough=0.5)]
+
+
+def anky_roar():
+    return [low(1.1, [(0, 90), (0.3, 120), (1, 80)], [(0, 0), (0.1, 1), (1, 0)], rough=0.9, rough_hz=24,
+                breath=0.5, drive=2.8)]
+
+
+def anky_hurt():
+    return [low(0.35, [(0, 150), (1, 110)], [(0, 0), (0.1, 1), (1, 0)], rough=0.6, drive=2.4)]
+
+
+def anky_death():
+    return [low(1.6, [(0, 120), (1, 45)], [(0, 0), (0.08, 1), (1, 0)], rough=0.9, breath=0.5, drive=2.4)]
+
+
+def heavy_step():
+    return [thump(0.3, (50, 26), 0.5), thump(0.32, (46, 25), 0.4)]
+
+
+# ---------------------------------------------------------------- giganotosaurus y carnotaurus
+def giga_ambient():
+    return [rex_voice(1.2, [(0, 56), (0.4, 74), (1, 50)], [(0, 0), (0.2, 1), (1, 0)], rough=0.7),
+            seq([rex_voice(0.35, [(0, 66), (1, 58)], [(0, 0), (0.25, 1), (1, 0)]),
+                 rex_voice(0.6, [(0, 70), (0.5, 80), (1, 56)], [(0, 0), (0.2, 1), (1, 0)])], [0.12])]
+
+
+def giga_roar():
+    out = []
+    for top in (190, 170):
+        body = rex_voice(2.0, [(0, 70), (0.15, top), (0.6, top * 0.85), (1, 64)], [(0, 0), (0.08, 1), (0.7, 0.9), (1, 0)],
+                         rough=1.0, drive=3.2, breath=0.55)
+        hiss = voice(2.0, [(0, 300), (0.2, top * 3), (1, 220)], [(0, 0), (0.1, 0.9), (0.6, 0.7), (1, 0)], harmonics=30,
+                     tilt=0.75, sub=0.3, rough=1.0, rough_hz=40, peaks=((900, 1.0, 400), (2200, 0.8, 600)), breath=0.6,
+                     drive=3.0)
+        out.append(norm(body) + 0.55 * norm(hiss))
+    return out
+
+
+def carno_growl(dur, f):
+    return voice(dur, [(0, f), (0.4, f * 1.3), (1, f * 0.9)], [(0, 0), (0.15, 1), (0.8, 0.8), (1, 0)], harmonics=40,
+                 tilt=0.7, sub=0.6, rough=0.9, rough_hz=30, vib=(5, 0.03), peaks=((400, 1.0, 200), (1100, 0.7, 400)),
+                 breath=0.35, drive=2.8)
+
+
+def carno_ambient():
+    return [carno_growl(0.8, 110), place(1.0, [(0, huff(0.4), 0.7), (0.3, carno_growl(0.5, 120), 1.0)])]
+
+
+def carno_roar():
+    return [seq([carno_growl(0.25, 160), carno_growl(1.0, 190)], [0.06])]
+
+
+def carno_hurt():
+    return [carno_growl(0.3, 240), carno_growl(0.28, 220)]
+
+
+def carno_death():
+    return [carno_growl(1.5, 180) * curve([(0, 1), (1, 0.4)], int(1.5 * SR))]
+
+
+def carno_attack():
+    return [place(0.5, [(0, carno_growl(0.3, 150), 0.8), (0.25, click(0.02, 400, 5000), 1.0),
+                        (0.25, thump(0.15, (150, 70), 0.8), 0.8)])]
+
+
+# ---------------------------------------------------------------- dimorphodon
+def dimo_ambient():
+    return [seq([caw(0.1, 1500, 0.4), caw(0.12, 1650, 0.4)], [0.05]), caw(0.2, 1400, 0.5)]
+
+
+def dimo_roar():
+    """El chillido de alarma (avisa de monstruos)."""
+    return [seq([caw(0.09, 1900, 0.6) for _ in range(4)], [0.03] * 3)]
+
+
+def step_mid():
+    return [thump(0.2, (64, 36), 0.5), thump(0.18, (70, 40), 0.4)]
+
+
+SPECIES_SOUNDS_3 = {
+    "parasaurolophus": [
+        ("ambient", para_ambient, "Parasaurolophus llama", "Parasaurolophus calls"),
+        ("roar", para_roar, "Parasaurolophus trompetea", "Parasaurolophus trumpets"),
+        ("hurt", para_hurt, "Parasaurolophus herido", "Parasaurolophus hurts"),
+        ("death", para_death, "Parasaurolophus muere", "Parasaurolophus dies"),
+        ("attack", para_attack, "Parasaurolophus empuja", "Parasaurolophus shoves"),
+        ("step", tri_step, "Pisadas pesadas", "Heavy footsteps"),
+        ("baby_ambient", tri_baby_ambient, "Cría de parasaurolophus bala", "Baby parasaurolophus bleats"),
+        ("baby_hurt", tri_baby_hurt, "Cría de parasaurolophus herida", "Baby parasaurolophus hurts"),
+    ],
+    "gallimimus": [
+        ("ambient", galli_ambient, "Gallimimus retumba", "Gallimimus booms"),
+        ("roar", galli_roar, "Gallimimus da la alarma", "Gallimimus alarm calls"),
+        ("hurt", galli_hurt, "Gallimimus herido", "Gallimimus hurts"),
+        ("death", galli_death, "Gallimimus muere", "Gallimimus dies"),
+        ("attack", galli_attack, "Gallimimus picotea", "Gallimimus pecks"),
+        ("step", galli_step, "Pasos de gallimimus", "Gallimimus footsteps"),
+        ("baby_ambient", ptera_baby_ambient, "Cría de gallimimus pía", "Baby gallimimus chirps"),
+        ("baby_hurt", ptera_baby_hurt, "Cría de gallimimus herida", "Baby gallimimus hurts"),
+    ],
+    "stegosaurus": [
+        ("ambient", stego_ambient, "Stegosaurus gruñe", "Stegosaurus grunts"),
+        ("roar", stego_roar, "Stegosaurus brama", "Stegosaurus bellows"),
+        ("hurt", stego_hurt, "Stegosaurus herido", "Stegosaurus hurts"),
+        ("death", stego_death, "Stegosaurus muere", "Stegosaurus dies"),
+        ("attack", tail_whack, "Coletazo con púas", "Spiked tail swing"),
+        ("step", heavy_step, "Pisadas pesadas", "Heavy footsteps"),
+        ("baby_ambient", tri_baby_ambient, "Cría de stegosaurus bala", "Baby stegosaurus bleats"),
+        ("baby_hurt", tri_baby_hurt, "Cría de stegosaurus herida", "Baby stegosaurus hurts"),
+    ],
+    "ankylosaurus": [
+        ("ambient", anky_ambient, "Ankylosaurus resopla", "Ankylosaurus snorts"),
+        ("roar", anky_roar, "Ankylosaurus brama", "Ankylosaurus bellows"),
+        ("hurt", anky_hurt, "Ankylosaurus herido", "Ankylosaurus hurts"),
+        ("death", anky_death, "Ankylosaurus muere", "Ankylosaurus dies"),
+        ("attack", tail_whack, "Golpe de maza", "Tail club smash"),
+        ("step", heavy_step, "Pisadas pesadas", "Heavy footsteps"),
+        ("baby_ambient", tri_baby_ambient, "Cría de ankylosaurus bala", "Baby ankylosaurus bleats"),
+        ("baby_hurt", tri_baby_hurt, "Cría de ankylosaurus herida", "Baby ankylosaurus hurts"),
+    ],
+    "giganotosaurus": [
+        ("ambient", giga_ambient, "Giganotosaurus gruñe", "Giganotosaurus rumbles"),
+        ("roar", giga_roar, "Giganotosaurus ruge", "Giganotosaurus roars"),
+        ("hurt", rex_hurt, "Giganotosaurus herido", "Giganotosaurus hurts"),
+        ("death", rex_death, "Giganotosaurus muere", "Giganotosaurus dies"),
+        ("attack", rex_attack, "Giganotosaurus muerde", "Giganotosaurus bites"),
+        ("step", rex_step, "Pisadas que hacen temblar el suelo", "Earth-shaking footsteps"),
+        ("baby_ambient", rex_baby_ambient, "Cría de giganotosaurus chilla", "Baby giganotosaurus squeaks"),
+        ("baby_hurt", rex_baby_hurt, "Cría de giganotosaurus herida", "Baby giganotosaurus hurts"),
+    ],
+    "carnotaurus": [
+        ("ambient", carno_ambient, "Carnotaurus gruñe", "Carnotaurus growls"),
+        ("roar", carno_roar, "Carnotaurus ruge", "Carnotaurus roars"),
+        ("hurt", carno_hurt, "Carnotaurus herido", "Carnotaurus hurts"),
+        ("death", carno_death, "Carnotaurus muere", "Carnotaurus dies"),
+        ("attack", carno_attack, "Carnotaurus embiste", "Carnotaurus rams"),
+        ("step", step_mid, "Pasos de carnotaurus", "Carnotaurus footsteps"),
+        ("baby_ambient", rex_baby_ambient, "Cría de carnotaurus chilla", "Baby carnotaurus squeaks"),
+        ("baby_hurt", rex_baby_hurt, "Cría de carnotaurus herida", "Baby carnotaurus hurts"),
+    ],
+    "dimorphodon": [
+        ("ambient", dimo_ambient, "Dimorphodon grazna", "Dimorphodon squawks"),
+        ("roar", dimo_roar, "Dimorphodon chilla", "Dimorphodon shrieks"),
+        ("hurt", ptera_baby_hurt, "Dimorphodon herido", "Dimorphodon hurts"),
+        ("death", ptera_death, "Dimorphodon muere", "Dimorphodon dies"),
+        ("attack", ptera_attack, "Dimorphodon muerde", "Dimorphodon bites"),
+        ("step", ptera_step, "Pasitos", "Tiny footsteps"),
+        ("flap", ptera_flap, "Aleteo", "Wings flap"),
+        ("baby_ambient", ptera_baby_ambient, "Cría de dimorphodon pía", "Baby dimorphodon chirps"),
+        ("baby_hurt", ptera_baby_hurt, "Cría de dimorphodon herida", "Baby dimorphodon hurts"),
+    ],
+}
+

@@ -1,0 +1,223 @@
+{
+  "species": "parasaurolophus",
+  "scale": 0.85,
+  "item": "dinoearth:parasaurolophus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "verde",
+      "name": "Verde",
+      "weight": 30
+    },
+    {
+      "id": "pardo",
+      "name": "Pardo",
+      "weight": 26
+    },
+    {
+      "id": "azul",
+      "name": "Azul",
+      "weight": 20
+    },
+    {
+      "id": "rojizo",
+      "name": "Rojizo",
+      "weight": 21
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 45.0,
+      "radius": 54.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            26.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            27.0,
+            21.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            37.5,
+            28.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            30.0,
+            -15.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            28.0,
+            -31.0
+          ]
+        },
+        {
+          "name": "leg_fr",
+          "parent": null,
+          "joint": [
+            7.0,
+            22.0,
+            14.0
+          ]
+        },
+        {
+          "name": "leg_fl",
+          "parent": null,
+          "joint": [
+            -7.0,
+            22.0,
+            14.0
+          ]
+        },
+        {
+          "name": "leg_br",
+          "parent": null,
+          "joint": [
+            8.0,
+            24.0,
+            -9.0
+          ]
+        },
+        {
+          "name": "leg_bl",
+          "parent": null,
+          "joint": [
+            -8.0,
+            24.0,
+            -9.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 19.75,
+      "radius": 21.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            9.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            10.0,
+            6.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            13.5,
+            10.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            11.0,
+            -6.5
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            10.0,
+            -13.5
+          ]
+        },
+        {
+          "name": "leg_fr",
+          "parent": null,
+          "joint": [
+            3.5,
+            8.0,
+            4.0
+          ]
+        },
+        {
+          "name": "leg_fl",
+          "parent": null,
+          "joint": [
+            -3.5,
+            8.0,
+            4.0
+          ]
+        },
+        {
+          "name": "leg_br",
+          "parent": null,
+          "joint": [
+            4.5,
+            9.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "leg_bl",
+          "parent": null,
+          "joint": [
+            -4.5,
+            9.0,
+            -4.0
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      26.0,
+      0.0
+    ],
+    "item": "dinoearth:parasaurolophus/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:parasaurolophus/egg/egg",
+    "cracked": "dinoearth:parasaurolophus/egg_cracked/egg",
+    "icon": "dinoearth:parasaurolophus/egg_item"
+  }
+}

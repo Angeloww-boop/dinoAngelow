@@ -21,8 +21,11 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - El item_display gira el modelo 180° en Y: el generador invierte X/Z alrededor del joint (`to_model`).
   Rotaciones regla de la mano derecha; rx positivo = baja la cabeza / la pata va hacia atrás.
 - Límite de Minecraft: ningún cubo a más de 24 px de su joint; ángulos de elemento solo ±22.5/±45.
-- Temperamento por especie (`Species.Temper`): CARNIVORE, HERBIVORE, HOSTILE, PACK; se le sacan goals
-  de lobo con la API MobGoals de Paper.
+- Temperamento por especie (`Species.Temper`): CARNIVORE, HERBIVORE, HOSTILE, PACK, PREY (huye en manada con el
+  pathfinder; agachado te acercas); se le sacan goals de lobo con la API MobGoals de Paper. Extras por especie:
+  `TailAttack` (SPIKES/CLUB: coletazo al que pega por atras, `Dino.onStruck`), `armored` (proyectiles x0.35),
+  `perches` (dimorphodon en el hombro: NO es pasajero del jugador porque eso traba los teleports; se lo sigue con
+  velocidad, sin gravedad ni colision).
 - Montura: `Player#getCurrentInput()` + `wolf.setAware(false)` + velocidad manual. Cada especie tiene su modelo de
   montura (hueso `saddle` hijo de `body`, materiales saddle/strap/metal/plate/spike/cloth/wood/rope); se equipa con la
   montura de vanilla (los crafteos los hace el dueño con Shopkeepers).
@@ -44,7 +47,7 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 
 | Ruta | Qué |
 |---|---|
-| `generator/species_*.py` | Modelo, colores y montura de cada especie (raptor, triceratops, dilophosaurus, compsognathus, trex, pteranodon) |
+| `generator/species_*.py` | Modelo, colores y montura de cada especie (13: raptor, triceratops, dilophosaurus, compsognathus, trex, pteranodon, parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus, dimorphodon) |
 | `generator/geometry.py` | Cube/Bone/Rig, huevo y materiales de montura (`SADDLE_COLORS`, cada especie los pisa con `saddle_colors`) |
 | `generator/feeder.py`, `generator/icons.py` | Modelo del comedero; iconos de la Dinopedia (los llama build.py) |
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
@@ -66,7 +69,7 @@ Después de compilar: copiar `plugin/target/DinoEarth-<versión>.jar` a la raíz
 Subir versión en `plugin/pom.xml` y `plugin/src/main/resources/plugin.yml`.
 Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.url` y hace `/dino pack reload`.
 
-## Estado (2026-10-15, v0.6.0)
+## Estado (2026-10-15, v0.7.0)
 
 - v0.1 (raptor) probado en el juego: modelo, orientación y animaciones confirmados.
 - v0.2–v0.4 **sin probar en el juego**: colores, macho/hembra, crías que crecen, montura, huevos, sonidos,
@@ -76,5 +79,6 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   huevo, rugido que asusta, montado espacio = rugir), Pteranodon (vuela montado y solo), monturas propias por especie.
 - v0.6 **sin probar**: hambre, comedero por puntos, Dinopedia. Compilado en la nube solo contra stubs propios de
   Bukkit (no hay acceso a paper-api): confirma que el codigo es coherente, no que la API real coincida.
+- v0.7 **sin probar**: 7 especies nuevas (para, galli, stego, anky, giga, carno, dimorphodon), presas, colas, hombro.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
-  (Parasaurolophus, Stegosaurus, Mosasaurus); hambre, órdenes, herencia de color.
+  (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

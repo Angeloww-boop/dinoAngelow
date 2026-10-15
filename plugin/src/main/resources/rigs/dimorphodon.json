@@ -1,0 +1,285 @@
+{
+  "species": "dimorphodon",
+  "scale": 0.5,
+  "item": "dinoearth:dimorphodon/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "loro",
+      "name": "Loro",
+      "weight": 26
+    },
+    {
+      "id": "tucan",
+      "name": "Tuc\u00e1n",
+      "weight": 24
+    },
+    {
+      "id": "pardo",
+      "name": "Pardo",
+      "weight": 26
+    },
+    {
+      "id": "cielo",
+      "name": "Cielo",
+      "weight": 21
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 23.0,
+      "radius": 34.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            14.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            15.0,
+            4.5
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            17.5,
+            8.0
+          ]
+        },
+        {
+          "name": "wing_r",
+          "parent": "body",
+          "joint": [
+            2.5,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "mem_r",
+          "parent": "wing_r",
+          "joint": [
+            2.5,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "wing_r2",
+          "parent": "wing_r",
+          "joint": [
+            19.0,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "mem_r2",
+          "parent": "wing_r2",
+          "joint": [
+            19.0,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "wing_l",
+          "parent": "body",
+          "joint": [
+            -2.5,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "mem_l",
+          "parent": "wing_l",
+          "joint": [
+            -2.5,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "wing_l2",
+          "parent": "wing_l",
+          "joint": [
+            -19.0,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "mem_l2",
+          "parent": "wing_l2",
+          "joint": [
+            -19.0,
+            15.0,
+            2.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            1.75,
+            12.0,
+            -2.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -1.75,
+            12.0,
+            -2.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 15.0,
+      "radius": 20.4,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            8.4,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            9.0,
+            2.6999999999999997
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            10.875,
+            5.325
+          ]
+        },
+        {
+          "name": "wing_r",
+          "parent": "body",
+          "joint": [
+            1.5,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "mem_r",
+          "parent": "wing_r",
+          "joint": [
+            1.5,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "wing_r2",
+          "parent": "wing_r",
+          "joint": [
+            11.4,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "mem_r2",
+          "parent": "wing_r2",
+          "joint": [
+            11.4,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "wing_l",
+          "parent": "body",
+          "joint": [
+            -1.5,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "mem_l",
+          "parent": "wing_l",
+          "joint": [
+            -1.5,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "wing_l2",
+          "parent": "wing_l",
+          "joint": [
+            -11.4,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "mem_l2",
+          "parent": "wing_l2",
+          "joint": [
+            -11.4,
+            9.0,
+            1.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            1.05,
+            7.199999999999999,
+            -1.2
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -1.05,
+            7.199999999999999,
+            -1.2
+          ]
+        }
+      ]
+    }
+  },
+  "egg": {
+    "item": "dinoearth:dimorphodon/egg/egg",
+    "cracked": "dinoearth:dimorphodon/egg_cracked/egg",
+    "icon": "dinoearth:dimorphodon/egg_item"
+  }
+}

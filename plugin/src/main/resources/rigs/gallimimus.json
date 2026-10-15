@@ -1,0 +1,187 @@
+{
+  "species": "gallimimus",
+  "scale": 1.0,
+  "item": "dinoearth:gallimimus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "arena",
+      "name": "Arena",
+      "weight": 30
+    },
+    {
+      "id": "gris",
+      "name": "Gris",
+      "weight": 24
+    },
+    {
+      "id": "verde",
+      "name": "Verde",
+      "weight": 22
+    },
+    {
+      "id": "naranja",
+      "name": "Naranja",
+      "weight": 21
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 35.0,
+      "radius": 35.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            22.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            22.0,
+            7.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            30.5,
+            17.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            23.0,
+            -7.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            22.0,
+            -17.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            3.5,
+            21.0,
+            -2.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -3.5,
+            21.0,
+            -2.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 18.5,
+      "radius": 14.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            10.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            11.0,
+            3.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            14.25,
+            9.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            11.0,
+            -3.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            10.5,
+            -8.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            2.5,
+            10.0,
+            -1.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -2.5,
+            10.0,
+            -1.0
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      22.0,
+      0.0
+    ],
+    "item": "dinoearth:gallimimus/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:gallimimus/egg/egg",
+    "cracked": "dinoearth:gallimimus/egg_cracked/egg",
+    "icon": "dinoearth:gallimimus/egg_item"
+  }
+}

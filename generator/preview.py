@@ -205,6 +205,41 @@ if __name__ == "__main__":
             render(dino(sets, "pteranodon/celeste/female", "vuelo", k=P), 180, -30, ppx=2.6, cy_frac=0.45),
             render(dino(sets, "pteranodon/gaviota/baby", "suelo"), 130, 14, ppx=12, cy_frac=0.72),
         ],
+        "parasaurolophus": [
+            render(dino(sets, "parasaurolophus/verde/male", k=T), 120, 12, ppx=3.6, cy_frac=0.75),
+            render(dino(sets, "parasaurolophus/rojizo/female", "caminar", saddle=True, k=T), 60, 18, ppx=3.6, cy_frac=0.75),
+            render(dino(sets, "parasaurolophus/azul/baby"), 130, 14, ppx=8, cy_frac=0.72),
+        ],
+        "gallimimus": [
+            render(dino(sets, "gallimimus/arena/male"), 120, 12, ppx=5.5, cy_frac=0.75),
+            render(dino(sets, "gallimimus/naranja/female", "caminar", saddle=True), 60, 18, ppx=5.5, cy_frac=0.75),
+            render(dino(sets, "gallimimus/gris/baby"), 130, 14, ppx=10, cy_frac=0.72),
+        ],
+        "stegosaurus": [
+            render(dino(sets, "stegosaurus/oliva/male", k=T), 120, 12, ppx=3.6, cy_frac=0.75),
+            render(dino(sets, "stegosaurus/pardo/female", "caminar", saddle=True, k=T), 60, 18, ppx=3.6, cy_frac=0.75),
+            render(dino(sets, "stegosaurus/gris/baby"), 130, 14, ppx=8, cy_frac=0.72),
+        ],
+        "ankylosaurus": [
+            render(dino(sets, "ankylosaurus/pardo/male", k=T), 120, 12, ppx=3.8, cy_frac=0.72),
+            render(dino(sets, "ankylosaurus/musgo/female", "caminar", saddle=True, k=T), 60, 22, ppx=3.8, cy_frac=0.72),
+            render(dino(sets, "ankylosaurus/piedra/baby"), 130, 14, ppx=9, cy_frac=0.72),
+        ],
+        "giganotosaurus": [
+            render(dino(sets, "giganotosaurus/arena/male", k=1.2), 120, 12, ppx=3.1, cy_frac=0.8),
+            render(dino(sets, "giganotosaurus/gris/female", "caminar", saddle=True, k=1.2), 60, 18, ppx=3.1, cy_frac=0.8),
+            render(dino(sets, "giganotosaurus/rojizo/baby"), 130, 14, ppx=8, cy_frac=0.72),
+        ],
+        "carnotaurus": [
+            render(dino(sets, "carnotaurus/rojo/male"), 120, 12, ppx=4.6, cy_frac=0.78),
+            render(dino(sets, "carnotaurus/pardo/female", "caminar", saddle=True), 60, 18, ppx=4.6, cy_frac=0.78),
+            render(dino(sets, "carnotaurus/gris/baby"), 130, 14, ppx=10, cy_frac=0.72),
+        ],
+        "dimorphodon": [
+            render(dino(sets, "dimorphodon/loro/male", "suelo", k=0.5), 120, 12, ppx=14, cy_frac=0.75),
+            render(dino(sets, "dimorphodon/tucan/male", "aleteo", k=0.5), 150, 30, ppx=8, cy_frac=0.6),
+            render(dino(sets, "dimorphodon/cielo/baby", "suelo", k=0.5), 130, 14, ppx=20, cy_frac=0.75),
+        ],
         "monturas": [
             render(dino(sets, "raptor/gris/male", saddle=True), 40, 30, ppx=10, cy_frac=0.85),
             render(dino(sets, "triceratops/pizarra/female", saddle=True, k=T), 40, 30, ppx=5, cy_frac=0.9),

@@ -171,12 +171,12 @@ def main():
             sounds_json[f"{group}.{key}"] = {"subtitle": sub, "sounds": names}
             es[sub], en[sub] = sub_es, sub_en
             total += len(names)
-    with open(os.path.join(ASSETS, "sounds.json"), "w", encoding="utf-8") as fh:
+    with open(os.path.join(ASSETS, "sounds.json"), "w", encoding="utf-8", newline="\n") as fh:
         json.dump(sounds_json, fh, indent=2)
     lang = os.path.join(ASSETS, "lang")
     os.makedirs(lang, exist_ok=True)
     for code, data in (("en_us", en), ("es_es", es), ("es_ar", es), ("es_mx", es), ("es_cl", es), ("es_uy", es)):
-        with open(os.path.join(lang, code + ".json"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(lang, code + ".json"), "w", encoding="utf-8", newline="\n") as fh:
             json.dump(data, fh, indent=2, ensure_ascii=False)
     print(f"{total} sonidos en {len(SOUNDS)} grupos")
 

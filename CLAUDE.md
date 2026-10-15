@@ -65,6 +65,10 @@ python generator/build.py                         # zip final (incluye sonidos)
 cd plugin && mvn package                          # jar (lleva rigs y pack adentro)
 ```
 
+`build.py` solo reescribe lo que cambió (los PNG se comparan por píxeles: el zlib de Windows y el de Linux
+comprimen distinto). Así regenerar en otra máquina no cambia el hash del pack si el contenido es el mismo.
+Si la nube no llega a `repo.papermc.io`, el jar se compila en la PC del dueño.
+
 Después de compilar: copiar `plugin/target/DinoEarth-<versión>.jar` a la raíz y borrar el jar anterior.
 Subir versión en `plugin/pom.xml` y `plugin/src/main/resources/plugin.yml`.
 Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.url` y hace `/dino pack reload`.
@@ -75,10 +79,12 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.2–v0.4 **sin probar en el juego**: colores, macho/hembra, crías que crecen, montura, huevos, sonidos,
   triceratops/dilophosaurus/compsognathus, rendimiento, `/dino spawn <tipo> <color> <sexo> <edad>`,
   envío automático del pack (modo url con mc-packs.net).
-- v0.5 **sin probar ni compilar** (la sesion en la nube no llega a repo.papermc.io): T-Rex (territorial, solo de
-  huevo, rugido que asusta, montado espacio = rugir), Pteranodon (vuela montado y solo), monturas propias por especie.
-- v0.6 **sin probar**: hambre, comedero por puntos, Dinopedia. Compilado en la nube solo contra stubs propios de
-  Bukkit (no hay acceso a paper-api): confirma que el codigo es coherente, no que la API real coincida.
-- v0.7 **sin probar**: 7 especies nuevas (para, galli, stego, anky, giga, carno, dimorphodon), presas, colas, hombro.
+- v0.5 **sin probar en el juego**: T-Rex (territorial, solo de huevo, rugido que asusta, montado espacio = rugir),
+  Pteranodon (vuela montado y solo), monturas propias por especie.
+- v0.6 **sin probar en el juego**: hambre, comedero por puntos, Dinopedia.
+- v0.7 **sin probar en el juego**: 7 especies nuevas (para, galli, stego, anky, giga, carno, dimorphodon), presas,
+  colas, hombro.
+- v0.5–v0.7 se escribieron en la nube (sin acceso a repo.papermc.io). El 2026-10-15 se compilaron en la PC contra el
+  paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

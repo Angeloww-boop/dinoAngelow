@@ -551,14 +551,19 @@ def build():
                  "supported_formats": [46, 99], "min_format": 46, "max_format": 99}
     }, indent=2).encode()
 
-    # limpiar lo generado antes (los sonidos y textos los maneja sounds.py y se conservan)
+    # Solo se reescribe lo que cambio de verdad. Cada maquina comprime distinto (el zlib de Python en
+    # Windows no es el de Linux), asi que un PNG con los mismos pixeles se deja como estaba: si no, el
+    # hash del pack cambiaria al regenerar en otra compu sin haber cambiado nada.
+    stale = set()
     for sub in ("models", "items", "textures"):
-        shutil.rmtree(os.path.join(PACK_DIR, "assets", NS, sub), ignore_errors=True)
+        for base, _, names in os.walk(os.path.join(PACK_DIR, "assets", NS, sub)):
+            stale.update(os.path.normpath(os.path.join(base, n)) for n in names)
     for rel_path, data in files.items():
-        out = os.path.join(PACK_DIR, rel_path)
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        with open(out, "wb") as fh:
-            fh.write(data)
+        out = os.path.normpath(os.path.join(PACK_DIR, rel_path))
+        stale.discard(out)
+        write_if_changed(out, data)
+    for old in stale:      # archivos de modelos que ya no existen
+        os.remove(old)
 
     # zip determinista (orden y fechas fijas): el hash solo cambia si cambia el contenido,
     # asi los jugadores no vuelven a descargar el pack si no hace falta
@@ -566,18 +571,20 @@ def build():
     for base, _, names in os.walk(PACK_DIR):
         for name in names:
             full = os.path.join(base, name)
-            entries.append((os.path.relpath(full, PACK_DIR).replace(os.sep, "/"), full))
-    with zipfile.ZipFile(PACK_ZIP, "w", zipfile.ZIP_DEFLATED) as z:
-        for arc, full in sorted(entries):
-            info = zipfile.ZipInfo(arc, date_time=(2024, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o644 << 16
             with open(full, "rb") as fh:
-                z.writestr(info, fh.read())
+                entries.append((os.path.relpath(full, PACK_DIR).replace(os.sep, "/"), fh.read()))
+    entries.sort()
+    if not zip_has(PACK_ZIP, entries):
+        with zipfile.ZipFile(PACK_ZIP, "w", zipfile.ZIP_DEFLATED) as z:
+            for arc, data in entries:
+                info = zipfile.ZipInfo(arc, date_time=(2024, 1, 1, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.external_attr = 0o644 << 16
+                z.writestr(info, data)
 
     # una copia viaja adentro del jar: el plugin la usa para comprobar (o servir) el pack
-    os.makedirs(os.path.dirname(BUNDLED_ZIP), exist_ok=True)
-    shutil.copyfile(PACK_ZIP, BUNDLED_ZIP)
+    with open(PACK_ZIP, "rb") as fh:
+        write_if_changed(BUNDLED_ZIP, fh.read())
 
     n_models = sum(1 for k in files if "/models/" in k)
     print(f"{len(ALL_SPECIES)} especies, {len(all_sets)} sets, {n_models} modelos -> {PACK_ZIP}")
@@ -609,9 +616,58 @@ def write_rig(sp):
     if sp["egg"]:
         rig["egg"] = {"item": f"{NS}:{sid}/egg/egg", "cracked": f"{NS}:{sid}/egg_cracked/egg",
                       "icon": f"{NS}:{sid}/egg_item"}
-    os.makedirs(RIG_DIR, exist_ok=True)
-    with open(os.path.join(RIG_DIR, sid + ".json"), "w") as fh:
-        json.dump(rig, fh, indent=2)
+    write_if_changed(os.path.join(RIG_DIR, sid + ".json"), json.dumps(rig, indent=2).encode())
+
+
+# ---------------------------------------------------------------- escritura estable
+def png_pixels(data):
+    """Encabezado + pixeles descomprimidos de un PNG (para comparar sin importar el compresor)."""
+    i, hdr, idat = 8, b"", b""
+    while i < len(data):
+        n = struct.unpack(">I", data[i:i + 4])[0]
+        tag = data[i + 4:i + 8]
+        if tag == b"IHDR":
+            hdr = data[i + 8:i + 8 + n]
+        elif tag == b"IDAT":
+            idat += data[i + 8:i + 8 + n]
+        i += 12 + n
+    return hdr, zlib.decompress(idat)
+
+
+def same_content(old, new, name):
+    if old == new:
+        return True
+    if name.endswith(".png"):
+        try:
+            return png_pixels(old) == png_pixels(new)
+        except (zlib.error, struct.error):
+            return False
+    return False
+
+
+def write_if_changed(path, data):
+    """Escribe el archivo solo si su contenido cambio (siempre en binario: nada de CRLF en Windows)."""
+    try:
+        with open(path, "rb") as fh:
+            if same_content(fh.read(), data, path):
+                return False
+    except OSError:
+        pass
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "wb") as fh:
+        fh.write(data)
+    return True
+
+
+def zip_has(path, entries):
+    """¿El zip existente ya tiene exactamente estas entradas? Entonces no se rehace (mismo hash)."""
+    try:
+        with zipfile.ZipFile(path) as z:
+            if z.namelist() != [arc for arc, _ in entries]:
+                return False
+            return all(z.read(arc) == data for arc, data in entries)
+    except (OSError, zipfile.BadZipFile):
+        return False
 
 
 def png_bytes(pix):

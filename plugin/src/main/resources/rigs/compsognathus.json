@@ -1,0 +1,97 @@
+{
+  "species": "compsognathus",
+  "scale": 0.9,
+  "item": "dinoearth:compsognathus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "verde",
+      "name": "Verde",
+      "weight": 40
+    },
+    {
+      "id": "pardo",
+      "name": "Pardo",
+      "weight": 30
+    },
+    {
+      "id": "gris",
+      "name": "Gris",
+      "weight": 25
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 10.5,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            5.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            6.0,
+            4.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            8.5,
+            6.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            5.5,
+            -3.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            5.25,
+            -7.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            1.5,
+            5.0,
+            -1.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -1.5,
+            5.0,
+            -1.0
+          ]
+        }
+      ]
+    }
+  }
+}

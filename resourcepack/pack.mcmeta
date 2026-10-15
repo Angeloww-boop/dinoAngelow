@@ -1,0 +1,12 @@
+{
+  "pack": {
+    "description": "DinoEarth - dinosaurios",
+    "pack_format": 46,
+    "supported_formats": [
+      46,
+      99
+    ],
+    "min_format": 46,
+    "max_format": 99
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "species": "raptor",
+  "scale": 1.0,
+  "item": "dinoearth:raptor/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "arena",
+      "name": "Arena",
+      "weight": 30
+    },
+    {
+      "id": "gris",
+      "name": "Gris azulado",
+      "weight": 20
+    },
+    {
+      "id": "verde",
+      "name": "Selva",
+      "weight": 20
+    },
+    {
+      "id": "rojizo",
+      "name": "Rojizo",
+      "weight": 15
+    },
+    {
+      "id": "oscuro",
+      "name": "Oscuro",
+      "weight": 12
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 32.25,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            17.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            19.5,
+            9.5
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            27.0,
+            12.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            19.0,
+            -8.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            18.75,
+            -23.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            5.5,
+            18.0,
+            -5.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -5.5,
+            18.0,
+            -5.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 18.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            9.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            10.0,
+            5.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            13.0,
+            8.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            9.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            8.5,
+            -9.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            3.25,
+            9.0,
+            -1.5
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -3.25,
+            9.0,
+            -1.5
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      17.0,
+      0.0
+    ],
+    "item": "dinoearth:raptor/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:raptor/egg/egg",
+    "cracked": "dinoearth:raptor/egg_cracked/egg",
+    "icon": "dinoearth:raptor/egg_item"
+  }
+}

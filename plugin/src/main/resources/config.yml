@@ -1,0 +1,59 @@
+# DinoEarth - configuracion
+
+# Resource pack: el plugin se lo manda a cada jugador al entrar y calcula el hash solo.
+# Si usás esto, sacá resource-pack y resource-pack-sha1 de server.properties (si no, se descarga dos veces).
+resource-pack:
+  # url  -> subiste DinoEarth-ResourcePack.zip a algún lado (mc-packs.net, GitHub, Dropbox con ?dl=1...)
+  #         y pegás el link directo abajo. El plugin lo descarga al arrancar para sacarle el hash y te
+  #         avisa en la consola si subiste uno viejo.
+  # host -> el plugin sirve el pack que trae adentro, sin subir nada. Necesita un puerto abierto hacia
+  #         afuera en la máquina del server (en muchos hostings hay que pedirlo o agregarlo en el panel).
+  # off  -> no manda nada.
+  mode: url
+  url: ""
+  host:
+    port: 8163
+    # IP o dominio con el que los jugadores llegan a ESTA máquina (no el de Velocity si está en otra)
+    public-address: ""
+  # true = quien rechace el pack no puede jugar
+  required: false
+  prompt: "Este servidor usa texturas de dinosaurios. ¡Aceptalas para verlos!"
+
+# Minutos (con el chunk cargado) que tarda una cria en ser adulta
+growth-minutes: 40
+
+# Minutos que tarda un huevo en eclosionar
+hatch-minutes: 5
+
+# Minutos de espera entre una puesta de huevo y la siguiente
+breed-cooldown-minutes: 5
+
+# Valores por especie. Velocidades de montura en bloques por tick
+# (un jugador caminando ~0.22, corriendo ~0.28).
+species:
+  raptor:
+    health: 30
+    damage: 6
+    speed: 0.36
+    tame-chance: 0.25        # por cada carne cruda
+    ride:
+      walk-speed: 0.32
+      sprint-speed: 0.5
+      jump: 0.58
+  triceratops:
+    health: 80
+    damage: 9
+    speed: 0.27
+    tame-chance: 0.2         # por cada trigo, zanahoria, manzana, remolacha, bayas, sandía o fardo
+    ride:
+      walk-speed: 0.24
+      sprint-speed: 0.36
+      jump: 0.42
+  dilophosaurus:
+    health: 24
+    damage: 5
+    speed: 0.33
+  compsognathus:
+    health: 6
+    damage: 2
+    speed: 0.4

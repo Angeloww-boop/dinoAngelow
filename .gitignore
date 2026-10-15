@@ -1,0 +1,17 @@
+# Python
+generator/.venv/
+__pycache__/
+*.pyc
+
+# Maven
+plugin/target/
+
+# Previews temporales (preview.png general si se sube)
+preview_*.png
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml

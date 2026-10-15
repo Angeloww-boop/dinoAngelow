@@ -1,0 +1,216 @@
+{
+  "raptor.ambient": {
+    "subtitle": "subtitles.dinoearth.raptor.ambient",
+    "sounds": [
+      "dinoearth:raptor/ambient1",
+      "dinoearth:raptor/ambient2",
+      "dinoearth:raptor/ambient3"
+    ]
+  },
+  "raptor.roar": {
+    "subtitle": "subtitles.dinoearth.raptor.roar",
+    "sounds": [
+      "dinoearth:raptor/roar1",
+      "dinoearth:raptor/roar2"
+    ]
+  },
+  "raptor.hurt": {
+    "subtitle": "subtitles.dinoearth.raptor.hurt",
+    "sounds": [
+      "dinoearth:raptor/hurt1",
+      "dinoearth:raptor/hurt2",
+      "dinoearth:raptor/hurt3"
+    ]
+  },
+  "raptor.death": {
+    "subtitle": "subtitles.dinoearth.raptor.death",
+    "sounds": [
+      "dinoearth:raptor/death1"
+    ]
+  },
+  "raptor.attack": {
+    "subtitle": "subtitles.dinoearth.raptor.attack",
+    "sounds": [
+      "dinoearth:raptor/attack1",
+      "dinoearth:raptor/attack2"
+    ]
+  },
+  "raptor.step": {
+    "subtitle": "subtitles.dinoearth.raptor.step",
+    "sounds": [
+      "dinoearth:raptor/step1",
+      "dinoearth:raptor/step2",
+      "dinoearth:raptor/step3"
+    ]
+  },
+  "raptor.baby_ambient": {
+    "subtitle": "subtitles.dinoearth.raptor.baby_ambient",
+    "sounds": [
+      "dinoearth:raptor/baby_ambient1",
+      "dinoearth:raptor/baby_ambient2",
+      "dinoearth:raptor/baby_ambient3"
+    ]
+  },
+  "raptor.baby_hurt": {
+    "subtitle": "subtitles.dinoearth.raptor.baby_hurt",
+    "sounds": [
+      "dinoearth:raptor/baby_hurt1",
+      "dinoearth:raptor/baby_hurt2"
+    ]
+  },
+  "triceratops.ambient": {
+    "subtitle": "subtitles.dinoearth.triceratops.ambient",
+    "sounds": [
+      "dinoearth:triceratops/ambient1",
+      "dinoearth:triceratops/ambient2",
+      "dinoearth:triceratops/ambient3"
+    ]
+  },
+  "triceratops.roar": {
+    "subtitle": "subtitles.dinoearth.triceratops.roar",
+    "sounds": [
+      "dinoearth:triceratops/roar1"
+    ]
+  },
+  "triceratops.hurt": {
+    "subtitle": "subtitles.dinoearth.triceratops.hurt",
+    "sounds": [
+      "dinoearth:triceratops/hurt1",
+      "dinoearth:triceratops/hurt2"
+    ]
+  },
+  "triceratops.death": {
+    "subtitle": "subtitles.dinoearth.triceratops.death",
+    "sounds": [
+      "dinoearth:triceratops/death1"
+    ]
+  },
+  "triceratops.attack": {
+    "subtitle": "subtitles.dinoearth.triceratops.attack",
+    "sounds": [
+      "dinoearth:triceratops/attack1"
+    ]
+  },
+  "triceratops.step": {
+    "subtitle": "subtitles.dinoearth.triceratops.step",
+    "sounds": [
+      "dinoearth:triceratops/step1",
+      "dinoearth:triceratops/step2",
+      "dinoearth:triceratops/step3"
+    ]
+  },
+  "triceratops.baby_ambient": {
+    "subtitle": "subtitles.dinoearth.triceratops.baby_ambient",
+    "sounds": [
+      "dinoearth:triceratops/baby_ambient1",
+      "dinoearth:triceratops/baby_ambient2",
+      "dinoearth:triceratops/baby_ambient3"
+    ]
+  },
+  "triceratops.baby_hurt": {
+    "subtitle": "subtitles.dinoearth.triceratops.baby_hurt",
+    "sounds": [
+      "dinoearth:triceratops/baby_hurt1"
+    ]
+  },
+  "dilophosaurus.ambient": {
+    "subtitle": "subtitles.dinoearth.dilophosaurus.ambient",
+    "sounds": [
+      "dinoearth:dilophosaurus/ambient1",
+      "dinoearth:dilophosaurus/ambient2"
+    ]
+  },
+  "dilophosaurus.roar": {
+    "subtitle": "subtitles.dinoearth.dilophosaurus.roar",
+    "sounds": [
+      "dinoearth:dilophosaurus/roar1"
+    ]
+  },
+  "dilophosaurus.spit": {
+    "subtitle": "subtitles.dinoearth.dilophosaurus.spit",
+    "sounds": [
+      "dinoearth:dilophosaurus/spit1",
+      "dinoearth:dilophosaurus/spit2"
+    ]
+  },
+  "dilophosaurus.hurt": {
+    "subtitle": "subtitles.dinoearth.dilophosaurus.hurt",
+    "sounds": [
+      "dinoearth:dilophosaurus/hurt1",
+      "dinoearth:dilophosaurus/hurt2"
+    ]
+  },
+  "dilophosaurus.death": {
+    "subtitle": "subtitles.dinoearth.dilophosaurus.death",
+    "sounds": [
+      "dinoearth:dilophosaurus/death1"
+    ]
+  },
+  "dilophosaurus.attack": {
+    "subtitle": "subtitles.dinoearth.dilophosaurus.attack",
+    "sounds": [
+      "dinoearth:dilophosaurus/attack1"
+    ]
+  },
+  "dilophosaurus.step": {
+    "subtitle": "subtitles.dinoearth.dilophosaurus.step",
+    "sounds": [
+      "dinoearth:dilophosaurus/step1",
+      "dinoearth:dilophosaurus/step2"
+    ]
+  },
+  "compsognathus.ambient": {
+    "subtitle": "subtitles.dinoearth.compsognathus.ambient",
+    "sounds": [
+      "dinoearth:compsognathus/ambient1",
+      "dinoearth:compsognathus/ambient2",
+      "dinoearth:compsognathus/ambient3"
+    ]
+  },
+  "compsognathus.roar": {
+    "subtitle": "subtitles.dinoearth.compsognathus.roar",
+    "sounds": [
+      "dinoearth:compsognathus/roar1"
+    ]
+  },
+  "compsognathus.hurt": {
+    "subtitle": "subtitles.dinoearth.compsognathus.hurt",
+    "sounds": [
+      "dinoearth:compsognathus/hurt1",
+      "dinoearth:compsognathus/hurt2"
+    ]
+  },
+  "compsognathus.death": {
+    "subtitle": "subtitles.dinoearth.compsognathus.death",
+    "sounds": [
+      "dinoearth:compsognathus/death1"
+    ]
+  },
+  "compsognathus.attack": {
+    "subtitle": "subtitles.dinoearth.compsognathus.attack",
+    "sounds": [
+      "dinoearth:compsognathus/attack1"
+    ]
+  },
+  "compsognathus.step": {
+    "subtitle": "subtitles.dinoearth.compsognathus.step",
+    "sounds": [
+      "dinoearth:compsognathus/step1",
+      "dinoearth:compsognathus/step2"
+    ]
+  },
+  "egg.crack": {
+    "subtitle": "subtitles.dinoearth.egg.crack",
+    "sounds": [
+      "dinoearth:egg/crack1",
+      "dinoearth:egg/crack2",
+      "dinoearth:egg/crack3"
+    ]
+  },
+  "egg.hatch": {
+    "subtitle": "subtitles.dinoearth.egg.hatch",
+    "sounds": [
+      "dinoearth:egg/hatch1"
+    ]
+  }
+}

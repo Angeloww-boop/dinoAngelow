@@ -66,7 +66,7 @@ def render(parts, yaw, pitch, ppx=PPX, cy_frac=0.62, canvas=None, bg=BG):
     cx, cy = CW / 2, CH * cy_frac
 
     for (rig, pix, size, models), mats in parts:
-        k = size / 16.0
+        ku, kv = size[0] / 16.0, size[1] / 16.0   # la textura puede ser rectangular
         for name, elements in models.items():
             joint = rig.bone(name).joint
             wm = mat_mul(view, mats[name][0])
@@ -75,8 +75,8 @@ def render(parts, yaw, pitch, ppx=PPX, cy_frac=0.62, canvas=None, bg=BG):
                 rot = el.get("rotation")
                 for fname, nrm, fw, fh, point in faces_of(f, t):
                     uv = el["faces"][fname]["uv"]
-                    W, H = round((uv[2] - uv[0]) * k), round((uv[3] - uv[1]) * k)
-                    ox, oy = round(uv[0] * k), round(uv[1] * k)
+                    W, H = round((uv[2] - uv[0]) * ku), round((uv[3] - uv[1]) * kv)
+                    ox, oy = round(uv[0] * ku), round(uv[1] * kv)
 
                     def to_screen(u, v):
                         m = point(u, v)

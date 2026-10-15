@@ -390,18 +390,36 @@ class Atlas:
         self.rects.append([w, h, painter, 0, 0])
         return self.rects[-1]
 
-    def pack(self, size, pad=1):
+    def pack(self, width, pad=1):
+        """Estantes de ancho fijo. Devuelve el alto que ocupa, o None si alguna cara no entra a lo ancho."""
         x = y = row_h = 0
-        for r in sorted(self.rects, key=lambda r: -r[1]):
+        for r in sorted(self.rects, key=lambda r: (-r[1], -r[0])):
             w, h = r[0] + pad * 2, r[1] + pad * 2
-            if x + w > size:
+            if w > width:
+                return None
+            if x + w > width:
                 x, y, row_h = 0, y + row_h, 0
-            if y + h > size:
-                return False
             r[3], r[4] = x + pad, y + pad
             x += w
             row_h = max(row_h, h)
-        return True
+        return y + row_h
+
+    def pack_tight(self):
+        """Elige el rectangulo mas chico (lados multiplos de 16) donde entran todas las caras.
+        Antes eran cuadrados potencia de 2 y el ~60 % quedaba vacio: todo eso es memoria de video
+        que ocupa el atlas de texturas del cliente sin dibujar nada."""
+        best = None
+        for width in range(32, 1025, 16):
+            height = self.pack(width)
+            if height is None:
+                continue
+            height = max(16, -(-height // 16) * 16)
+            key = (width * height, abs(width - height))   # menos area; si empata, mas cuadrado
+            if best is None or key < best[0]:
+                best = (key, width, height)
+        _, width, height = best
+        self.pack(width)
+        return width, height
 
 
 def build_set(rig, ctx, tex_id, prefix, files, display=None):
@@ -436,31 +454,31 @@ def build_set(rig, ctx, tex_id, prefix, files, display=None):
             elements.append(el)
         models[bone.name] = elements
 
-    size = 32
-    while not atlas.pack(size):
-        size *= 2
+    tw, th = atlas.pack_tight()
+    size = (tw, th)
 
     # 1 texel de borde repetido alrededor de cada cara para que el mipmap no sangre
-    pix = [[(0, 0, 0, 0)] * size for _ in range(size)]
+    pix = [[(0, 0, 0, 0)] * tw for _ in range(th)]
     for w, h, painter, rx, ry in atlas.rects:
         block = [[painter(i, j) for i in range(w)] for j in range(h)]
         for j in range(-1, h + 1):
             for i in range(-1, w + 1):
                 c = block[min(max(j, 0), h - 1)][min(max(i, 0), w - 1)]
                 yy, xx = ry + j, rx + i
-                if 0 <= yy < size and 0 <= xx < size:
+                if 0 <= yy < th and 0 <= xx < tw:
                     pix[yy][xx] = (int(c[0]), int(c[1]), int(c[2]), 255)
 
-    k = 16.0 / size
+    # las UV van de 0 a 16 en cada eje, sea cual sea el tamaño de la textura
+    ku, kv = 16.0 / tw, 16.0 / th
     for face_, rect, W, H in face_refs:
         rx, ry = rect[3], rect[4]
-        face_["uv"] = [round(rx * k, 4), round(ry * k, 4), round((rx + W) * k, 4), round((ry + H) * k, 4)]
+        face_["uv"] = [round(rx * ku, 4), round(ry * kv, 4), round((rx + W) * ku, 4), round((ry + H) * kv, 4)]
 
     files[f"assets/{NS}/textures/item/{tex_id}.png"] = png_bytes(pix)
     for name, elements in models.items():
         model = {
             "credit": "DinoEarth - generado por generator/build.py",
-            "texture_size": [size, size],
+            "texture_size": [tw, th],
             "textures": {"0": f"{NS}:item/{tex_id}", "particle": f"{NS}:item/{tex_id}"},
             "elements": elements,
         }

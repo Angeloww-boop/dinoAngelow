@@ -1,5 +1,5 @@
 """Iconos de la Dinopedia: cada color de cada especie renderizado con el mismo motor de preview.py
-(fondo transparente, 64x64), una silueta gris para las especies sin descubrir y el libro.
+(fondo transparente, 32x32), una silueta gris para las especies sin descubrir y el libro.
 Lo llama build.py despues de armar todos los modelos.
 """
 import json
@@ -7,7 +7,7 @@ import json
 from build import NS, png_bytes
 from preview import dino, mat_t, render
 
-SIZE = 64
+SIZE = 32   # en el menu se ven a 16 px x la escala de la interfaz: 32 alcanza y ocupa 1/4 que 64
 CANVAS = 300
 # pose y angulo de camara (yaw, pitch) de cada especie; el resto usa la de reposo
 POSE = {"pteranodon": ("vuelo", 120, 28), "dimorphodon": ("vuelo", 120, 28)}

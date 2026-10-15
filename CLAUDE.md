@@ -10,6 +10,9 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - Cliente del dueño: Minecraft **1.21.9**, Fabric, **VulkanMod** (GTX 1050 notebook). VulkanMod dio
   `VK_ERROR_DEVICE_LOST`; por eso **no usar glowing/contornos** en las displays.
 - El pack declara formatos 46–99 (1.21.4 en adelante). No usar nada que no exista en 1.21.4.
+- Con la 0.7 (13 especies) el cliente con VulkanMod empezó a mezclar texturas (mobs, menús e inventario con
+  rayas de los dinos). En 0.7.4 las texturas se empaquetan ajustadas (rectángulos múltiplos de 16, no cuadrados
+  potencia de 2) y los íconos son 32x32: el pack ocupa ~42 % de la memoria de video de antes. Mantenerlo chico.
 - En la PC: Java 21 + Maven, Python 3.14. Sonidos: `generator/.venv` con numpy + soundfile
   (en otra máquina: `python -m venv generator/.venv && generator/.venv/Scripts/pip install numpy soundfile`).
 
@@ -85,6 +88,6 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.7 **sin probar en el juego**: 7 especies nuevas (para, galli, stego, anky, giga, carno, dimorphodon), presas,
   colas, hombro.
 - v0.5–v0.7 se escribieron en la nube (sin acceso a repo.papermc.io). El 2026-10-15 se compilaron en la PC contra el
-  paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build (0.7.1: /dino pack info muestra por que no esta listo el pack; 0.7.2: el config.yml viejo se actualiza solo y queda config-anterior.yml; 0.7.3: /dino tame [jugador] domestica el dino que mirás, incluso los que solo nacen de huevo).
+  paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build (0.7.1: /dino pack info muestra por que no esta listo el pack; 0.7.2: el config.yml viejo se actualiza solo y queda config-anterior.yml; 0.7.3: /dino tame [jugador] domestica el dino que mirás, incluso los que solo nacen de huevo; 0.7.4: texturas ajustadas, pack nuevo sha1 06aaccf2…).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

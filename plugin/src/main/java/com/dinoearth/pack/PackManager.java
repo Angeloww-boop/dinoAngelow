@@ -51,6 +51,7 @@ public final class PackManager implements Listener {
     private byte[] bundled;
     private String bundledHash;
     private volatile ResourcePackInfo pack;   // null hasta que este listo
+    private volatile String problem;          // ultimo problema al preparar el pack (para /dino pack info)
     private HttpServer server;
 
     public PackManager(JavaPlugin plugin) {
@@ -59,6 +60,7 @@ public final class PackManager implements Listener {
 
     // ------------------------------------------------------------ arranque
     public void start() {
+        problem = null;
         ConfigurationSection c = plugin.getConfig().getConfigurationSection("resource-pack");
         mode = c != null ? c.getString("mode", "url").toLowerCase() : "url";
         required = c != null && c.getBoolean("required", false);
@@ -73,7 +75,7 @@ public final class PackManager implements Listener {
             case "url" -> startUrl(c != null ? c.getString("url", "") : "");
             case "host" -> startHost(c);
             case "off" -> plugin.getLogger().info("Resource pack: desactivado (resource-pack.mode: off).");
-            default -> plugin.getLogger().warning("resource-pack.mode desconocido: '" + mode + "' (usá url, host u off).");
+            default -> problem("resource-pack.mode desconocido: '" + mode + "' (usá url, host u off).");
         }
     }
 
@@ -96,7 +98,7 @@ public final class PackManager implements Listener {
 
     private void startUrl(String url) {
         if (url == null || url.isBlank()) {
-            plugin.getLogger().warning("Resource pack: falta resource-pack.url en config.yml. Subí el "
+            problem("falta resource-pack.url en config.yml. Subí el "
                     + "DinoEarth-ResourcePack.zip (por ejemplo a mc-packs.net) y pegá el link directo, "
                     + "o usá resource-pack.mode: host.");
             return;
@@ -105,7 +107,7 @@ public final class PackManager implements Listener {
         try {
             uri = URI.create(url.trim());
         } catch (IllegalArgumentException e) {
-            plugin.getLogger().warning("Resource pack: la URL no es válida: " + url);
+            problem("la URL no es válida: " + url);
             return;
         }
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -114,32 +116,32 @@ public final class PackManager implements Listener {
                         .followRedirects(HttpClient.Redirect.ALWAYS)
                         .connectTimeout(Duration.ofSeconds(15)).build();
                 HttpResponse<byte[]> res = client.send(HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(60))
-                        .header("User-Agent", "DinoEarth").GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+                        .header("User-Agent", "Minecraft Java/1.21 (DinoEarth)").GET().build(), HttpResponse.BodyHandlers.ofByteArray());
                 if (res.statusCode() != 200) {
-                    plugin.getLogger().warning("Resource pack: la URL respondió " + res.statusCode() + " (" + uri + ")");
+                    problem("la URL respondió " + res.statusCode() + " (" + uri + ")");
                     return;
                 }
                 byte[] data = res.body();
                 if (data.length > MAX_BYTES || data.length < 4 || data[0] != 'P' || data[1] != 'K') {
-                    plugin.getLogger().warning("Resource pack: lo que hay en la URL no es un .zip. "
+                    problem("lo que hay en la URL no es un .zip. "
                             + "¿Es un link de descarga directa? (" + uri + ")");
                     return;
                 }
                 String hash = sha1(data);
                 if (bundledHash != null && !bundledHash.equals(hash)) {
-                    plugin.getLogger().warning("Resource pack: el zip de la URL NO es el de esta versión del plugin. "
+                    problem("el zip de la URL NO es el de esta versión del plugin. "
                             + "Subí el DinoEarth-ResourcePack.zip nuevo (o usá /dino pack reload después de subirlo).");
                 }
                 Bukkit.getScheduler().runTask(plugin, () -> ready(uri, hash));
             } catch (Exception e) {
-                plugin.getLogger().warning("Resource pack: no se pudo descargar " + uri + ": " + e.getMessage());
+                problem("no se pudo descargar " + uri + ": " + e.getMessage());
             }
         });
     }
 
     private void startHost(ConfigurationSection c) {
         if (bundled == null) {
-            plugin.getLogger().warning("Resource pack: este jar no trae el pack adentro.");
+            problem("este jar no trae el pack adentro.");
             return;
         }
         int port = c != null ? c.getInt("host.port", 8163) : 8163;
@@ -147,7 +149,7 @@ public final class PackManager implements Listener {
         if (address == null || address.isBlank()) {
             address = Bukkit.getIp();
             if (address == null || address.isBlank()) {
-                plugin.getLogger().warning("Resource pack: poné resource-pack.host.public-address en config.yml "
+                problem("poné resource-pack.host.public-address en config.yml "
                         + "(la IP o dominio con el que los jugadores entran al server).");
                 return;
             }
@@ -177,7 +179,7 @@ public final class PackManager implements Listener {
             }));
             server.start();
         } catch (IOException e) {
-            plugin.getLogger().warning("Resource pack: no se pudo abrir el puerto " + port + ": " + e.getMessage());
+            problem("no se pudo abrir el puerto " + port + ": " + e.getMessage());
             server = null;
             return;
         }
@@ -204,11 +206,20 @@ public final class PackManager implements Listener {
         return true;
     }
 
+    /** Anota un problema al preparar el pack: va a la consola y a /dino pack info. */
+    private void problem(String message) {
+        problem = message;
+        plugin.getLogger().warning("Resource pack: " + message);
+    }
+
     public String status() {
         ResourcePackInfo info = pack;
         if ("off".equals(mode)) return "desactivado";
-        return info == null ? "modo " + mode + ", todavía no está listo (mirá la consola)"
-                : "modo " + mode + ", " + info.uri() + " (sha1 " + info.hash() + ")";
+        String note = problem;
+        if (info == null) {
+            return "modo " + mode + ", no está listo: " + (note != null ? note : "todavía descargando el pack, probá en unos segundos");
+        }
+        return "modo " + mode + ", " + info.uri() + " (sha1 " + info.hash() + ")" + (note != null ? " · AVISO: " + note : "");
     }
 
     @EventHandler

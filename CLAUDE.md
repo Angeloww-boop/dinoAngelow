@@ -85,6 +85,6 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.7 **sin probar en el juego**: 7 especies nuevas (para, galli, stego, anky, giga, carno, dimorphodon), presas,
   colas, hombro.
 - v0.5–v0.7 se escribieron en la nube (sin acceso a repo.papermc.io). El 2026-10-15 se compilaron en la PC contra el
-  paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build (0.7.1: /dino pack info muestra por que no esta listo el pack).
+  paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build (0.7.1: /dino pack info muestra por que no esta listo el pack; 0.7.2: el config.yml viejo se actualiza solo y queda config-anterior.yml).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

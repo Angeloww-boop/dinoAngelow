@@ -35,7 +35,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
+        ConfigUpdater.update(this);
+        reloadConfig();
         for (Species s : Species.ALL) {
             try (InputStream in = getResource("rigs/" + s.id + ".json")) {
                 s.rig = DinoRig.load(in);

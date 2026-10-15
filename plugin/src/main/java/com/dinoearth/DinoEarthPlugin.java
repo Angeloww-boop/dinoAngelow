@@ -12,10 +12,12 @@ import com.dinoearth.species.Species;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.InputStream;
@@ -153,6 +155,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 msg(sender, "Hambre al " + Math.round(value * 100) + "% en " + n + " dino(s) domesticado(s).",
                         NamedTextColor.GREEN);
             }
+            case "tame", "domesticar" -> tame(sender, args);
             case "count" -> {
                 StringBuilder sb = new StringBuilder("Cargados: " + dinos.count());
                 for (Species s : Species.ALL) {
@@ -167,10 +170,62 @@ public final class DinoEarthPlugin extends JavaPlugin {
                         NamedTextColor.GRAY);
                 msg(sender, "/dino comedero <carne|plantas|pescado> [cantidad]  ·  /dino dinopedia [jugador]  ·  /dino hambre [%]",
                         NamedTextColor.GRAY);
+                msg(sender, "/dino tame [jugador]  (domestica el dino que estás mirando)", NamedTextColor.GRAY);
                 msg(sender, "/dino pack [reload|info]  ·  Especies: " + String.join(", ", ids()), NamedTextColor.GRAY);
             }
         }
         return true;
+    }
+
+    /**
+     * Admin: domestica el dino que estas mirando (o el mas cercano a 4 bloques) a tu nombre o al de otro
+     * jugador. Sirve tambien para los que solo se crian desde el huevo (T-Rex, Giganotosaurus).
+     */
+    private boolean tame(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+        Player owner = player;
+        if (args.length > 1) {
+            owner = getServer().getPlayerExact(args[1]);
+            if (owner == null) return msg(sender, "No encontré a " + args[1] + " conectado.", NamedTextColor.RED);
+        }
+        Dino d = lookedAt(player);
+        if (d == null) return msg(sender, "Mirá a un dino (a 24 bloques o menos) y volvé a usar /dino tame.", NamedTextColor.RED);
+        Species s = d.species();
+        if (!s.tameable()) return msg(sender, s.name + " es salvaje por naturaleza: no se puede domesticar.", NamedTextColor.RED);
+        Wolf wolf = d.wolf();
+        if (wolf.isTamed() && owner.getUniqueId().equals(wolf.getOwnerUniqueId())) {
+            return msg(sender, "Ese " + s.name + " ya es de " + owner.getName() + ".", NamedTextColor.YELLOW);
+        }
+        wolf.setOwner(owner);
+        wolf.setTarget(null);
+        wolf.setAngry(false);
+        wolf.setSitting(true);
+        d.healFully();
+        d.setHunger(1f);
+        d.onTamed();
+        wolf.getWorld().spawnParticle(Particle.HEART, wolf.getLocation().add(0, wolf.getHeight() + 0.3, 0), 9, 0.6, 0.4, 0.6);
+        dex.addTamed(owner, s, d.variant());
+        msg(sender, s.name + " " + s.rig.variant(d.variant()).name() + " domesticado para " + owner.getName()
+                + ". Quedó sentado: click derecho para que te siga.", NamedTextColor.GREEN);
+        if (owner != player) msg(owner, player.getName() + " te regaló un " + s.name + ".", NamedTextColor.GREEN);
+        return true;
+    }
+
+    /** El dino al que apunta la mira (las cajas se agrandan un poco porque el modelo es mas grande que el lobo). */
+    private Dino lookedAt(Player player) {
+        var hit = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getEyeLocation().getDirection(),
+                24, 0.8, e -> e instanceof Wolf && dinos.isDino(e));
+        if (hit != null && hit.getHitEntity() != null) return dinos.get(hit.getHitEntity());
+        Dino best = null;
+        double bestD = 4 * 4;
+        for (Dino d : nearby(player, 4)) {
+            double dist = d.wolf().getLocation().distanceSquared(player.getLocation());
+            if (dist < bestD) {
+                best = d;
+                bestD = dist;
+            }
+        }
+        return best;
     }
 
     private boolean packCommand(CommandSender sender, String[] args) {
@@ -279,7 +334,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
-            return filter(admin ? List.of("spawn", "egg", "grow", "remove", "count", "comedero", "dinopedia", "hambre", "pack")
+            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "remove", "count", "comedero", "dinopedia", "hambre", "pack")
                     : List.of("pack"), args[0]);
         }
         String sub = args[0].toLowerCase();
@@ -290,7 +345,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         if (args.length == 3 && sub.equals("remove")) return filter(ids(), args[2]);
         if (args.length == 2 && (sub.equals("comedero") || sub.equals("feeder"))) return filter(diets(), args[1]);
         if (args.length == 2 && sub.equals("hambre")) return filter(List.of("0", "25", "50", "100"), args[1]);
-        if (args.length == 2 && sub.equals("dinopedia")) {
+        if (args.length == 2 && (sub.equals("dinopedia") || sub.equals("tame") || sub.equals("domesticar"))) {
             return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[1]);
         }
         if (sub.equals("spawn")) {

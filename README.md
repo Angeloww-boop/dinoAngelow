@@ -53,6 +53,7 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 /dino spawn <tipo> [color|random] [macho|hembra|random] [adulto|bebe] [cantidad]
 /dino egg <especie> [cantidad]
 /dino grow [%]                      (crías a 10 bloques)
+/dino tame [jugador]                (domestica el dino que mirás; sirve para T-Rex y Giganotosaurus)
 /dino remove [radio] [especie]
 /dino count
 /dino comedero <carne|plantas|pescado> [cantidad]

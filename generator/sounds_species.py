@@ -174,3 +174,148 @@ SPECIES_SOUNDS = {
         ("step", compy_step, "Pasitos", "Tiny footsteps"),
     ],
 }
+
+
+# ---------------------------------------------------------------- tyrannosaurus rex
+def rex_voice(dur, f0, env, rough=0.8, drive=2.8, breath=0.35):
+    """Muy grave, con subarmonico fuerte: se siente mas de lo que se oye."""
+    return voice(dur, f0, env, harmonics=60, tilt=0.7, sub=0.9, rough=rough, rough_hz=19, vib=(3, 0.025),
+                 jitter=0.02, peaks=((180, 1.0, 120), (520, 0.7, 220), (1300, 0.3, 450)), breath=breath,
+                 breath_band=(200, 2000), drive=drive)
+
+
+def rex_ambient():
+    a = rex_voice(1.4, [(0, 48), (0.4, 62), (1, 44)], [(0, 0), (0.2, 1), (0.75, 0.8), (1, 0)], rough=0.6)
+    b = place(1.5, [(0, huff(0.6, 1.0), 0.7), (0.5, rex_voice(0.9, [(0, 55), (1, 46)], [(0, 0), (0.3, 1), (1, 0)]), 1.0)])
+    c = seq([rex_voice(0.4, [(0, 60), (1, 52)], [(0, 0), (0.25, 1), (1, 0)]),
+             rex_voice(0.7, [(0, 64), (0.5, 72), (1, 50)], [(0, 0), (0.2, 1), (1, 0)])], [0.15])
+    return [a, b, c]
+
+
+def rex_roar():
+    out = []
+    for top in (150, 132):
+        body = rex_voice(2.4, [(0, 60), (0.18, top), (0.6, top * 0.85), (1, 58)],
+                         [(0, 0), (0.08, 1), (0.7, 0.9), (1, 0)], rough=1.0, drive=3.2, breath=0.5)
+        scream = voice(2.4, [(0, 240), (0.2, top * 2.6), (0.6, top * 2.2), (1, 180)],
+                       [(0, 0), (0.12, 0.8), (0.6, 0.7), (1, 0)], harmonics=30, tilt=0.8, sub=0.4, rough=0.9,
+                       rough_hz=31, vib=(4, 0.04), peaks=((700, 1.0, 300), (1600, 0.7, 500)), breath=0.5, drive=3.0)
+        out.append(norm(body) + 0.45 * norm(scream))
+    return out
+
+
+def rex_hurt():
+    return [rex_voice(0.7, [(0, 110), (0.3, 150), (1, 80)], [(0, 0), (0.1, 1), (1, 0)], rough=0.9, drive=3.0)
+            for _ in range(2)]
+
+
+def rex_death():
+    return [rex_voice(3.0, [(0, 120), (0.15, 140), (0.7, 60), (1, 32)], [(0, 0), (0.06, 1), (0.6, 0.7), (1, 0)],
+                      rough=1.0, breath=0.55)]
+
+
+def rex_attack():
+    out = []
+    for f in (70, 60):
+        chomp = place(0.25, [(0, thump(0.25, (f * 2, f), 1.0), 1.0), (0.02, click(0.02, 400, 5000), 0.8)])
+        out.append(place(0.75, [(0, huff(0.4, 1.0), 0.7), (0.12, rex_voice(0.4, [(0, f), (1, f * 1.4)],
+                                                                             [(0, 0), (0.3, 1), (1, 0)]), 0.8),
+                                (0.42, chomp, 1.0)]))
+    return out
+
+
+def rex_step():
+    return [thump(0.45, (38, 20), 0.6), thump(0.5, (34, 19), 0.5), thump(0.42, (40, 22), 0.7)]
+
+
+def rex_baby_ambient():
+    return [voice(0.35, [(0, a), (0.4, a * 1.2), (1, a * 0.85)], [(0, 0), (0.2, 1), (1, 0)], harmonics=20, tilt=1.0,
+                  sub=0.3, rough=0.5, rough_hz=40, vib=(9, 0.05), peaks=((900, 1.0, 400), (2000, 0.5, 600)),
+                  breath=0.3, drive=2.2) for a in (380, 330, 420)]
+
+
+def rex_baby_hurt():
+    return [voice(0.25, [(0, 520), (0.3, 640), (1, 400)], [(0, 0), (0.15, 1), (1, 0)], harmonics=18, tilt=1.0,
+                  sub=0.2, rough=0.6, peaks=((1100, 1.0, 400),), breath=0.25, drive=2.4) for _ in range(2)]
+
+
+# ---------------------------------------------------------------- pteranodon
+def caw(dur, f, rough=0.7):
+    """Graznido aspero ("kraa") de ave marina grande."""
+    return voice(dur, [(0, f * 0.8), (0.25, f), (1, f * 0.7)], [(0, 0), (0.08, 1), (0.6, 0.8), (1, 0)],
+                 harmonics=30, tilt=0.8, sub=0.3, rough=rough, rough_hz=48, vib=(6, 0.03),
+                 peaks=((1100, 1.0, 350), (2400, 0.7, 500), (3600, 0.4, 700)), breath=0.35, drive=2.8)
+
+
+def ptera_ambient():
+    a = seq([caw(0.28, 520), caw(0.34, 480)], [0.12])
+    b = caw(0.55, 450)
+    c = seq([caw(0.14, 600, 0.5), caw(0.14, 620, 0.5), caw(0.3, 540)], [0.06, 0.08])
+    return [a, b, c]
+
+
+def ptera_roar():
+    return [voice(1.1, [(0, 500), (0.2, 900), (0.6, 820), (1, 520)], [(0, 0), (0.06, 1), (0.75, 0.85), (1, 0)],
+                  harmonics=30, tilt=0.75, sub=0.35, rough=0.8, rough_hz=52, vib=(7, 0.04),
+                  peaks=((1200, 1.0, 400), (2800, 0.8, 600)), breath=0.45, drive=3.0)]
+
+
+def ptera_hurt():
+    return [caw(0.3, f, 0.9) for f in (760, 700)]
+
+
+def ptera_death():
+    return [voice(1.5, [(0, 700), (0.15, 820), (1, 260)], [(0, 0), (0.06, 1), (0.6, 0.6), (1, 0)], harmonics=28,
+                  sub=0.4, rough=0.9, rough_hz=30, vib=(6, 0.06), breath=0.4, drive=2.6)]
+
+
+def ptera_attack():
+    snap = place(0.12, [(0, click(0.012, 800, 7000), 1.0), (0.05, click(0.01, 1000, 8000), 0.7)])
+    return [place(0.45, [(0, caw(0.25, 640, 0.9), 0.7), (0.24, snap, 1.0)])]
+
+
+def ptera_step():
+    return [click(0.008, 600, 5000) * 0.5, click(0.01, 500, 4000) * 0.45]
+
+
+def flap_once(dur=0.32, lo=150, hi=1400):
+    n = int(dur * SR)
+    return norm(spectral(noise(n), band(lo, hi))) * curve([(0, 0), (0.35, 1), (0.6, 0.4), (1, 0)], n)
+
+
+def ptera_flap():
+    return [place(0.4, [(0, flap_once(), 1.0), (0.05, thump(0.2, (60, 40), 0.2), 0.4)]),
+            place(0.4, [(0, flap_once(0.36, 120, 1200), 1.0)])]
+
+
+def ptera_baby_ambient():
+    return [seq([tweet(1500, 0.08, 1.1), tweet(1400, 0.1, 1.1)], [0.05]), tweet(1300, 0.14, 1.2)]
+
+
+def ptera_baby_hurt():
+    return [tweet(1900, 0.16, 1.3)]
+
+
+SPECIES_SOUNDS_2 = {
+    "trex": [
+        ("ambient", rex_ambient, "T-Rex gruñe", "T-Rex rumbles"),
+        ("roar", rex_roar, "T-Rex ruge", "T-Rex roars"),
+        ("hurt", rex_hurt, "T-Rex herido", "T-Rex hurts"),
+        ("death", rex_death, "T-Rex muere", "T-Rex dies"),
+        ("attack", rex_attack, "T-Rex muerde", "T-Rex bites"),
+        ("step", rex_step, "Pisadas que hacen temblar el suelo", "Earth-shaking footsteps"),
+        ("baby_ambient", rex_baby_ambient, "Cría de T-Rex chilla", "Baby T-Rex squeaks"),
+        ("baby_hurt", rex_baby_hurt, "Cría de T-Rex herida", "Baby T-Rex hurts"),
+    ],
+    "pteranodon": [
+        ("ambient", ptera_ambient, "Pteranodon grazna", "Pteranodon caws"),
+        ("roar", ptera_roar, "Pteranodon chilla", "Pteranodon screeches"),
+        ("hurt", ptera_hurt, "Pteranodon herido", "Pteranodon hurts"),
+        ("death", ptera_death, "Pteranodon muere", "Pteranodon dies"),
+        ("attack", ptera_attack, "Pteranodon picotea", "Pteranodon pecks"),
+        ("step", ptera_step, "Pasos de pteranodon", "Pteranodon footsteps"),
+        ("flap", ptera_flap, "Aleteo", "Wings flap"),
+        ("baby_ambient", ptera_baby_ambient, "Cría de pteranodon pía", "Baby pteranodon chirps"),
+        ("baby_hurt", ptera_baby_hurt, "Cría de pteranodon herida", "Baby pteranodon hurts"),
+    ],
+}

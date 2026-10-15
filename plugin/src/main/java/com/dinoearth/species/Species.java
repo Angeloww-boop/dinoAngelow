@@ -14,7 +14,8 @@ import java.util.Set;
  */
 public final class Species {
 
-    public enum Body { BIPED, QUADRUPED }
+    /** FLYER: camina en cuatro patas (las alas plegadas) y vuela. */
+    public enum Body { BIPED, QUADRUPED, FLYER }
 
     public enum Temper {
         /** Neutral (como un lobo), caza animales chicos, se domestica con carne. */
@@ -32,6 +33,8 @@ public final class Species {
 
     public static final Set<Material> MEAT = EnumSet.of(
             Material.BEEF, Material.CHICKEN, Material.PORKCHOP, Material.MUTTON, Material.RABBIT);
+    public static final Set<Material> FISH = EnumSet.of(
+            Material.COD, Material.SALMON, Material.TROPICAL_FISH);
     public static final Set<Material> PLANTS = EnumSet.of(
             Material.WHEAT, Material.CARROT, Material.APPLE, Material.BEETROOT, Material.SWEET_BERRIES,
             Material.MELON_SLICE, Material.HAY_BLOCK);
@@ -57,6 +60,17 @@ public final class Species {
     public double rideJump;
     public final boolean spits;
     public final boolean charges;
+    /** Ruge y asusta (lentitud + oscuridad). Montado ruge con la barra espaciadora en vez de saltar. */
+    public final boolean roars;
+    /** Salvaje persigue jugadores aunque su temperamento sea domesticable. */
+    public final boolean territorial;
+    /** No se domestica dandole comida: solo naciendo de un huevo. */
+    public final boolean eggTameOnly;
+    /** Grados que se balancean las patas al caminar (las patas largas, menos). */
+    public final float swing;
+    public double flySpeed;
+    public double flySprint;
+    private final Set<Material> food;
     /** Distancia de dibujado de un adulto (1 = 64 bloques, segun la "distancia de entidades" del jugador). */
     public final double viewRange;
     /** Cuantos aparecen juntos con /dino spawn. */
@@ -84,6 +98,13 @@ public final class Species {
         rideJump = b.rideJump;
         spits = b.spits;
         charges = b.charges;
+        roars = b.roars;
+        territorial = b.territorial;
+        eggTameOnly = b.eggTameOnly;
+        swing = b.swing;
+        flySpeed = b.flySpeed;
+        flySprint = b.flySprint;
+        food = b.food;
         group = b.group;
         viewRange = b.viewRange;
         drops = b.drops;
@@ -99,7 +120,12 @@ public final class Species {
 
     /** Comida para domesticar, curar, criar y hacer crecer a las crias. */
     public Set<Material> food() {
+        if (food != null) return food;
         return temper == Temper.HERBIVORE ? PLANTS : MEAT;
+    }
+
+    public boolean flies() {
+        return body == Body.FLYER;
     }
 
     public boolean hasBabies() {
@@ -116,6 +142,8 @@ public final class Species {
         rideWalk = c.getDouble("ride.walk-speed", rideWalk);
         rideSprint = c.getDouble("ride.sprint-speed", rideSprint);
         rideJump = c.getDouble("ride.jump", rideJump);
+        flySpeed = c.getDouble("ride.fly-speed", flySpeed);
+        flySprint = c.getDouble("ride.fly-sprint-speed", flySprint);
     }
 
     // ------------------------------------------------------------ especies
@@ -137,7 +165,19 @@ public final class Species {
             .aliases("compy", "compi").stats(6, 2, 0.4).hitbox(0.55).stride(5.5).group(5).view(0.5)
             .drops(new Drop(Material.CHICKEN, 0, 1)).build();
 
-    public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS);
+    public static final Species TREX = new Builder("trex", "Tyrannosaurus rex", Body.BIPED, Temper.CARNIVORE)
+            .aliases("t-rex", "rex", "tiranosaurio", "tyrannosaurus").stats(160, 14, 0.3).hitbox(3.2).knockback(1.2)
+            .stride(1.3).swing(26).territorial().eggTameOnly().roars().ride(0.26, 0.42, 0).view(2)
+            .drops(new Drop(Material.BEEF, 4, 8), new Drop(Material.BONE, 3, 6), new Drop(Material.LEATHER, 2, 4))
+            .build();
+
+    public static final Species PTERANODON = new Builder("pteranodon", "Pteranodon", Body.FLYER, Temper.CARNIVORE)
+            .aliases("ptera", "ptero", "pterodactilo", "pterodactyl").stats(28, 4, 0.3).hitbox(1.6).stride(3.2)
+            .food(FISH).tame(0.2).ride(0.16, 0.22, 0.55).fly(0.55, 0.9).view(1.5)
+            .drops(new Drop(Material.FEATHER, 1, 3), new Drop(Material.CHICKEN, 1, 2), new Drop(Material.BONE, 0, 2))
+            .build();
+
+    public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS, TREX, PTERANODON);
 
     public static Species byId(String id) {
         if (id == null) return null;
@@ -154,9 +194,10 @@ public final class Species {
         final Temper temper;
         List<String> aliases = List.of();
         double health = 20, damage = 4, speed = 0.3, hitbox = 1, knockback = 0, tameChance = 0, viewRange = 1;
-        double rideWalk, rideSprint, rideJump;
-        float maleScale = 1.06f, stride = 2.4f;
-        boolean rideable, spits, charges;
+        double rideWalk, rideSprint, rideJump, flySpeed, flySprint;
+        float maleScale = 1.06f, stride = 2.4f, swing = 38;
+        boolean rideable, spits, charges, roars, territorial, eggTameOnly;
+        Set<Material> food;
         int group = 1;
         List<Drop> drops = List.of();
 
@@ -219,6 +260,37 @@ public final class Species {
 
         Builder charges() {
             charges = true;
+            return this;
+        }
+
+        Builder roars() {
+            roars = true;
+            return this;
+        }
+
+        Builder territorial() {
+            territorial = true;
+            return this;
+        }
+
+        Builder eggTameOnly() {
+            eggTameOnly = true;
+            return this;
+        }
+
+        Builder swing(double degrees) {
+            swing = (float) degrees;
+            return this;
+        }
+
+        Builder food(Set<Material> items) {
+            food = items;
+            return this;
+        }
+
+        Builder fly(double speed, double sprint) {
+            flySpeed = speed;
+            flySprint = sprint;
             return this;
         }
 

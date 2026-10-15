@@ -15,11 +15,14 @@ import zlib
 import geometry as G
 import species_compsognathus
 import species_dilophosaurus
+import species_pteranodon
 import species_raptor
+import species_trex
 import species_triceratops
 
 ALL_SPECIES = [species_raptor.SPECIES, species_triceratops.SPECIES,
-               species_dilophosaurus.SPECIES, species_compsognathus.SPECIES]
+               species_dilophosaurus.SPECIES, species_compsognathus.SPECIES,
+               species_trex.SPECIES, species_pteranodon.SPECIES]
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACK_DIR = os.path.join(ROOT, "resourcepack")
@@ -110,18 +113,65 @@ def faces_of(f, t):
 
 # ---------------------------------------------------------------- pintura
 class Ctx:
-    def __init__(self, pal=None, face=None, male=False, pattern="stripes", cracked=False, egg=None):
+    def __init__(self, pal=None, face=None, male=False, pattern="stripes", cracked=False, egg=None, saddle=None):
         self.pal = pal
         self.face = face or {}
         self.male = male
         self.pattern = pattern
         self.cracked = cracked
         self.egg = egg
+        self.saddle = saddle or G.SADDLE_COLORS
 
 
 def rel(cube, p0, axis):
     """Posicion 0..1 de p0 dentro del cubo sobre un eje (sin rotar)."""
     return (p0[axis] - cube.frm[axis]) / max(0.001, cube.to[axis] - cube.frm[axis])
+
+
+def border(cube, p0, n):
+    """Distancia (px) de p0 al borde mas cercano de la cara en la que esta."""
+    ax = max(range(3), key=lambda i: abs(n[i]))
+    return min(min(p0[i] - cube.frm[i], cube.to[i] - p0[i]) for i in range(3) if i != ax)
+
+
+def paint_saddle(ctx, cube, n, p0, edge, noise):
+    """Materiales de las monturas (la paleta es de cada especie)."""
+    pal, tag = ctx.saddle, cube.tag
+    x, y, z = p0
+    b = border(cube, p0, n)
+    col = pal[tag]
+    if tag == "saddle":
+        if n[1] > 0.5 and (edge < 0.6 or rel(cube, p0, 2) < 0.06 or rel(cube, p0, 2) > 0.94):
+            col = scale(col, 1.25)  # costura del borde
+    elif tag == "plate":
+        # placa de metal: bisel oscuro, remaches en las esquinas, brillo arriba
+        col = scale(col, 1.18 if n[1] > 0.5 else 0.92)
+        if b < 0.5:
+            col = scale(pal["plate"], 0.7)
+        elif b < 1.25 and hash3(math.floor(x), math.floor(y), math.floor(z), 41) > 0.55:
+            col = scale(pal["metal"], 1.1)
+        return scale(col, 0.97 + 0.06 * hash3(math.floor(x * 2), math.floor(y * 2), math.floor(z * 2), 42))
+    elif tag == "spike":
+        axis = {"x": 0, "y": 1, "z": 2}[cube.tip or "y"]
+        return scale(mix(col, HORN_TIP, smooth(0.45, 1.0, rel(cube, p0, axis))), noise)
+    elif tag == "cloth":
+        if b < 1.0:
+            col = pal["trim"]                       # guarda
+        elif b < 1.5:
+            col = scale(col, 0.75)
+        elif (math.floor(x) + math.floor(y) + math.floor(z)) % 4 == 0:
+            col = scale(col, 0.88)                  # trama
+        return scale(col, 0.96 + 0.06 * hash3(math.floor(x * 2), math.floor(y * 2), math.floor(z * 2), 43))
+    elif tag == "wood":
+        long_axis = max(range(3), key=lambda i: cube.to[i] - cube.frm[i])
+        across = [p0[i] for i in range(3) if i != long_axis][0]
+        if math.sin(across * 2.4 + 2 * hash3(0, 0, math.floor(p0[long_axis] / 3), 44)) > 0.6:
+            col = scale(col, 0.82)                  # veta
+        if b < 0.4:
+            col = scale(col, 0.75)
+    elif tag == "rope":
+        col = scale(col, 0.8 if (math.floor(x * 2) + math.floor(y * 2) + math.floor(z * 2)) % 3 == 0 else 1.05)
+    return scale(col, noise)
 
 
 def paint(ctx, bone, cube, n, p, p0, edge):
@@ -131,17 +181,15 @@ def paint(ctx, bone, cube, n, p, p0, edge):
     noise = 0.93 + 0.12 * hash3(math.floor(x * 2), math.floor(y * 2), math.floor(z * 2), 7)
     tag = cube.tag
 
-    if tag in G.SADDLE_COLORS:
-        col = G.SADDLE_COLORS[tag]
-        if tag == "saddle" and n[1] > 0.5 and (edge < 0.6 or rel(cube, p0, 2) < 0.06 or rel(cube, p0, 2) > 0.94):
-            col = scale(col, 1.25)  # costura del borde
-        return scale(col, noise)
+    if tag in G.SADDLE_TAGS:
+        return paint_saddle(ctx, cube, n, p0, edge, noise)
     if tag == "egg":
         return paint_egg(ctx, p)
     if tag == "claw":
         return scale(CLAW, 1.0 + 0.25 * hash3(x, y, z, 3))
     if tag == "beak":
-        return scale(BEAK, noise * (1.15 if n[1] > 0.5 else 1.0))
+        beak = ctx.pal.get("beak", BEAK) if ctx.pal else BEAK
+        return scale(beak, noise * (1.15 if n[1] > 0.5 else 1.0))
     if tag == "horn":
         axis = {"x": 0, "y": 1, "z": 2}[cube.tip or "y"]
         if axis == 0:   # cuernos laterales: la punta es la cara mas alejada del centro
@@ -161,6 +209,8 @@ def paint(ctx, bone, cube, n, p, p0, edge):
         return scale(mix(pal["accent"], accent2, smooth(0.4, 1.0, rel(cube, p0, 1))), noise)
     if tag == "frill":
         return scale(paint_frill(ctx, cube, n, p0, accent2), noise)
+    if tag == "membrane":
+        return scale(paint_membrane(ctx, n, p0), noise)
     if tag == "fan":
         if abs(x) > 9.5 or abs(n[0]) > 0.5 or abs(n[1]) > 0.5:
             return scale(pal["dark"], noise)
@@ -197,7 +247,7 @@ def paint(ctx, bone, cube, n, p, p0, edge):
             col = mix(col, stripe, 0.6)
         # arrugas / escamas grandes
         col = scale(col, 0.92 + 0.12 * hash3(math.floor(x / 2), math.floor(y / 2), math.floor(z / 2), 17))
-    else:  # manchas
+    elif ctx.pattern == "spots":
         if upper and hash3(math.floor(x / 1.5), math.floor(y / 1.5), math.floor(z / 1.5), 5) > 0.78:
             col = mix(col, stripe, 0.75)
 
@@ -239,6 +289,21 @@ def paint_frill(ctx, cube, n, p0, accent2):
         ang = math.atan2(u, v + 1.1)
         if math.sin(ang * 9) > 0.35:
             col = mix(col, pal["accent"], 0.75)
+    return col
+
+
+def paint_membrane(ctx, n, p0):
+    """Membrana del ala: mas oscura hacia la punta y el borde de atras, con fibras a lo largo."""
+    pal = ctx.pal
+    x, y, z = p0
+    wing = pal.get("wing", pal["base"])
+    tip = pal.get("wing_tip", pal["dark"])
+    if n[1] < -0.5:
+        wing = mix(wing, pal["belly"], 0.45)       # de abajo es mas clara
+    col = mix(wing, tip, smooth(30, 46, abs(x)))
+    col = mix(col, tip, 0.35 * smooth(-1, -8, z))
+    if math.sin(abs(x) * 0.9 + z * 1.6) > 0.8:
+        col = scale(col, 0.9)                       # fibras
     return col
 
 
@@ -319,6 +384,8 @@ def build_set(rig, ctx, tex_id, prefix, files):
         elements = []
         for cube in bone.cubes:
             f, t, rot = model_cube(cube, bone.joint)
+            if min(f) < -16 or max(t) > 32:
+                raise ValueError(f"{prefix}/{bone.name}: cubo {cube.frm}->{cube.to} a mas de 24 px del joint")
             el = {"from": [round(v, 4) for v in f], "to": [round(v, 4) for v in t], "faces": {}}
             if rot:
                 el["rotation"] = {"angle": rot[1], "axis": rot[0], "origin": [round(v, 4) for v in rot[2]]}
@@ -409,7 +476,8 @@ def build_species(sp, files):
             ctx = Ctx(pal, rig.face, male=model == "male", pattern=rig.pattern)
             sets[f"{vid}/{model}"] = build_set(rig, ctx, f"{sid}/{vid}_{model}", f"{sid}/{vid}/{model}", files)
     if sp["saddle"]:
-        sets["saddle"] = build_set(sp["saddle"](), Ctx(), f"{sid}/saddle", f"{sid}/saddle", files)
+        ctx = Ctx(saddle=G.saddle_palette(sp.get("saddle_colors")))
+        sets["saddle"] = build_set(sp["saddle"](), ctx, f"{sid}/saddle", f"{sid}/saddle", files)
     if sp["egg"]:
         egg_rig = G.egg(sp["egg"]["k"])
         sets["egg"] = build_set(egg_rig, Ctx(egg=sp["egg"]), f"{sid}/egg", f"{sid}/egg", files)
@@ -475,7 +543,10 @@ def write_rig(sp):
     sid = sp["id"]
 
     def form(rig):
-        return {"height": max(c.to[1] for b in rig.bones for c in b.cubes),
+        cubes = [c for b in rig.bones for c in b.cubes]
+        return {"height": max(c.to[1] for c in cubes),
+                # hasta donde llega el modelo en horizontal (para la caja de culling de las displays)
+                "radius": max(max(abs(c.frm[i]), abs(c.to[i])) for c in cubes for i in (0, 2)),
                 "bones": [{"name": b.name, "parent": b.parent, "joint": list(b.joint)} for b in rig.bones]}
 
     rig = {

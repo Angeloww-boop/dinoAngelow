@@ -3,7 +3,7 @@
 Se modela a escala 1 y el plugin lo muestra a SPECIES['scale'] (0.85), asi queda de
 ~2.2 bloques de alto y ~5.3 de largo sin pasarse del limite de 24 px por hueso.
 """
-from geometry import Cube, Bone, Rig, mirror, face, saddle_cubes
+from geometry import Cube, Bone, Rig, mirror, face
 
 
 def adult(male=False):
@@ -106,11 +106,26 @@ def baby():
 
 
 def saddle():
-    return Rig([Bone("saddle", (0, 24, 0), "body", saddle_cubes(
-        seat=((-9.0, 34.0, -2.0), (9.0, 35.5, 10.0)),
-        cantle=((-6.0, 35.5, -2.0), (6.0, 37.75, -0.5)),
-        pommel=((-2.0, 35.5, 8.0), (2.0, 37.5, 10.0)),
-        strap_x=12.0, strap_y=(13.0, 34.0), strap_z=(3.0, 5.0), belly_y=12.0))])
+    """Montura de carga: manta grande, baranda de madera a los costados, respaldo alto y alforjas."""
+    side_r = [
+        Cube((12.0, 25.5, 4.0), (12.5, 34.5, 11.0), tag="cloth"),                 # manta colgando
+        Cube((12.0, 13.0, 1.0), (12.4, 34.0, 3.0), tag="strap"),                  # cincha
+        Cube((12.35, 16.0, 1.25), (12.7, 17.75, 2.75), tag="metal"),              # hebilla
+        Cube((12.5, 23.5, 4.5), (15.0, 30.0, 10.5), tag="saddle"),                              # alforja
+        Cube((14.9, 26.5, 6.75), (15.25, 28.0, 8.25), tag="metal"),               # cierre de la alforja
+        Cube((12.4, 29.0, 4.75), (15.1, 30.5, 10.25), tag="saddle_dark"),         # tapa de la alforja
+        Cube((7.0, 34.5, -1.0), (8.5, 39.0, 0.5), tag="wood"),                    # poste de atras
+        Cube((7.0, 34.5, 8.0), (8.5, 38.0, 9.5), tag="wood"),                     # poste de adelante
+        Cube((7.25, 37.5, -1.0), (8.25, 38.75, 9.5), tag="wood"),                 # baranda
+    ]
+    return Rig([Bone("saddle", (0, 24, 0), "body", [
+        Cube((-12.0, 34.0, -3.0), (12.0, 34.5, 11.5), tag="cloth"),               # manta
+        Cube((-6.5, 34.5, -1.0), (6.5, 36.0, 9.5), tag="saddle"),                               # asiento
+        Cube((-6.0, 36.0, -1.5), (6.0, 39.5, 0.0), tag="saddle_dark"),            # respaldo alto
+        Cube((-6.5, 39.5, -1.75), (6.5, 40.25, 0.25), tag="wood"),                # remate del respaldo
+        Cube((-2.0, 36.0, 7.5), (2.0, 38.0, 9.5), tag="saddle_dark"),             # pomo
+        Cube((-12.0, 11.6, 1.0), (12.0, 12.0, 3.0), tag="strap"),                 # cincha por la panza
+    ] + side_r + mirror(side_r))])
 
 
 VARIANTS = {
@@ -135,6 +150,8 @@ SPECIES = dict(
     id="triceratops", name="Triceratops", scale=0.85,
     forms=dict(female=lambda: adult(False), male=lambda: adult(True), baby=baby),
     saddle=saddle,
+    saddle_colors=dict(saddle=(110, 72, 44), saddle_dark=(72, 46, 28), strap=(58, 40, 28), metal=(190, 192, 196),
+                       cloth=(44, 72, 128), trim=(222, 196, 112), wood=(128, 92, 56)),
     egg=dict(k=1.3, shell=(196, 200, 176), spot=(96, 108, 80), crack=(50, 46, 36)),
     variants=VARIANTS,
 )

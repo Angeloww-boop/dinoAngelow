@@ -184,6 +184,11 @@ public final class DinoListener implements Listener {
             // salvaje: el hueso no sirve, se doma con su comida
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
+            if (species.eggTameOnly) {
+                player.sendActionBar(Component.text("Un " + species.name + " salvaje no se domestica: criá uno desde el huevo.",
+                        NamedTextColor.RED));
+                return;
+            }
             if (!food || wolf.isAngry()) return;
             if (!creative) hand.subtract();
             if (ThreadLocalRandom.current().nextDouble() < species.tameChance) {
@@ -237,9 +242,9 @@ public final class DinoListener implements Listener {
             player.sendActionBar(Component.text("Crecimiento: " + Math.round(d.growth() * 100) + "%", NamedTextColor.GREEN));
             return;
         }
-        if (species.temper == Species.Temper.HERBIVORE) {
-            // los lobos solo comen carne: a los herbivoros los curamos y ponemos en celo nosotros
-            if (Species.MEAT.contains(type)) {
+        if (species.food() != Species.MEAT) {
+            // el lobo solo entiende la carne: a los que comen otra cosa los curamos y ponemos en celo nosotros
+            if (species.temper == Species.Temper.HERBIVORE && Species.MEAT.contains(type)) {
                 event.setCancelled(true);
                 return;
             }

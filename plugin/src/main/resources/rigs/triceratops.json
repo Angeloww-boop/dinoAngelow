@@ -32,6 +32,7 @@
   "forms": {
     "adult": {
       "height": 45.5,
+      "radius": 52.0,
       "bones": [
         {
           "name": "body",
@@ -118,6 +119,7 @@
     },
     "baby": {
       "height": 19.0,
+      "radius": 20.0,
       "bones": [
         {
           "name": "body",

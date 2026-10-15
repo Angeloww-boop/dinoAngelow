@@ -24,8 +24,8 @@ public final class DinoRig {
     public record BoneDef(int index, String name, int parent, float jx, float jy, float jz) {
     }
 
-    /** Una forma del cuerpo (adulto o cria) con su lista de huesos. */
-    public record Form(String id, float height, List<BoneDef> bones) {
+    /** Una forma del cuerpo (adulto o cria) con su lista de huesos. radius = alcance horizontal en px. */
+    public record Form(String id, float height, float radius, List<BoneDef> bones) {
         public int index(String name) {
             for (BoneDef b : bones) {
                 if (b.name().equals(name)) return b.index();
@@ -84,7 +84,8 @@ public final class DinoRig {
                     parent == null || parent.isJsonNull() ? -1 : names.indexOf(parent.getAsString()),
                     j.get(0).getAsFloat(), j.get(1).getAsFloat(), j.get(2).getAsFloat()));
         }
-        return new Form(id, o.get("height").getAsFloat(), List.copyOf(bones));
+        float radius = o.has("radius") ? o.get("radius").getAsFloat() : 32f;
+        return new Form(id, o.get("height").getAsFloat(), radius, List.copyOf(bones));
     }
 
     public static DinoRig load(InputStream in) {

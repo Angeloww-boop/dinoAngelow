@@ -212,5 +212,123 @@
     "sounds": [
       "dinoearth:egg/hatch1"
     ]
+  },
+  "trex.ambient": {
+    "subtitle": "subtitles.dinoearth.trex.ambient",
+    "sounds": [
+      "dinoearth:trex/ambient1",
+      "dinoearth:trex/ambient2",
+      "dinoearth:trex/ambient3"
+    ]
+  },
+  "trex.roar": {
+    "subtitle": "subtitles.dinoearth.trex.roar",
+    "sounds": [
+      "dinoearth:trex/roar1",
+      "dinoearth:trex/roar2"
+    ]
+  },
+  "trex.hurt": {
+    "subtitle": "subtitles.dinoearth.trex.hurt",
+    "sounds": [
+      "dinoearth:trex/hurt1",
+      "dinoearth:trex/hurt2"
+    ]
+  },
+  "trex.death": {
+    "subtitle": "subtitles.dinoearth.trex.death",
+    "sounds": [
+      "dinoearth:trex/death1"
+    ]
+  },
+  "trex.attack": {
+    "subtitle": "subtitles.dinoearth.trex.attack",
+    "sounds": [
+      "dinoearth:trex/attack1",
+      "dinoearth:trex/attack2"
+    ]
+  },
+  "trex.step": {
+    "subtitle": "subtitles.dinoearth.trex.step",
+    "sounds": [
+      "dinoearth:trex/step1",
+      "dinoearth:trex/step2",
+      "dinoearth:trex/step3"
+    ]
+  },
+  "trex.baby_ambient": {
+    "subtitle": "subtitles.dinoearth.trex.baby_ambient",
+    "sounds": [
+      "dinoearth:trex/baby_ambient1",
+      "dinoearth:trex/baby_ambient2",
+      "dinoearth:trex/baby_ambient3"
+    ]
+  },
+  "trex.baby_hurt": {
+    "subtitle": "subtitles.dinoearth.trex.baby_hurt",
+    "sounds": [
+      "dinoearth:trex/baby_hurt1",
+      "dinoearth:trex/baby_hurt2"
+    ]
+  },
+  "pteranodon.ambient": {
+    "subtitle": "subtitles.dinoearth.pteranodon.ambient",
+    "sounds": [
+      "dinoearth:pteranodon/ambient1",
+      "dinoearth:pteranodon/ambient2",
+      "dinoearth:pteranodon/ambient3"
+    ]
+  },
+  "pteranodon.roar": {
+    "subtitle": "subtitles.dinoearth.pteranodon.roar",
+    "sounds": [
+      "dinoearth:pteranodon/roar1"
+    ]
+  },
+  "pteranodon.hurt": {
+    "subtitle": "subtitles.dinoearth.pteranodon.hurt",
+    "sounds": [
+      "dinoearth:pteranodon/hurt1",
+      "dinoearth:pteranodon/hurt2"
+    ]
+  },
+  "pteranodon.death": {
+    "subtitle": "subtitles.dinoearth.pteranodon.death",
+    "sounds": [
+      "dinoearth:pteranodon/death1"
+    ]
+  },
+  "pteranodon.attack": {
+    "subtitle": "subtitles.dinoearth.pteranodon.attack",
+    "sounds": [
+      "dinoearth:pteranodon/attack1"
+    ]
+  },
+  "pteranodon.step": {
+    "subtitle": "subtitles.dinoearth.pteranodon.step",
+    "sounds": [
+      "dinoearth:pteranodon/step1",
+      "dinoearth:pteranodon/step2"
+    ]
+  },
+  "pteranodon.flap": {
+    "subtitle": "subtitles.dinoearth.pteranodon.flap",
+    "sounds": [
+      "dinoearth:pteranodon/flap1",
+      "dinoearth:pteranodon/flap2"
+    ]
+  },
+  "pteranodon.baby_ambient": {
+    "subtitle": "subtitles.dinoearth.pteranodon.baby_ambient",
+    "sounds": [
+      "dinoearth:pteranodon/baby_ambient1",
+      "dinoearth:pteranodon/baby_ambient2"
+    ]
+  },
+  "pteranodon.baby_hurt": {
+    "subtitle": "subtitles.dinoearth.pteranodon.baby_hurt",
+    "sounds": [
+      "dinoearth:pteranodon/baby_hurt1"
+    ]
   }
 }

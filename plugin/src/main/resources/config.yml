@@ -57,3 +57,22 @@ species:
     health: 6
     damage: 2
     speed: 0.4
+  trex:
+    health: 160
+    damage: 14
+    speed: 0.3
+    # no se domestica con comida: solo criándolo desde el huevo. Montado, espacio = rugido
+    ride:
+      walk-speed: 0.26
+      sprint-speed: 0.42
+  pteranodon:
+    health: 28
+    damage: 4
+    speed: 0.3
+    tame-chance: 0.2         # por cada bacalao, salmón o pez tropical crudo
+    ride:
+      walk-speed: 0.16       # caminando en el suelo
+      sprint-speed: 0.22
+      jump: 0.55             # impulso al despegar (con espacio)
+      fly-speed: 0.55        # volando con W
+      fly-sprint-speed: 0.9  # volando con W + Ctrl

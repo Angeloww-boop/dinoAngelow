@@ -1,0 +1,295 @@
+{
+  "species": "pteranodon",
+  "scale": 1.1,
+  "item": "dinoearth:pteranodon/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "gaviota",
+      "name": "Gaviota",
+      "weight": 30
+    },
+    {
+      "id": "pardo",
+      "name": "Pardo",
+      "weight": 28
+    },
+    {
+      "id": "pizarra",
+      "name": "Pizarra",
+      "weight": 22
+    },
+    {
+      "id": "celeste",
+      "name": "Celeste",
+      "weight": 17
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 28.75,
+      "radius": 47.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            18.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            19.0,
+            6.5
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            24.5,
+            11.0
+          ]
+        },
+        {
+          "name": "wing_r",
+          "parent": "body",
+          "joint": [
+            3.0,
+            19.0,
+            3.0
+          ]
+        },
+        {
+          "name": "mem_r",
+          "parent": "wing_r",
+          "joint": [
+            3.0,
+            19.0,
+            3.0
+          ]
+        },
+        {
+          "name": "wing_r2",
+          "parent": "wing_r",
+          "joint": [
+            25.0,
+            19.0,
+            3.25
+          ]
+        },
+        {
+          "name": "mem_r2",
+          "parent": "wing_r2",
+          "joint": [
+            25.0,
+            19.0,
+            3.25
+          ]
+        },
+        {
+          "name": "wing_l",
+          "parent": "body",
+          "joint": [
+            -3.0,
+            19.0,
+            3.0
+          ]
+        },
+        {
+          "name": "mem_l",
+          "parent": "wing_l",
+          "joint": [
+            -3.0,
+            19.0,
+            3.0
+          ]
+        },
+        {
+          "name": "wing_l2",
+          "parent": "wing_l",
+          "joint": [
+            -25.0,
+            19.0,
+            3.25
+          ]
+        },
+        {
+          "name": "mem_l2",
+          "parent": "wing_l2",
+          "joint": [
+            -25.0,
+            19.0,
+            3.25
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            2.25,
+            15.5,
+            -3.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -2.25,
+            15.5,
+            -3.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 14.692499999999999,
+      "radius": 21.150000000000002,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            8.1,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            8.55,
+            2.9250000000000003
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            12.015,
+            5.760000000000001
+          ]
+        },
+        {
+          "name": "wing_r",
+          "parent": "body",
+          "joint": [
+            1.35,
+            8.55,
+            1.35
+          ]
+        },
+        {
+          "name": "mem_r",
+          "parent": "wing_r",
+          "joint": [
+            1.35,
+            8.55,
+            1.35
+          ]
+        },
+        {
+          "name": "wing_r2",
+          "parent": "wing_r",
+          "joint": [
+            11.25,
+            8.55,
+            1.4625000000000001
+          ]
+        },
+        {
+          "name": "mem_r2",
+          "parent": "wing_r2",
+          "joint": [
+            11.25,
+            8.55,
+            1.4625000000000001
+          ]
+        },
+        {
+          "name": "wing_l",
+          "parent": "body",
+          "joint": [
+            -1.35,
+            8.55,
+            1.35
+          ]
+        },
+        {
+          "name": "mem_l",
+          "parent": "wing_l",
+          "joint": [
+            -1.35,
+            8.55,
+            1.35
+          ]
+        },
+        {
+          "name": "wing_l2",
+          "parent": "wing_l",
+          "joint": [
+            -11.25,
+            8.55,
+            1.4625000000000001
+          ]
+        },
+        {
+          "name": "mem_l2",
+          "parent": "wing_l2",
+          "joint": [
+            -11.25,
+            8.55,
+            1.4625000000000001
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            1.0125,
+            6.9750000000000005,
+            -1.35
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -1.0125,
+            6.9750000000000005,
+            -1.35
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      18.0,
+      0.0
+    ],
+    "item": "dinoearth:pteranodon/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:pteranodon/egg/egg",
+    "cracked": "dinoearth:pteranodon/egg_cracked/egg",
+    "icon": "dinoearth:pteranodon/egg_item"
+  }
+}

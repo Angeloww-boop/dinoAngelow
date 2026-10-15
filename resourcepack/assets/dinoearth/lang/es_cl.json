@@ -29,5 +29,22 @@
   "subtitles.dinoearth.compsognathus.attack": "Compsognathus muerde",
   "subtitles.dinoearth.compsognathus.step": "Pasitos",
   "subtitles.dinoearth.egg.crack": "Huevo se agrieta",
-  "subtitles.dinoearth.egg.hatch": "Huevo eclosiona"
+  "subtitles.dinoearth.egg.hatch": "Huevo eclosiona",
+  "subtitles.dinoearth.trex.ambient": "T-Rex gruñe",
+  "subtitles.dinoearth.trex.roar": "T-Rex ruge",
+  "subtitles.dinoearth.trex.hurt": "T-Rex herido",
+  "subtitles.dinoearth.trex.death": "T-Rex muere",
+  "subtitles.dinoearth.trex.attack": "T-Rex muerde",
+  "subtitles.dinoearth.trex.step": "Pisadas que hacen temblar el suelo",
+  "subtitles.dinoearth.trex.baby_ambient": "Cría de T-Rex chilla",
+  "subtitles.dinoearth.trex.baby_hurt": "Cría de T-Rex herida",
+  "subtitles.dinoearth.pteranodon.ambient": "Pteranodon grazna",
+  "subtitles.dinoearth.pteranodon.roar": "Pteranodon chilla",
+  "subtitles.dinoearth.pteranodon.hurt": "Pteranodon herido",
+  "subtitles.dinoearth.pteranodon.death": "Pteranodon muere",
+  "subtitles.dinoearth.pteranodon.attack": "Pteranodon picotea",
+  "subtitles.dinoearth.pteranodon.step": "Pasos de pteranodon",
+  "subtitles.dinoearth.pteranodon.flap": "Aleteo",
+  "subtitles.dinoearth.pteranodon.baby_ambient": "Cría de pteranodon pía",
+  "subtitles.dinoearth.pteranodon.baby_hurt": "Cría de pteranodon herida"
 }

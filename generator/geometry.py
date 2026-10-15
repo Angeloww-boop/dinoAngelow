@@ -17,8 +17,8 @@ class Cube:
     def __init__(self, frm, to, tag="skin", rot=None, mouth=None, stripes="z", tip=None):
         self.frm = tuple(float(v) for v in frm)
         self.to = tuple(float(v) for v in to)
-        # skin | claw | dark | accent | crest | horn | beak | frill | fan |
-        # saddle | saddle_dark | strap | metal | egg
+        # skin | claw | dark | accent | crest | horn | beak | frill | fan | membrane | egg
+        # montura: saddle | saddle_dark | strap | metal | plate | spike | cloth | wood | rope
         self.tag = tag
         self.rot = rot          # (eje, angulo, origen) en espacio local, o None
         self.mouth = mouth      # 'up' / 'down': esa cara es el interior de la boca
@@ -66,21 +66,6 @@ def face(eye, pupil, highlight=None, eye_stripe=None, brow=None, teeth_y=None, t
                 nostril=nostril, mouth_teeth=mouth_teeth)
 
 
-def saddle_cubes(seat, cantle, pommel, strap_x, strap_y, strap_z, belly_y):
-    """Montura generica: asiento, respaldo, pomo, correas a los costados y cincha."""
-    strap_r = [
-        Cube((strap_x, strap_y[0], strap_z[0]), (strap_x + 0.4, strap_y[1], strap_z[1]), tag="strap"),
-        Cube((strap_x + 0.35, strap_y[0] + 2, strap_z[0] + 0.25), (strap_x + 0.6, strap_y[0] + 3.25, strap_z[1] - 0.25),
-             tag="metal"),
-    ]
-    return [
-        Cube(seat[0], seat[1], tag="saddle"),
-        Cube(cantle[0], cantle[1], tag="saddle_dark"),
-        Cube(pommel[0], pommel[1], tag="saddle_dark"),
-        Cube((-strap_x, belly_y - 0.4, strap_z[0]), (strap_x, belly_y, strap_z[1]), tag="strap"),
-    ] + strap_r + mirror(strap_r)
-
-
 def egg(k=1.0):
     """Huevo apilando capas; k = tamaño relativo."""
     layers = [(2.5, 0.0, 1.0), (3.5, 1.0, 3.0), (4.0, 3.0, 6.0), (3.5, 6.0, 8.5), (2.5, 8.5, 10.0), (1.25, 10.0, 10.75)]
@@ -89,4 +74,15 @@ def egg(k=1.0):
     ])])
 
 
-SADDLE_COLORS = dict(saddle=(122, 74, 42), saddle_dark=(84, 50, 28), strap=(62, 42, 30), metal=(206, 194, 150))
+# Materiales de las monturas. Cada especie puede cambiar cualquiera con SPECIES["saddle_colors"].
+#   saddle = cuero del asiento (con costura), saddle_dark = respaldo/pomo, strap = correas,
+#   metal = hebillas y argollas, plate = placas de armadura (con remaches), spike = puas de hueso,
+#   cloth = manta (trim = su guarda), wood = madera, rope = soga
+SADDLE_COLORS = dict(saddle=(122, 74, 42), saddle_dark=(84, 50, 28), strap=(62, 42, 30), metal=(206, 194, 150),
+                     plate=(120, 122, 128), spike=(226, 214, 186), cloth=(150, 40, 40), trim=(220, 180, 70),
+                     wood=(128, 92, 56), rope=(190, 162, 112))
+SADDLE_TAGS = ("saddle", "saddle_dark", "strap", "metal", "plate", "spike", "cloth", "wood", "rope")
+
+
+def saddle_palette(over=None):
+    return {**SADDLE_COLORS, **(over or {})}

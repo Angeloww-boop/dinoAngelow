@@ -27,6 +27,7 @@
   "forms": {
     "adult": {
       "height": 35.0,
+      "radius": 39.0,
       "bones": [
         {
           "name": "body",

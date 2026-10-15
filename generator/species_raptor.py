@@ -1,5 +1,5 @@
 """Velociraptor: bipedo chico, neutral y domesticable, se puede montar."""
-from geometry import Cube, Bone, Rig, mirror, face, saddle_cubes
+from geometry import Cube, Bone, Rig, mirror, face
 
 
 def adult(male=False):
@@ -96,11 +96,20 @@ def baby():
 
 
 def saddle():
-    return Rig([Bone("saddle", (0, 17, 0), "body", saddle_cubes(
-        seat=((-4.75, 21.5, -6.0), (4.75, 22.75, 3.0)),
-        cantle=((-3.0, 22.75, -6.0), (3.0, 24.25, -4.5)),
-        pommel=((-1.5, 22.75, 1.5), (1.5, 24.0, 3.0)),
-        strap_x=4.5, strap_y=(13.0, 21.5), strap_z=(-0.5, 1.0), belly_y=13.0))])
+    """Montura de carrera: liviana, asiento corto, pomo alto con tope de bronce y manta roja."""
+    drape_r = [Cube((4.6, 18.0, -1.0), (5.1, 21.75, 3.75), tag="cloth")]          # manta colgando al costado
+    strap_r = [
+        Cube((4.5, 13.0, 0.25), (4.9, 18.0, 1.5), tag="strap"),                    # cincha
+        Cube((4.85, 15.0, 0.4), (5.2, 16.25, 1.35), tag="metal"),                  # hebilla
+    ]
+    return Rig([Bone("saddle", (0, 17, 0), "body", [
+        Cube((-4.9, 21.25, -6.5), (4.9, 21.75, 4.0), tag="cloth"),                 # manta
+        Cube((-3.75, 21.75, -5.0), (3.75, 22.75, 2.0), tag="saddle"),                            # asiento
+        Cube((-3.0, 22.75, -5.0), (3.0, 24.25, -3.75), tag="saddle_dark"),         # respaldo
+        Cube((-1.25, 22.75, 0.75), (1.25, 24.75, 2.0), tag="saddle_dark"),         # pomo alto
+        Cube((-0.75, 24.75, 1.0), (0.75, 25.25, 1.75), tag="metal"),               # tope del pomo
+        Cube((-4.5, 12.6, 0.25), (4.5, 13.0, 1.5), tag="strap"),                   # cincha por la panza
+    ] + drape_r + strap_r + mirror(drape_r + strap_r))])
 
 
 # Cada variante: base, rayas, panza, oscuro, iris, pupila, acento (cresta del macho)
@@ -123,6 +132,8 @@ SPECIES = dict(
     id="raptor", name="Velociraptor", scale=1.0,
     forms=dict(female=lambda: adult(False), male=lambda: adult(True), baby=baby),
     saddle=saddle,
+    saddle_colors=dict(saddle=(150, 98, 56), saddle_dark=(96, 60, 34), strap=(70, 46, 30), metal=(214, 180, 90),
+                       cloth=(156, 38, 36), trim=(226, 186, 76)),
     egg=dict(k=1.0, shell=(232, 224, 198), spot=(150, 116, 80), crack=(60, 44, 34)),
     variants=VARIANTS,
 )

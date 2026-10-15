@@ -133,6 +133,15 @@ POSES = {
     # gola del dilophosaurus plegada (asi esta cuando esta tranquilo)
     "plegado": {"frill_r": (0, 80, 0, 0, 0.3), "frill_l": (0, -80, 0, 0, 0.3)},
     "escupir": {"head": (-20, 0, 0, 0), "jaw": (30, 0, 0, 0)},
+    "rugido": {"head": (-28, 0, 0, 0), "jaw": (34, 0, 0, 0), "tail1": (-6, 0, 0, 0)},
+    # pteranodon: alas plegadas (en el suelo), planeando y aleteando
+    "suelo": {"wing_r": (-10, 0, -68, 0), "wing_l": (-10, 0, 68, 0), "wing_r2": (0, 145, 30, 0),
+              "wing_l2": (0, -145, -30, 0), "mem_r": (0, 0, 0, 0, 0.12), "mem_l": (0, 0, 0, 0, 0.12),
+              "mem_r2": (0, 0, 0, 0, 0.12), "mem_l2": (0, 0, 0, 0, 0.12)},
+    "vuelo": {"leg_r": (75, 0, 0, 0), "leg_l": (75, 0, 0, 0), "head": (12, 0, 0, 0),
+              "wing_r": (0, 0, 4, 0), "wing_l": (0, 0, -4, 0), "wing_r2": (0, 0, -3, 0), "wing_l2": (0, 0, 3, 0)},
+    "aleteo": {"leg_r": (75, 0, 0, 0), "leg_l": (75, 0, 0, 0), "head": (12, 0, 0, 0),
+               "wing_r": (0, 0, 32, 0), "wing_l": (0, 0, -32, 0), "wing_r2": (0, 0, 16, 0), "wing_l2": (0, 0, -16, 0)},
 }
 
 
@@ -151,7 +160,7 @@ if __name__ == "__main__":
     import sys
     sets = build()
     which = sys.argv[1] if len(sys.argv) > 1 else "todos"
-    T, D, C = 0.85, 0.85, 0.9
+    T, D, C, R, P = 0.85, 0.85, 0.9, 1.15, 1.1
     views = {
         "raptor": [
             render(dino(sets, "raptor/arena/female"), 120, 12),
@@ -178,8 +187,32 @@ if __name__ == "__main__":
             render(dino(sets, "compsognathus/pardo/male", "caminar", k=C), 140, 18, ppx=16, cy_frac=0.7),
             render(dino(sets, "compsognathus/gris/male", "ataque", k=C), 90, 8, ppx=16, cy_frac=0.7),
         ],
+        "trex": [
+            render(dino(sets, "trex/pardo/female", k=R), 120, 12, ppx=3.3, cy_frac=0.8),
+            render(dino(sets, "trex/oscuro/male", "rugido", k=R), 150, 10, ppx=3.3, cy_frac=0.8),
+            render(dino(sets, "trex/verde/male", "caminar", saddle=True, k=R), 60, 18, ppx=3.3, cy_frac=0.8),
+            render(dino(sets, "trex/rojizo/female", "ataque", k=R), 95, 6, ppx=3.3, cy_frac=0.8),
+            render(dino(sets, "trex/pardo/baby"), 130, 14, ppx=8, cy_frac=0.72),
+            render(dino(sets, "trex/egg", root=mat_t(-8, 0, 0)) + dino(sets, "pteranodon/egg", root=mat_t(8, 0, 0)),
+                   160, 20, ppx=10, cy_frac=0.75),
+        ],
+        "pteranodon": [
+            render(dino(sets, "pteranodon/gaviota/male", "suelo", k=P), 120, 12, ppx=5, cy_frac=0.75),
+            render(dino(sets, "pteranodon/pardo/female", "suelo", saddle=True, k=P), 60, 15, ppx=5, cy_frac=0.75),
+            render(dino(sets, "pteranodon/gaviota/male", "vuelo", k=P), 150, 35, ppx=2.6, cy_frac=0.6),
+            render(dino(sets, "pteranodon/pizarra/male", "aleteo", saddle=True, k=P), 20, 20, ppx=2.6, cy_frac=0.6),
+            render(dino(sets, "pteranodon/celeste/female", "vuelo", k=P), 180, -30, ppx=2.6, cy_frac=0.45),
+            render(dino(sets, "pteranodon/gaviota/baby", "suelo"), 130, 14, ppx=12, cy_frac=0.72),
+        ],
+        "monturas": [
+            render(dino(sets, "raptor/gris/male", saddle=True), 40, 30, ppx=10, cy_frac=0.85),
+            render(dino(sets, "triceratops/pizarra/female", saddle=True, k=T), 40, 30, ppx=5, cy_frac=0.9),
+            render(dino(sets, "trex/oscuro/female", saddle=True, k=R), 40, 30, ppx=4, cy_frac=1.0),
+            render(dino(sets, "pteranodon/gaviota/female", "suelo", saddle=True, k=P), 40, 30, ppx=9, cy_frac=0.85),
+        ],
     }
-    imgs = [v for k, vs in views.items() if which in ("todos", k) for v in vs]
+    # "todos" no incluye las monturas de cerca (python generator/preview.py monturas)
+    imgs = [v for k, vs in views.items() if which == k or (which == "todos" and k != "monturas") for v in vs]
     out = os.path.join(ROOT, "preview.png" if which == "todos" else f"preview_{which}.png")
     with open(out, "wb") as fh:
         fh.write(png_bytes(sheet(imgs, 3)))

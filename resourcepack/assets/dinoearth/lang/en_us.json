@@ -29,5 +29,22 @@
   "subtitles.dinoearth.compsognathus.attack": "Compsognathus bites",
   "subtitles.dinoearth.compsognathus.step": "Tiny footsteps",
   "subtitles.dinoearth.egg.crack": "Egg cracks",
-  "subtitles.dinoearth.egg.hatch": "Egg hatches"
+  "subtitles.dinoearth.egg.hatch": "Egg hatches",
+  "subtitles.dinoearth.trex.ambient": "T-Rex rumbles",
+  "subtitles.dinoearth.trex.roar": "T-Rex roars",
+  "subtitles.dinoearth.trex.hurt": "T-Rex hurts",
+  "subtitles.dinoearth.trex.death": "T-Rex dies",
+  "subtitles.dinoearth.trex.attack": "T-Rex bites",
+  "subtitles.dinoearth.trex.step": "Earth-shaking footsteps",
+  "subtitles.dinoearth.trex.baby_ambient": "Baby T-Rex squeaks",
+  "subtitles.dinoearth.trex.baby_hurt": "Baby T-Rex hurts",
+  "subtitles.dinoearth.pteranodon.ambient": "Pteranodon caws",
+  "subtitles.dinoearth.pteranodon.roar": "Pteranodon screeches",
+  "subtitles.dinoearth.pteranodon.hurt": "Pteranodon hurts",
+  "subtitles.dinoearth.pteranodon.death": "Pteranodon dies",
+  "subtitles.dinoearth.pteranodon.attack": "Pteranodon pecks",
+  "subtitles.dinoearth.pteranodon.step": "Pteranodon footsteps",
+  "subtitles.dinoearth.pteranodon.flap": "Wings flap",
+  "subtitles.dinoearth.pteranodon.baby_ambient": "Baby pteranodon chirps",
+  "subtitles.dinoearth.pteranodon.baby_hurt": "Baby pteranodon hurts"
 }

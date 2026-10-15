@@ -47,10 +47,11 @@ public final class DinoModel {
     /**
      * @param vehicle     entidad a la que se montan las partes, o null para un modelo fijo.
      * @param mountOffset estimacion de cuanto mas arriba quedan las partes montadas, hasta poder medirlo.
+     * @param cullWidth   ancho/alto (bloques) de la caja con la que el cliente decide si dibujar cada parte.
      * @param tagger  marca cada display (PDC) para reconocerlas despues.
      */
     public DinoModel(List<DinoRig.BoneDef> bones, NamespacedKey[] items, Location at, Entity vehicle,
-                     Vector mountOffset, Consumer<ItemDisplay> tagger) {
+                     Vector mountOffset, float cullWidth, float cullHeight, Consumer<ItemDisplay> tagger) {
         this.bones = bones;
         this.vehicle = vehicle;
         this.offset.copy(mountOffset);
@@ -70,8 +71,8 @@ public final class DinoModel {
                 d.setPersistent(false);
                 d.setInterpolationDuration(2);
                 // caja de culling: sin esto las partes desaparecen al mirar de costado
-                d.setDisplayWidth(4f);
-                d.setDisplayHeight(3f);
+                d.setDisplayWidth(cullWidth);
+                d.setDisplayHeight(cullHeight);
                 if (i == 0) {
                     d.setShadowRadius(0.9f);
                     d.setShadowStrength(0.6f);

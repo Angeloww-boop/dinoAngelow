@@ -31,6 +31,9 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 | Montura | Click derecho con una montura (adulto, solo el dueño). Click derecho para subir. WASD, Ctrl corre, espacio salta, Shift baja. Tijeras: sacar la montura |
 | Volar (pteranodon) | En el suelo, **espacio despega**. En el aire: **W vuela hacia donde mirás** (mirar abajo = picada, arriba = trepar), Ctrl más rápido, **espacio aletea para subir**, sin W planea bajando. Aterriza solo al tocar el suelo. Si te bajás (Shift) en el aire caés con caída lenta |
 | T-Rex | Los salvajes no se domestican: hay que conseguir un huevo (`/dino egg trex` o vendido con Shopkeepers), criarlo y esperar a que sea adulto |
+| Hambre | Los domesticados se van quedando con hambre (1–2 h de juego de lleno a vacío). Se les da su comida con click derecho. **Muertos de hambre se echan, se ven mal y no se dejan montar** (no se mueren); con hambre tampoco crían |
+| Comedero | Se pone en el suelo y se carga con click derecho con su comida (agachado = la pila entera). Los dinos domesticados con hambre a menos de 16 bloques **van solos a comer**. Hay de carne, de plantas y de pescado. No tiene inventario: la comida se convierte en puntos y no se puede sacar. Lo rompe el dueño (agachado si tiene comida) |
+| Dinopedia | Libro: click derecho abre las especies. Cada especie (y cada color) se anota sola al ver un dino de cerca. Con el libro, click derecho a un dino = su ficha (color, sexo, edad, vida, hambre, dueño) |
 | Criar | Dar comida a un macho y una hembra adultos domesticados → la hembra pone un **huevo** |
 | Huevo | Click derecho en el suelo. Se mueve, se agrieta y a los 5 min nace una cría al azar, domesticada por quien lo puso. Click derecho = ver %, golpe = recogerlo |
 | Cría | Crece sola (40 min). Darle su comida la hace crecer un 5 % |
@@ -43,6 +46,9 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 /dino grow [%]                      (crías a 10 bloques)
 /dino remove [radio] [especie]
 /dino count
+/dino comedero <carne|plantas|pescado> [cantidad]
+/dino dinopedia [jugador]
+/dino hambre [%]                    (pone el hambre de los domesticados a 10 bloques, para probar)
 /dino pack [reload|info]
 ```
 
@@ -79,6 +85,8 @@ El zip es determinista: su hash solo cambia cuando cambia el contenido, así los
 |---|---|
 | `generator/species_*.py` | **Los modelos y colores** de cada especie |
 | `generator/geometry.py` | Piezas comunes (cubos, huesos, huevo, materiales de las monturas) |
+| `generator/feeder.py` | Modelo del comedero (3 dietas × 4 niveles de comida) |
+| `generator/icons.py` | Íconos de la Dinopedia (cada color renderizado, silueta, libro) |
 | `generator/build.py` | Genera texturas, modelos JSON, el zip del pack y los rigs del plugin |
 | `generator/sounds.py`, `sounds_species.py`, `synth.py` | Síntesis de sonidos (necesita `generator/.venv`) |
 | `generator/preview.py` | Regenera todo y renderiza `preview.png` (`python generator/preview.py triceratops` = una sola especie, `monturas` = las monturas de cerca) |

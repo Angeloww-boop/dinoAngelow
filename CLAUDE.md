@@ -29,6 +29,13 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - Vuelo (`Body.FLYER`, pteranodon): `setGravity(false)` + velocidad propia (`flyVel`, para que el roce del aire no la
   frene). Alas modeladas abiertas; en el suelo se pliegan (brazo = pata delantera, membranas `mem_*` escala 0.12).
   La inclinacion en vuelo va en `model.extra()`. Al guardar/cargar se vuelve a poner la gravedad.
+- Hambre (solo domesticados, `Dino.tickHunger`): 0..1 en el PDC, baja en `hunger-minutes`. En 0 se echa
+  (`starvingSit`), cabeza/cola caidas, no se monta, no crece; nunca muere. Con hambre busca un comedero de su
+  dieta (`Species.Diet`) a 16 bloques con el pathfinder y come.
+- Comedero (`feeder/FeederManager`): Interaction + item_display como los huevos, **sin inventario** (la comida se
+  convierte en puntos en el PDC: sin dupes). Poner/romper consulta Towny/WG con un BlockPlaceEvent de prueba
+  (`Protection`). Dinopedia (`dex/DexManager`): libro → menu de solo lectura (todo click cancelado, se reconoce por
+  `InventoryHolder`); lo descubierto va en el PDC del jugador. Iconos: `generator/icons.py` con el render de preview.
 - Rendimiento: pose solo si alguien la ve (`getTrackedBy`), menos seguido de lejos; view range por tamaño.
 - Resource pack: el plugin lo manda solo (`PackManager`, modo `url` o `host`). El zip es determinista y
   una copia va dentro del jar (`plugin/src/main/resources/pack/`).
@@ -39,6 +46,7 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 |---|---|
 | `generator/species_*.py` | Modelo, colores y montura de cada especie (raptor, triceratops, dilophosaurus, compsognathus, trex, pteranodon) |
 | `generator/geometry.py` | Cube/Bone/Rig, huevo y materiales de montura (`SADDLE_COLORS`, cada especie los pisa con `saddle_colors`) |
+| `generator/feeder.py`, `generator/icons.py` | Modelo del comedero; iconos de la Dinopedia (los llama build.py) |
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
 | `generator/preview.py` | Render propio a `preview.png` (`python generator/preview.py <especie>`) — usarlo para revisar modelos |
 | `generator/sounds.py`, `sounds_species.py`, `synth.py` | Sonidos sintetizados a `.ogg` |
@@ -58,7 +66,7 @@ Después de compilar: copiar `plugin/target/DinoEarth-<versión>.jar` a la raíz
 Subir versión en `plugin/pom.xml` y `plugin/src/main/resources/plugin.yml`.
 Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.url` y hace `/dino pack reload`.
 
-## Estado (2026-10-15, v0.5.0)
+## Estado (2026-10-15, v0.6.0)
 
 - v0.1 (raptor) probado en el juego: modelo, orientación y animaciones confirmados.
 - v0.2–v0.4 **sin probar en el juego**: colores, macho/hembra, crías que crecen, montura, huevos, sonidos,
@@ -66,5 +74,7 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   envío automático del pack (modo url con mc-packs.net).
 - v0.5 **sin probar ni compilar** (la sesion en la nube no llega a repo.papermc.io): T-Rex (territorial, solo de
   huevo, rugido que asusta, montado espacio = rugir), Pteranodon (vuela montado y solo), monturas propias por especie.
-- Pendiente: probar todo en el server; spawn natural por bioma respetando Towny/WorldGuard; más especies
+- v0.6 **sin probar**: hambre, comedero por puntos, Dinopedia. Compilado en la nube solo contra stubs propios de
+  Bukkit (no hay acceso a paper-api): confirma que el codigo es coherente, no que la API real coincida.
+- Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Parasaurolophus, Stegosaurus, Mosasaurus); hambre, órdenes, herencia de color.

@@ -12,6 +12,7 @@ import struct
 import zipfile
 import zlib
 
+import feeder
 import geometry as G
 import species_compsognathus
 import species_dilophosaurus
@@ -113,7 +114,8 @@ def faces_of(f, t):
 
 # ---------------------------------------------------------------- pintura
 class Ctx:
-    def __init__(self, pal=None, face=None, male=False, pattern="stripes", cracked=False, egg=None, saddle=None):
+    def __init__(self, pal=None, face=None, male=False, pattern="stripes", cracked=False, egg=None, saddle=None,
+                 food=None):
         self.pal = pal
         self.face = face or {}
         self.male = male
@@ -121,6 +123,7 @@ class Ctx:
         self.cracked = cracked
         self.egg = egg
         self.saddle = saddle or G.SADDLE_COLORS
+        self.food = food
 
 
 def rel(cube, p0, axis):
@@ -183,6 +186,8 @@ def paint(ctx, bone, cube, n, p, p0, edge):
 
     if tag in G.SADDLE_TAGS:
         return paint_saddle(ctx, cube, n, p0, edge, noise)
+    if tag == "food":
+        return scale(paint_food(ctx.food, p), noise)
     if tag == "egg":
         return paint_egg(ctx, p)
     if tag == "claw":
@@ -292,6 +297,19 @@ def paint_frill(ctx, cube, n, p0, accent2):
     return col
 
 
+def paint_food(food, p):
+    """Comida del comedero: carne marmolada, heno con pasto, pescado con lomo oscuro."""
+    x, y, z = p
+    base, alt = food["base"], food["alt"]
+    if food["kind"] == "meat":
+        return alt if math.sin(x * 1.3 + z * 0.7 + y) > 0.72 else base
+    if food["kind"] == "plants":
+        col = base if math.floor(x * 1.5 + hash3(0, 0, math.floor(z), 51) * 2) % 2 == 0 else scale(base, 0.82)
+        return alt if hash3(math.floor(x), math.floor(y * 2), math.floor(z), 52) > 0.8 else col
+    col = mix(base, alt, 0.7) if y > 3 and (math.floor(x) + math.floor(z)) % 3 == 0 else base
+    return scale(col, 1.1) if hash3(math.floor(x * 2), math.floor(y * 2), math.floor(z * 2), 53) > 0.85 else col
+
+
 def paint_membrane(ctx, n, p0):
     """Membrana del ala: mas oscura hacia la punta y el borde de atras, con fibras a lo largo."""
     pal = ctx.pal
@@ -375,7 +393,7 @@ class Atlas:
         return True
 
 
-def build_set(rig, ctx, tex_id, prefix, files):
+def build_set(rig, ctx, tex_id, prefix, files, display=None):
     """Arma textura + modelos de un rig. Devuelve (rig, pix, size, {hueso: elementos})."""
     atlas = Atlas()
     face_refs = []
@@ -435,6 +453,8 @@ def build_set(rig, ctx, tex_id, prefix, files):
             "textures": {"0": f"{NS}:item/{tex_id}", "particle": f"{NS}:item/{tex_id}"},
             "elements": elements,
         }
+        if display:
+            model["display"] = display
         files[f"assets/{NS}/models/item/{prefix}/{name}.json"] = json.dumps(model, separators=(",", ":")).encode()
         item_def = {"model": {"type": "minecraft:model", "model": f"{NS}:item/{prefix}/{name}"}}
         files[f"assets/{NS}/items/{prefix}/{name}.json"] = json.dumps(item_def).encode()
@@ -492,12 +512,26 @@ def build_species(sp, files):
     return sets
 
 
+def build_feeders(files):
+    """Comederos: un modelo por dieta y nivel de comida. El lleno es tambien el item del inventario."""
+    sets = {}
+    for diet, food in feeder.DIETS.items():
+        for level in range(feeder.LEVELS):
+            name = f"{diet}_{level}"
+            sets[f"feeder/{name}"] = build_set(feeder.rig(diet, level), Ctx(food=food), f"feeder/{name}",
+                                               f"feeder/{name}", files, display=feeder.DISPLAY)
+    return sets
+
+
 def build():
     files = {}
     all_sets = {}
     for sp in ALL_SPECIES:
         for key, s in build_species(sp, files).items():
             all_sets[f"{sp['id']}/{key}"] = s
+    all_sets.update(build_feeders(files))
+    import icons  # aca y no arriba: icons usa el render de preview.py, que importa este modulo
+    icons.build_icons(ALL_SPECIES, all_sets, files)
 
     files["pack.mcmeta"] = json.dumps({
         # 46 = 1.21.4 (primera version con items/ y item_model), 69 = 1.21.9, 75 = 1.21.11.

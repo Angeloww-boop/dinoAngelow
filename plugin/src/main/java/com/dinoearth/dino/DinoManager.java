@@ -2,6 +2,8 @@ package com.dinoearth.dino;
 
 import com.dinoearth.Keys;
 import com.dinoearth.Settings;
+import com.dinoearth.dex.DexManager;
+import com.dinoearth.feeder.FeederManager;
 import com.dinoearth.species.Species;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,14 +28,26 @@ public final class DinoManager {
     private final Settings settings;
     private final Map<UUID, Dino> active = new HashMap<>();
     private final List<Dino> dying = new ArrayList<>();
+    private final FeederManager feeders;
+    private final DexManager dex;
 
-    public DinoManager(Keys keys, Settings settings) {
+    public DinoManager(Keys keys, Settings settings, FeederManager feeders, DexManager dex) {
         this.keys = keys;
         this.settings = settings;
+        this.feeders = feeders;
+        this.dex = dex;
     }
 
     public Settings settings() {
         return settings;
+    }
+
+    public FeederManager feeders() {
+        return feeders;
+    }
+
+    public DexManager dex() {
+        return dex;
     }
 
     /** Especie de un lobo-dino, o null si es un lobo comun (o cualquier otra cosa). */
@@ -76,7 +90,7 @@ public final class DinoManager {
         if (existing != null) return existing;
         Species species = speciesOf(wolf);
         if (species == null || species.rig == null) return null;
-        Dino d = new Dino(wolf, species, keys, settings);
+        Dino d = new Dino(wolf, species, keys, settings, this);
         active.put(wolf.getUniqueId(), d);
         return d;
     }

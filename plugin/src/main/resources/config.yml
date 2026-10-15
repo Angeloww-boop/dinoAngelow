@@ -28,10 +28,18 @@ hatch-minutes: 5
 # Minutos de espera entre una puesta de huevo y la siguiente
 breed-cooldown-minutes: 5
 
+# Hambre de los dinos domesticados (los salvajes no tienen). Muertos de hambre se echan,
+# no se dejan montar ni crecen hasta que coman. Nunca se mueren de hambre.
+hunger:
+  enabled: true
+  # Puntos que entran en un comedero (un trozo de carne = 6-10, un fardo = 45)
+  feeder-capacity: 600
+
 # Valores por especie. Velocidades de montura en bloques por tick
 # (un jugador caminando ~0.22, corriendo ~0.28).
 species:
   raptor:
+    hunger-minutes: 80       # de lleno a muerto de hambre
     health: 30
     damage: 6
     speed: 0.36
@@ -41,6 +49,7 @@ species:
       sprint-speed: 0.5
       jump: 0.58
   triceratops:
+    hunger-minutes: 100      # de lleno a muerto de hambre
     health: 80
     damage: 9
     speed: 0.27
@@ -58,6 +67,7 @@ species:
     damage: 2
     speed: 0.4
   trex:
+    hunger-minutes: 70       # de lleno a muerto de hambre
     health: 160
     damage: 14
     speed: 0.3
@@ -66,6 +76,7 @@ species:
       walk-speed: 0.26
       sprint-speed: 0.42
   pteranodon:
+    hunger-minutes: 80       # de lleno a muerto de hambre
     health: 28
     damage: 4
     speed: 0.3

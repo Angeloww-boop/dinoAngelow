@@ -3,6 +3,8 @@ package com.dinoearth;
 import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoListener;
 import com.dinoearth.dino.DinoManager;
+import com.dinoearth.dex.DexManager;
+import com.dinoearth.feeder.FeederManager;
 import com.dinoearth.egg.EggManager;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.pack.PackManager;
@@ -28,6 +30,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private DinoManager dinos;
     private EggManager eggs;
     private PackManager pack;
+    private FeederManager feeders;
+    private DexManager dex;
 
     @Override
     public void onEnable() {
@@ -47,17 +51,21 @@ public final class DinoEarthPlugin extends JavaPlugin {
         }
         Keys keys = new Keys(this);
         Settings settings = new Settings(getConfig());
-        dinos = new DinoManager(keys, settings);
+        feeders = new FeederManager(keys, settings);
+        dex = new DexManager(keys);
+        dinos = new DinoManager(keys, settings, feeders, dex);
         eggs = new EggManager(keys, dinos, settings.hatchTicks);
         getServer().getPluginManager().registerEvents(new DinoListener(this, dinos, eggs, keys), this);
         getServer().getScheduler().runTaskTimer(this, () -> {
             dinos.tick();
             eggs.tick();
         }, 1L, 1L);
+        getServer().getScheduler().runTaskTimer(this, feeders::tick, 20L, 20L);
         // los mundos ya estan cargados si es un /reload
         getServer().getScheduler().runTask(this, () -> {
             dinos.attachLoaded();
             eggs.attachLoaded();
+            feeders.attachLoaded();
         });
         pack = new PackManager(this);
         getServer().getPluginManager().registerEvents(pack, this);
@@ -69,6 +77,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public void onDisable() {
         if (dinos != null) dinos.shutdown();
         if (eggs != null) eggs.shutdown();
+        if (feeders != null) feeders.shutdown();
         if (pack != null) pack.stop();
     }
 
@@ -116,6 +125,33 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 }
                 msg(sender, "Dinosaurios eliminados: " + n, NamedTextColor.YELLOW);
             }
+            case "comedero", "feeder" -> {
+                if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+                Species.Diet diet = args.length > 1 ? Species.Diet.byId(args[1]) : Species.Diet.MEAT;
+                if (diet == null) return msg(sender, "Dietas: " + String.join(", ", diets()), NamedTextColor.RED);
+                int amount = Math.max(1, Math.min(64, args.length > 2 ? (int) parse(args[2], 1) : 1));
+                player.getInventory().addItem(feeders.createItem(diet, amount));
+                msg(sender, "Te di " + amount + " comedero(s) de " + diet.label + ".", NamedTextColor.GREEN);
+            }
+            case "dinopedia", "libro" -> {
+                Player target = args.length > 1 ? getServer().getPlayerExact(args[1])
+                        : sender instanceof Player p ? p : null;
+                if (target == null) return msg(sender, "/dino dinopedia [jugador]", NamedTextColor.RED);
+                target.getInventory().addItem(dex.createBook());
+                msg(sender, "Dinopedia entregada a " + target.getName() + ".", NamedTextColor.GREEN);
+            }
+            case "hambre", "hunger" -> {
+                if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+                float value = (float) parse(args.length > 1 ? args[1] : "100", 100) / 100f;
+                int n = 0;
+                for (Dino d : nearby(player, 10)) {
+                    if (!d.tracksHunger()) continue;
+                    d.setHunger(value);
+                    n++;
+                }
+                msg(sender, "Hambre al " + Math.round(value * 100) + "% en " + n + " dino(s) domesticado(s).",
+                        NamedTextColor.GREEN);
+            }
             case "count" -> {
                 StringBuilder sb = new StringBuilder("Cargados: " + dinos.count());
                 for (Species s : Species.ALL) {
@@ -127,6 +163,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
             default -> {
                 msg(sender, "/dino spawn <tipo> [color|random] [macho|hembra|random] [adulto|bebe] [cantidad]", NamedTextColor.GRAY);
                 msg(sender, "/dino egg <especie> [cantidad]  ·  /dino grow [%]  ·  /dino remove [radio] [especie]  ·  /dino count",
+                        NamedTextColor.GRAY);
+                msg(sender, "/dino comedero <carne|plantas|pescado> [cantidad]  ·  /dino dinopedia [jugador]  ·  /dino hambre [%]",
                         NamedTextColor.GRAY);
                 msg(sender, "/dino pack [reload|info]  ·  Especies: " + String.join(", ", ids()), NamedTextColor.GRAY);
             }
@@ -240,7 +278,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
-            return filter(admin ? List.of("spawn", "egg", "grow", "remove", "count", "pack") : List.of("pack"), args[0]);
+            return filter(admin ? List.of("spawn", "egg", "grow", "remove", "count", "comedero", "dinopedia", "hambre", "pack")
+                    : List.of("pack"), args[0]);
         }
         String sub = args[0].toLowerCase();
         if (args.length == 2 && sub.equals("pack") && admin) return filter(List.of("reload", "info"), args[1]);
@@ -248,6 +287,11 @@ public final class DinoEarthPlugin extends JavaPlugin {
         if (args.length == 2 && sub.equals("spawn")) return filter(ids(), args[1]);
         if (args.length == 2 && (sub.equals("egg") || sub.equals("huevo"))) return filter(eggSpecies(), args[1]);
         if (args.length == 3 && sub.equals("remove")) return filter(ids(), args[2]);
+        if (args.length == 2 && (sub.equals("comedero") || sub.equals("feeder"))) return filter(diets(), args[1]);
+        if (args.length == 2 && sub.equals("hambre")) return filter(List.of("0", "25", "50", "100"), args[1]);
+        if (args.length == 2 && sub.equals("dinopedia")) {
+            return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[1]);
+        }
         if (sub.equals("spawn")) {
             Species s = Species.byId(args[1]);
             if (s == null) return List.of();
@@ -264,6 +308,10 @@ public final class DinoEarthPlugin extends JavaPlugin {
     }
 
     private static final List<String> SEXES = List.of("macho", "hembra");
+
+    private static List<String> diets() {
+        return java.util.Arrays.stream(Species.Diet.values()).map(d -> d.label).toList();
+    }
 
     private static List<String> colors(Species s) {
         return List.copyOf(s.rig.variants().keySet());
@@ -285,7 +333,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     }
 
     private static List<String> filter(List<String> options, String prefix) {
-        return options.stream().filter(o -> o.startsWith(prefix.toLowerCase())).toList();
+        return options.stream().filter(o -> o.toLowerCase().startsWith(prefix.toLowerCase())).toList();
     }
 
     private static boolean msg(CommandSender sender, String text, NamedTextColor color) {

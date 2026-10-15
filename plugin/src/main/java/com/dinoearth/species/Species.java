@@ -31,6 +31,24 @@ public final class Species {
     public record Drop(Material item, int min, int max) {
     }
 
+    /** Que come: decide con que comida se domestica, crece y se alimenta, y de que comedero come. */
+    public enum Diet {
+        MEAT("carne"), PLANTS("plantas"), FISH("pescado");
+
+        public final String label;
+
+        Diet(String label) {
+            this.label = label;
+        }
+
+        public static Diet byId(String id) {
+            for (Diet d : values()) {
+                if (d.name().equalsIgnoreCase(id) || d.label.equalsIgnoreCase(id)) return d;
+            }
+            return null;
+        }
+    }
+
     public static final Set<Material> MEAT = EnumSet.of(
             Material.BEEF, Material.CHICKEN, Material.PORKCHOP, Material.MUTTON, Material.RABBIT);
     public static final Set<Material> FISH = EnumSet.of(
@@ -38,6 +56,28 @@ public final class Species {
     public static final Set<Material> PLANTS = EnumSet.of(
             Material.WHEAT, Material.CARROT, Material.APPLE, Material.BEETROOT, Material.SWEET_BERRIES,
             Material.MELON_SLICE, Material.HAY_BLOCK);
+
+    /** Puntos de comida que da cada cosa (para el hambre y para cargar comederos). */
+    public static int foodPoints(Material m) {
+        return switch (m) {
+            case BEEF, PORKCHOP -> 10;
+            case MUTTON, SALMON -> 8;
+            case CHICKEN, RABBIT, COD, APPLE -> 6;
+            case WHEAT, CARROT -> 5;
+            case BEETROOT, TROPICAL_FISH -> 4;
+            case SWEET_BERRIES, MELON_SLICE -> 3;
+            case HAY_BLOCK -> 45;
+            default -> 0;
+        };
+    }
+
+    public static Set<Material> foodOf(Diet diet) {
+        return switch (diet) {
+            case MEAT -> MEAT;
+            case PLANTS -> PLANTS;
+            case FISH -> FISH;
+        };
+    }
 
     public final String id;
     public final String name;
@@ -71,6 +111,13 @@ public final class Species {
     public double flySpeed;
     public double flySprint;
     private final Set<Material> food;
+    /** Minutos que tarda en pasar de lleno a muerto de hambre (0 = no tiene hambre). */
+    public double hungerMinutes;
+    /** Puntos de comida que le entran de vacio a lleno. */
+    public final int stomach;
+    /** Para la Dinopedia: tamaño de un adulto y una frase sobre la especie. */
+    public final String size;
+    public final String about;
     /** Distancia de dibujado de un adulto (1 = 64 bloques, segun la "distancia de entidades" del jugador). */
     public final double viewRange;
     /** Cuantos aparecen juntos con /dino spawn. */
@@ -105,6 +152,10 @@ public final class Species {
         flySpeed = b.flySpeed;
         flySprint = b.flySprint;
         food = b.food;
+        hungerMinutes = b.hungerMinutes;
+        stomach = b.stomach;
+        size = b.size;
+        about = b.about;
         group = b.group;
         viewRange = b.viewRange;
         drops = b.drops;
@@ -128,6 +179,15 @@ public final class Species {
         return body == Body.FLYER;
     }
 
+    public Diet diet() {
+        Set<Material> f = food();
+        return f == FISH ? Diet.FISH : f == PLANTS ? Diet.PLANTS : Diet.MEAT;
+    }
+
+    public boolean getsHungry() {
+        return hungerMinutes > 0 && tameable();
+    }
+
     public boolean hasBabies() {
         return rig.baby() != null;
     }
@@ -144,36 +204,43 @@ public final class Species {
         rideJump = c.getDouble("ride.jump", rideJump);
         flySpeed = c.getDouble("ride.fly-speed", flySpeed);
         flySprint = c.getDouble("ride.fly-sprint-speed", flySprint);
+        hungerMinutes = c.getDouble("hunger-minutes", hungerMinutes);
     }
 
     // ------------------------------------------------------------ especies
     public static final Species RAPTOR = new Builder("raptor", "Velociraptor", Body.BIPED, Temper.CARNIVORE)
             .aliases("velociraptor").stats(30, 6, 0.36).hitbox(1.7).stride(2.4)
-            .tame(0.25).ride(0.32, 0.5, 0.58)
+            .tame(0.25).ride(0.32, 0.5, 0.58).hunger(80, 40)
+            .about("2 × 3,6 bloques", "Cazador ágil y astuto. Domesticado es una montura rápida y saltarina.")
             .drops(new Drop(Material.CHICKEN, 1, 2), new Drop(Material.BONE, 0, 2)).build();
 
     public static final Species TRICERATOPS = new Builder("triceratops", "Triceratops", Body.QUADRUPED, Temper.HERBIVORE)
             .aliases("trike", "tricera").stats(80, 9, 0.27).hitbox(2.4).knockback(1.5).stride(1.7).maleScale(1.08f)
-            .tame(0.2).ride(0.24, 0.36, 0.42).charges().view(1.5)
+            .tame(0.2).ride(0.24, 0.36, 0.42).charges().view(1.5).hunger(100, 90)
+            .about("2,2 × 5,3 bloques", "Tranquilo hasta que lo molestan. Montado y corriendo arrolla lo que tenga adelante.")
             .drops(new Drop(Material.LEATHER, 2, 5), new Drop(Material.BEEF, 2, 4)).build();
 
     public static final Species DILOPHOSAURUS = new Builder("dilophosaurus", "Dilophosaurus", Body.BIPED, Temper.HOSTILE)
             .aliases("dilo").stats(24, 5, 0.33).hitbox(1.45).stride(2.6).spits()
+            .about("2 × 3,3 bloques", "Abre la gola del cuello y escupe veneno que ciega. Mejor verlo de lejos.")
             .drops(new Drop(Material.SPIDER_EYE, 1, 2), new Drop(Material.BONE, 0, 2)).build();
 
     public static final Species COMPSOGNATHUS = new Builder("compsognathus", "Compsognathus", Body.BIPED, Temper.PACK)
             .aliases("compy", "compi").stats(6, 2, 0.4).hitbox(0.55).stride(5.5).group(5).view(0.5)
+            .about("0,6 × 1,4 bloques", "Chiquito y cobarde solo, peligroso en banda: ataca a los heridos.")
             .drops(new Drop(Material.CHICKEN, 0, 1)).build();
 
     public static final Species TREX = new Builder("trex", "Tyrannosaurus rex", Body.BIPED, Temper.CARNIVORE)
             .aliases("t-rex", "rex", "tiranosaurio", "tyrannosaurus").stats(160, 14, 0.3).hitbox(3.2).knockback(1.2)
-            .stride(1.3).swing(26).territorial().eggTameOnly().roars().ride(0.26, 0.42, 0).view(2)
+            .stride(1.3).swing(26).territorial().eggTameOnly().roars().ride(0.26, 0.42, 0).view(2).hunger(70, 120)
+            .about("3,4 × 7,3 bloques", "El rey. Su rugido paraliza de miedo. Solo se domestica criándolo desde el huevo.")
             .drops(new Drop(Material.BEEF, 4, 8), new Drop(Material.BONE, 3, 6), new Drop(Material.LEATHER, 2, 4))
             .build();
 
     public static final Species PTERANODON = new Builder("pteranodon", "Pteranodon", Body.FLYER, Temper.CARNIVORE)
             .aliases("ptera", "ptero", "pterodactilo", "pterodactyl").stats(28, 4, 0.3).hitbox(1.6).stride(3.2)
-            .food(FISH).tame(0.2).ride(0.16, 0.22, 0.55).fly(0.55, 0.9).view(1.5)
+            .food(FISH).tame(0.2).ride(0.16, 0.22, 0.55).fly(0.55, 0.9).view(1.5).hunger(80, 36)
+            .about("6,5 bloques de ala a ala", "Reptil volador que pesca en las costas. Domesticado te lleva por el aire.")
             .drops(new Drop(Material.FEATHER, 1, 3), new Drop(Material.CHICKEN, 1, 2), new Drop(Material.BONE, 0, 2))
             .build();
 
@@ -198,6 +265,9 @@ public final class Species {
         float maleScale = 1.06f, stride = 2.4f, swing = 38;
         boolean rideable, spits, charges, roars, territorial, eggTameOnly;
         Set<Material> food;
+        double hungerMinutes;
+        int stomach = 40;
+        String size = "?", about = "";
         int group = 1;
         List<Drop> drops = List.of();
 
@@ -285,6 +355,18 @@ public final class Species {
 
         Builder food(Set<Material> items) {
             food = items;
+            return this;
+        }
+
+        Builder hunger(double minutes, int stomachPoints) {
+            hungerMinutes = minutes;
+            stomach = stomachPoints;
+            return this;
+        }
+
+        Builder about(String adultSize, String text) {
+            size = adultSize;
+            about = text;
             return this;
         }
 

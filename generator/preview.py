@@ -57,12 +57,13 @@ def bone_matrices(rig, pose, root, parents=None):
 
 
 # ---------------------------------------------------------------- render
-def render(parts, yaw, pitch, ppx=PPX, cy_frac=0.62):
-    """parts: lista de (set, matrices)."""
-    img = [[BG] * VIEW_W for _ in range(VIEW_H)]
-    zbuf = [[1e9] * VIEW_W for _ in range(VIEW_H)]
+def render(parts, yaw, pitch, ppx=PPX, cy_frac=0.62, canvas=None, bg=BG):
+    """parts: lista de (set, matrices). canvas=(ancho, alto) para otro tamaño; bg=None = fondo transparente."""
+    CW, CH = canvas or (VIEW_W, VIEW_H)
+    img = [[bg] * CW for _ in range(CH)]
+    zbuf = [[1e9] * CW for _ in range(CH)]
     view = mat_mul(mat_r(rx=-pitch), mat_r(ry=yaw))  # pitch > 0 = camara arriba
-    cx, cy = VIEW_W / 2, VIEW_H * cy_frac
+    cx, cy = CW / 2, CH * cy_frac
 
     for (rig, pix, size, models), mats in parts:
         k = size / 16.0
@@ -94,8 +95,8 @@ def render(parts, yaw, pitch, ppx=PPX, cy_frac=0.62):
                     shade = {"up": 1.0, "down": 0.5}.get(fname, 0.8 if fname in ("north", "south") else 0.65)
                     xs = [p0[0], pu[0], pv[0], pu[0] + vx]
                     ys = [p0[1], pu[1], pv[1], pu[1] + vy]
-                    x0, x1 = max(0, int(min(xs))), min(VIEW_W - 1, int(max(xs)) + 1)
-                    y0, y1 = max(0, int(min(ys))), min(VIEW_H - 1, int(max(ys)) + 1)
+                    x0, x1 = max(0, int(min(xs))), min(CW - 1, int(max(xs)) + 1)
+                    y0, y1 = max(0, int(min(ys))), min(CH - 1, int(max(ys)) + 1)
                     dzu, dzv = pu[2] - p0[2], pv[2] - p0[2]
                     for py in range(y0, y1 + 1):
                         for px in range(x0, x1 + 1):

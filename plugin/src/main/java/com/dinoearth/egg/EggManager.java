@@ -67,7 +67,7 @@ public final class EggManager {
             if (model != null) model.remove();
             DinoRig rig = species.rig;
             model = new DinoModel(EGG_BONES, new NamespacedKey[]{cracked ? rig.eggCracked() : rig.eggModel()},
-                    box.getLocation(), null, new Vector(), keys::tagPart);
+                    box.getLocation(), null, new Vector(), 1f, 1f, keys::tagPart);
             pose();
         }
 
@@ -249,6 +249,7 @@ public final class EggManager {
         var owner = ownerId != null ? Bukkit.getOfflinePlayer(UUID.fromString(ownerId)) : null;
         Dino baby = dinos.spawn(egg.species, at, null, null, 0f, owner);
         Player online = owner != null ? owner.getPlayer() : null;
+        if (baby != null && online != null) dinos.dex().addTamed(online, egg.species, baby.variant());
         if (baby != null && online != null && online.getWorld() == world && online.getLocation().distanceSquared(at) < 48 * 48) {
             String sexo = baby.isMale() ? "macho" : "hembra";
             online.sendActionBar(Component.text("¡Nació una cría de " + egg.species.name + " "

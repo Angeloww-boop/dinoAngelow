@@ -5,15 +5,19 @@ import com.destroystokyo.paper.entity.ai.MobGoals;
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.dinoearth.Keys;
 import com.dinoearth.Settings;
+import com.dinoearth.feeder.FeederManager;
 import com.dinoearth.model.DinoModel;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.species.Species;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Input;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
@@ -24,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -47,12 +52,14 @@ public final class Dino {
     private static final int DEATH_TICKS = 24;
     private static final int SPIT_TICKS = 16;
     private static final int ROAR_COOLDOWN = 140;
+    private static final int EAT_TICKS = 40;
 
     private final Wolf wolf;
     private final Species species;
     private final DinoRig rig;
     private final Keys keys;
     private final Settings settings;
+    private final DinoManager manager;
 
     private final String variant;
     private final boolean male;
@@ -88,6 +95,14 @@ public final class Dino {
     private float flapPhase;
     private float flightPitch, flightRoll, lastYaw;
     private Player lastRider;
+
+    // hambre (solo domesticados)
+    private float hunger = 1;    // 1 lleno .. 0 muerto de hambre
+    private boolean starvingSit; // lo sentamos nosotros por hambre (no el dueño)
+    private float sick;          // 0..1 cabeza y cola caidas
+    private FeederManager.Feeder feeder;  // comedero al que va a comer
+    private int seekTicks;
+    private int eating = -1;
     private int age;
     private int attack = -1;
     private int roar = -1;
@@ -99,13 +114,16 @@ public final class Dino {
     private int lastPose;
     private final Map<UUID, Integer> rammed = new HashMap<>();
 
-    public Dino(Wolf wolf, Species species, Keys keys, Settings settings) {
+    public Dino(Wolf wolf, Species species, Keys keys, Settings settings, DinoManager manager) {
         this.wolf = wolf;
         this.species = species;
         this.rig = species.rig;
         this.keys = keys;
         this.settings = settings;
+        this.manager = manager;
         PersistentDataContainer pdc = wolf.getPersistentDataContainer();
+        this.hunger = pdc.getOrDefault(keys.hunger, PersistentDataType.FLOAT, 1f);
+        this.starvingSit = pdc.getOrDefault(keys.starving, PersistentDataType.BYTE, (byte) 0) == 1;
         this.variant = rig.variant(pdc.getOrDefault(keys.variant, PersistentDataType.STRING, "")).id();
         this.male = "male".equals(pdc.get(keys.sex, PersistentDataType.STRING));
         float g = pdc.getOrDefault(keys.growth, PersistentDataType.FLOAT, 1f);
@@ -292,7 +310,129 @@ public final class Dino {
     }
 
     public boolean canRide() {
-        return species.rideable && rig.hasSaddle() && isAdult() && saddled && wolf.isTamed();
+        return species.rideable && rig.hasSaddle() && isAdult() && saddled && wolf.isTamed() && !isStarving();
+    }
+
+    // ------------------------------------------------------------ hambre
+    /** Si esta especie (domesticada) tiene hambre con esta configuracion. */
+    public boolean tracksHunger() {
+        return settings.hunger && species.getsHungry() && wolf.isTamed();
+    }
+
+    public float hunger() {
+        return hunger;
+    }
+
+    public boolean isStarving() {
+        return tracksHunger() && hunger <= 0;
+    }
+
+    /** Tiene lugar para comer (los salvajes no: a esos la comida los domestica). */
+    public boolean wantsFood() {
+        return tracksHunger() && hunger < 0.97f;
+    }
+
+    /** Come puntos de comida (de la mano o de un comedero). */
+    public void feed(int points) {
+        hunger = Math.min(1f, hunger + points / (float) Math.max(1, species.stomach));
+        if (starvingSit && hunger > 0.12f) standUp();
+        save();
+    }
+
+    public void setHunger(float value) {
+        hunger = Math.max(0f, Math.min(1f, value));
+        if (starvingSit && hunger > 0.12f) standUp();
+        save();
+    }
+
+    private void standUp() {
+        starvingSit = false;
+        if (rider() == null) wolf.setSitting(false);
+    }
+
+    private void tickHunger(Player rider) {
+        if (!tracksHunger()) {
+            sick += (0 - sick) * 0.1f;
+            if (starvingSit) standUp();
+            return;
+        }
+        if (hunger > 0) hunger = Math.max(0f, hunger - 1f / (float) (species.hungerMinutes * 1200));
+        if (age % 200 == 0) save();
+        boolean starving = hunger <= 0;
+        sick += ((starving ? 1f : 0f) - sick) * 0.05f;
+        if (starving) {
+            if (rider != null) {
+                wolf.removePassenger(rider);
+                rider.sendActionBar(Component.text(species.name + " tiene demasiada hambre para llevarte.",
+                        NamedTextColor.RED));
+            }
+            if (flying) wildFlight = 0;
+            // se echa, como si estuviera mal (salvo que este yendo a comer)
+            if (!flying && feeder == null && !wolf.isSitting() && age % 20 == 0) {
+                wolf.setSitting(true);
+                starvingSit = true;
+            }
+            if (age % 160 == 0) {
+                play("hurt", 0.35f, 0.7f);
+                wolf.getWorld().spawnParticle(Particle.SMOKE, wolf.getLocation().add(0, wolf.getHeight() * 0.8, 0),
+                        4, 0.3, 0.2, 0.3, 0.01);
+            }
+        } else if (hunger < 0.25f && age % 600 == 0) {
+            play("ambient", 0.5f, 0.8f);   // pide comida
+        }
+        if (starvingSit && hunger > 0.12f) standUp();
+        tickFeeder(rider);
+    }
+
+    /** Con hambre busca un comedero de su dieta cerca, camina hasta el y come. */
+    private void tickFeeder(Player rider) {
+        if (eating >= 0) {
+            if (++eating == EAT_TICKS / 2 && feeder != null && feeder.isValid()) {
+                int wanted = (int) Math.ceil((1 - hunger) * species.stomach);
+                int got = manager.feeders().take(feeder, wanted);
+                if (got > 0) {
+                    feed(got);
+                    heal(got / (float) species.stomach * 0.3 * species.health);
+                    wolf.getWorld().playSound(wolf.getLocation(), "minecraft:entity.generic.eat", SoundCategory.NEUTRAL, 1f, 0.8f);
+                    Material bite = Species.foodOf(species.diet()).iterator().next();
+                    wolf.getWorld().spawnParticle(Particle.ITEM, feeder.location().add(0, 0.5, 0), 10, 0.25, 0.1, 0.25,
+                            0.05, new ItemStack(bite));
+                }
+            }
+            if (eating > EAT_TICKS) {
+                eating = -1;
+                feeder = null;
+            }
+            return;
+        }
+        if (feeder != null) {
+            if (!feeder.isValid() || feeder.points() <= 0 || rider != null || flying
+                    || feeder.location().getWorld() != wolf.getWorld()) {
+                feeder = null;
+                return;
+            }
+            Location at = feeder.location();
+            Location me = wolf.getLocation();
+            double reach = 1.1 + wolf.getWidth() / 2;
+            if (Math.hypot(at.getX() - me.getX(), at.getZ() - me.getZ()) <= reach && Math.abs(at.getY() - me.getY()) < 2) {
+                wolf.getPathfinder().stopPathfinding();
+                float yaw = (float) Math.toDegrees(Math.atan2(-(at.getX() - me.getX()), at.getZ() - me.getZ()));
+                wolf.setRotation(yaw, 30);
+                wolf.setBodyYaw(yaw);
+                eating = 0;
+            } else if (seekTicks++ % 20 == 0) {
+                if (wolf.isSitting()) wolf.setSitting(false);
+                wolf.getPathfinder().moveTo(at, 1.0);
+            }
+            if (seekTicks > 400) feeder = null;   // no llega: se rinde (si no hay hambre extrema, vuelve a probar)
+            return;
+        }
+        if (age % 40 != 0 || hunger >= 0.6f || rider != null || flying || wolf.isLeashed()) return;
+        if (wolf.isSitting() && !starvingSit) return;   // el dueño lo dejo sentado: espera
+        FeederManager.Feeder near = manager.feeders().nearest(wolf.getLocation(), species.diet(), 16);
+        if (near == null) return;
+        feeder = near;
+        seekTicks = 0;
     }
 
     public void addGrowth(float amount) {
@@ -315,6 +455,8 @@ public final class Dino {
         PersistentDataContainer pdc = wolf.getPersistentDataContainer();
         pdc.set(keys.growth, PersistentDataType.FLOAT, growth);
         pdc.set(keys.saddled, PersistentDataType.BYTE, (byte) (saddled ? 1 : 0));
+        pdc.set(keys.hunger, PersistentDataType.FLOAT, hunger);
+        pdc.set(keys.starving, PersistentDataType.BYTE, (byte) (starvingSit ? 1 : 0));
     }
 
     public Player rider() {
@@ -373,7 +515,7 @@ public final class Dino {
         age++;
         if (age % 20 == 0) model.remount();
 
-        if (growth < 1f) {
+        if (growth < 1f && !isStarving()) {   // muerto de hambre no crece
             boolean wasBaby = isBabyForm();
             growth = Math.min(1f, growth + 1f / settings.growthTicks);
             if (wasBaby && !isBabyForm()) buildModel();
@@ -392,6 +534,8 @@ public final class Dino {
             wildFlight = 0;
         }
         lastRider = rider;
+        tickHunger(rider);
+        if (rider != null && rider() == null) rider = null;   // lo bajo el hambre
         if (rider != null) ride(rider);
         else if (flying) flyAlone();
         else {
@@ -419,6 +563,7 @@ public final class Dino {
 
         sit += ((wolf.isSitting() ? 1f : 0f) - sit) * 0.15f;
         behave(rider, loc);
+        if (age % 40 == 0) discover(loc);
 
         if (hurt > 0) hurt--;
         if (attack >= 0 && ++attack > ATTACK_TICKS) attack = -1;
@@ -834,6 +979,26 @@ public final class Dino {
             case QUADRUPED -> animateQuadruped();
             case FLYER -> animateFlyer();
             default -> animateBiped();
+        }
+        if (sick > 0.01f) {
+            // muerto de hambre: cabeza y cola caidas
+            model.pose(head).rx += 22 * sick;
+            if (tail1 >= 0) model.pose(tail1).rx -= 10 * sick;
+        }
+        if (eating >= 0) {
+            // baja la cabeza al comedero y mastica
+            float e = Math.max(0f, Math.min(1f, Math.min(eating / 6f, (EAT_TICKS - eating) / 6f)));
+            model.pose(head).rx += 38 * e;
+            if (jaw >= 0) model.pose(jaw).rx += Math.abs((float) Math.sin(eating * 0.8f)) * 22 * e;
+        }
+    }
+
+    /** Anota la especie (y el color) en la Dinopedia de los jugadores que lo ven de cerca. */
+    private void discover(Location loc) {
+        for (Player p : model.viewers()) {
+            if (p.getWorld() == loc.getWorld() && p.getLocation().distanceSquared(loc) < 16 * 16 && p.hasLineOfSight(wolf)) {
+                manager.dex().discover(p, species, variant);
+            }
         }
     }
 

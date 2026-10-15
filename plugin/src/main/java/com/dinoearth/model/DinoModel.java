@@ -8,8 +8,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -20,6 +23,12 @@ import java.util.function.Consumer;
  * ella (importante cuando alguien lo monta). La rotacion del cuerpo, la escala
  * y la pose de cada hueso van en la matriz de transformacion, y el cliente
  * interpola el movimiento.
+ *
+ * <p>Ojo: la matriz NO se manda con setTransformationMatrix. Minecraft la descompone con SVD en
+ * rotacion izquierda + escala + rotacion derecha, y para una rotacion con escala pareja esa
+ * descomposicion no es unica: un cambio minimo (respirar) reparte el giro entre las dos rotaciones de
+ * otra forma y el cliente, que interpola cada una por separado, dibuja la pieza temblando. Por eso se
+ * arma la transformacion a mano: traslacion + una sola rotacion + escala.
  */
 public final class DinoModel {
 
@@ -42,6 +51,7 @@ public final class DinoModel {
     private final ItemDisplay[] parts;
     private final ItemStack[] shown;      // lo que muestra cada parte cuando no esta oculta
     private final boolean[] hidden;
+    private final Quaternionf[] lastRot;  // para mandar siempre el cuaternion del mismo "lado" que el anterior
     private final BonePose[] pose;
     private final Matrix4f[] world;
     private final Matrix4f extra = new Matrix4f();
@@ -64,6 +74,7 @@ public final class DinoModel {
         this.parts = new ItemDisplay[n];
         this.shown = new ItemStack[n];
         this.hidden = new boolean[n];
+        this.lastRot = new Quaternionf[n];
         this.pose = new BonePose[n];
         this.world = new Matrix4f[n];
         Location spawn = at.clone();
@@ -195,10 +206,24 @@ public final class DinoModel {
 
             setHidden(i, p.hidden);
             ItemDisplay d = parts[i];
-            d.setTransformationMatrix(m);
+            d.setTransformation(decompose(i, m));
             d.setInterpolationDelay(0);
             d.setInterpolationDuration(interpolation);
         }
+    }
+
+    /**
+     * Traslacion + rotacion + escala de una matriz que es solo eso (rotaciones y escala pareja):
+     * siempre da la misma respuesta para la misma pose, asi la interpolacion del cliente es suave.
+     */
+    private Transformation decompose(int i, Matrix4f m) {
+        Vector3f translation = m.getTranslation(new Vector3f());
+        Vector3f scale = m.getScale(new Vector3f());
+        Quaternionf rot = m.getNormalizedRotation(new Quaternionf());
+        Quaternionf prev = lastRot[i];
+        if (prev != null && prev.dot(rot) < 0) rot.mul(-1f);   // q y -q son el mismo giro: elegir el cercano
+        lastRot[i] = new Quaternionf(rot);
+        return new Transformation(translation, rot, scale, new Quaternionf());
     }
 
     public void setGlow(Color color) {

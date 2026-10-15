@@ -98,11 +98,14 @@ def to_local(m, joint):
     return (joint[0] - (m[0] - 8), joint[1] + (m[1] - 8), joint[2] - (m[2] - 8))
 
 
-def model_cube(cube, joint):
-    a = to_model(cube.frm, joint)
-    b = to_model(cube.to, joint)
-    frm = tuple(min(a[i], b[i]) for i in range(3))
-    to = tuple(max(a[i], b[i]) for i in range(3))
+def model_cube(cube, joint, grown=True):
+    """Cubo en coordenadas de modelo. grown=False: sin lo que agrando defight (para la textura)."""
+    lo, hi = cube.bounds() if grown else (cube.frm, cube.to)
+    a = to_model(lo, joint)
+    b = to_model(hi, joint)
+    # lo agrandado por defight no puede pasarse del limite de Minecraft (-16..32)
+    frm = tuple(max(-16.0, min(a[i], b[i])) if grown else min(a[i], b[i]) for i in range(3))
+    to = tuple(min(32.0, max(a[i], b[i])) if grown else max(a[i], b[i]) for i in range(3))
     rot = None
     if cube.rot:
         axis, ang, o = cube.rot
@@ -424,6 +427,7 @@ class Atlas:
 
 def build_set(rig, ctx, tex_id, prefix, files, display=None):
     """Arma textura + modelos de un rig. Devuelve (rig, pix, size, {hueso: elementos})."""
+    G.defight(rig.bones)
     atlas = Atlas()
     face_refs = []
     models = {}
@@ -431,12 +435,13 @@ def build_set(rig, ctx, tex_id, prefix, files, display=None):
         elements = []
         for cube in bone.cubes:
             f, t, rot = model_cube(cube, bone.joint)
+            f0, t0, _ = model_cube(cube, bone.joint, grown=False)
             if min(f) < -16 or max(t) > 32:
                 raise ValueError(f"{prefix}/{bone.name}: cubo {cube.frm}->{cube.to} a mas de 24 px del joint")
             el = {"from": [round(v, 4) for v in f], "to": [round(v, 4) for v in t], "faces": {}}
             if rot:
                 el["rotation"] = {"angle": rot[1], "axis": rot[0], "origin": [round(v, 4) for v in rot[2]]}
-            for name, nrm, fw, fh, point in faces_of(f, t):
+            for name, nrm, fw, fh, point in faces_of(f0, t0):
                 W, H = max(1, math.ceil(fw - 1e-6)), max(1, math.ceil(fh - 1e-6))
                 local_n = (-nrm[0], nrm[1], -nrm[2])
 
@@ -519,14 +524,18 @@ def egg_icon(c):
 def build_species(sp, files):
     sid = sp["id"]
     sets = {}
+    # la montura se apoya sobre el cuerpo: sus caras se separan junto con las del adulto
+    saddle_rig = sp["saddle"]() if sp["saddle"] else None
     for vid, pal in sp["variants"].items():
         for model, make in sp["forms"].items():
             rig = make()
+            if saddle_rig and model != "baby":
+                G.defight(rig.bones + saddle_rig.bones)
             ctx = Ctx(pal, rig.face, male=model == "male", pattern=rig.pattern)
             sets[f"{vid}/{model}"] = build_set(rig, ctx, f"{sid}/{vid}_{model}", f"{sid}/{vid}/{model}", files)
     if sp["saddle"]:
         ctx = Ctx(saddle=G.saddle_palette(sp.get("saddle_colors")))
-        sets["saddle"] = build_set(sp["saddle"](), ctx, f"{sid}/saddle", f"{sid}/saddle", files)
+        sets["saddle"] = build_set(saddle_rig, ctx, f"{sid}/saddle", f"{sid}/saddle", files)
     if sp["egg"]:
         egg_rig = G.egg(sp["egg"]["k"])
         sets["egg"] = build_set(egg_rig, Ctx(egg=sp["egg"]), f"{sid}/egg", f"{sid}/egg", files)

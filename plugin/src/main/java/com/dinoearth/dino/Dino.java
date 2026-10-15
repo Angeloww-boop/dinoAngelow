@@ -1242,6 +1242,8 @@ public final class Dino {
             model.pose(frillR).ry = 80 * (1 - frill) + quiver;
             model.pose(frillL).ry = -80 * (1 - frill) - quiver;
             model.pose(frillR).scale = model.pose(frillL).scale = 0.3f + 0.7f * frill;
+            // cerrada queda pegada al cuello (y titila contra el): solo se dibuja mientras se abre
+            model.pose(frillR).hidden = model.pose(frillL).hidden = frill < 0.05f;
         }
         if (sit > 0.01f) {
             float d = 7 * k * sit;
@@ -1364,7 +1366,11 @@ public final class Dino {
         pBody.dy += -Math.abs((float) Math.cos(phase)) * 0.8f * s * k * g;
         pHead.rx = (float) Math.sin(phase * 2) * 3 * s * g;
         float membrane = 1 - 0.88f * g;
-        for (int m : new int[]{memR, memL, memR2, memL2}) model.pose(m).scale = membrane;
+        for (int m : new int[]{memR, memL, memR2, memL2}) {
+            model.pose(m).scale = membrane;
+            // plegada del todo queda apretada adentro del ala y sus caras titilan: mejor no dibujarla
+            model.pose(m).hidden = membrane < 0.2f;
+        }
 
         // --- aire: aleteo (o planeo con las alas apenas en V)
         float beat = (float) Math.sin(flapPhase) * flap;
@@ -1436,6 +1442,7 @@ public final class Dino {
             model.pose(frillR).ry = 80;
             model.pose(frillL).ry = -80;
             model.pose(frillR).scale = model.pose(frillL).scale = 0.3f;
+            model.pose(frillR).hidden = model.pose(frillL).hidden = true;
         }
         if (wingR >= 0) {
             // alas plegadas, medio abiertas al caer

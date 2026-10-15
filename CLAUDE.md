@@ -24,6 +24,9 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - El item_display gira el modelo 180° en Y: el generador invierte X/Z alrededor del joint (`to_model`).
   Rotaciones regla de la mano derecha; rx positivo = baja la cabeza / la pata va hacia atrás.
 - Límite de Minecraft: ningún cubo a más de 24 px de su joint; ángulos de elemento solo ±22.5/±45.
+- Z-fighting: caras de cubos distintos en el mismo plano titilan. `geometry.defight` (lo llama build.py) empuja
+  0.08 px la cara del cubo más chico; `python generator/zfight.py` confirma que no queda ninguna. Partes que se
+  pliegan adentro de otras (membranas, gola) se ocultan con `BonePose.hidden` en vez de achicarlas al mínimo.
 - Temperamento por especie (`Species.Temper`): CARNIVORE, HERBIVORE, HOSTILE, PACK, PREY (huye en manada con el
   pathfinder; agachado te acercas); se le sacan goals de lobo con la API MobGoals de Paper. Extras por especie:
   `TailAttack` (SPIKES/CLUB: coletazo al que pega por atras, `Dino.onStruck`), `armored` (proyectiles x0.35),
@@ -88,6 +91,6 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.7 **sin probar en el juego**: 7 especies nuevas (para, galli, stego, anky, giga, carno, dimorphodon), presas,
   colas, hombro.
 - v0.5–v0.7 se escribieron en la nube (sin acceso a repo.papermc.io). El 2026-10-15 se compilaron en la PC contra el
-  paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build (0.7.1: /dino pack info muestra por que no esta listo el pack; 0.7.2: el config.yml viejo se actualiza solo y queda config-anterior.yml; 0.7.3: /dino tame [jugador] domestica el dino que mirás, incluso los que solo nacen de huevo; 0.7.4: texturas ajustadas, pack nuevo sha1 06aaccf2…).
+  paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build (0.7.1: /dino pack info muestra por que no esta listo el pack; 0.7.2: el config.yml viejo se actualiza solo y queda config-anterior.yml; 0.7.3: /dino tame [jugador] domestica el dino que mirás, incluso los que solo nacen de huevo; 0.7.4: texturas ajustadas; 0.7.5: sin z-fighting, pack sha1 8c5971bd…).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

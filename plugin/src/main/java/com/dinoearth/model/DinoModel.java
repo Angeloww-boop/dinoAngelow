@@ -26,10 +26,13 @@ public final class DinoModel {
     /** Pose de un hueso: rotacion en grados (orden Y, X, Z), desplazamiento vertical en pixeles y escala. */
     public static final class BonePose {
         public float rx, ry, rz, dy, scale = 1;
+        /** Ocultar la parte (por ejemplo, plegada del todo adentro de otra: si no, sus caras titilan). */
+        public boolean hidden;
 
         void reset() {
             rx = ry = rz = dy = 0;
             scale = 1;
+            hidden = false;
         }
     }
 
@@ -37,6 +40,8 @@ public final class DinoModel {
 
     private final List<DinoRig.BoneDef> bones;
     private final ItemDisplay[] parts;
+    private final ItemStack[] shown;      // lo que muestra cada parte cuando no esta oculta
+    private final boolean[] hidden;
     private final BonePose[] pose;
     private final Matrix4f[] world;
     private final Matrix4f extra = new Matrix4f();
@@ -57,6 +62,8 @@ public final class DinoModel {
         this.offset.copy(mountOffset);
         int n = bones.size();
         this.parts = new ItemDisplay[n];
+        this.shown = new ItemStack[n];
+        this.hidden = new boolean[n];
         this.pose = new BonePose[n];
         this.world = new Matrix4f[n];
         Location spawn = at.clone();
@@ -65,6 +72,7 @@ public final class DinoModel {
         for (DinoRig.BoneDef bone : bones) {
             int i = bone.index();
             ItemStack item = itemFor(items[i]);
+            shown[i] = item;
             parts[i] = at.getWorld().spawn(spawn, ItemDisplay.class, d -> {
                 d.setItemStack(item);
                 d.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.NONE);
@@ -109,7 +117,14 @@ public final class DinoModel {
     }
 
     public void setItem(int bone, NamespacedKey key) {
-        parts[bone].setItemStack(itemFor(key));
+        shown[bone] = itemFor(key);
+        if (!hidden[bone]) parts[bone].setItemStack(shown[bone]);
+    }
+
+    private void setHidden(int bone, boolean value) {
+        if (hidden[bone] == value) return;
+        hidden[bone] = value;
+        parts[bone].setItemStack(value ? ItemStack.empty() : shown[bone]);
     }
 
     /** Jugadores que reciben esta entidad (los que la tienen cerca); vacio = nadie la ve. */
@@ -185,6 +200,7 @@ public final class DinoModel {
                     .rotateZ((float) Math.toRadians(p.rz));
             if (p.scale != 1) m.scale(p.scale);
 
+            setHidden(i, p.hidden);
             ItemDisplay d = parts[i];
             d.setTransformationMatrix(m);
             d.setInterpolationDelay(0);

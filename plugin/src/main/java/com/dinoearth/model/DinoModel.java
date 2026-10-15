@@ -155,13 +155,6 @@ public final class DinoModel {
         }
     }
 
-    /** Las partes dejan de seguir a la entidad (al morir), quedan donde estan. */
-    public void dismount() {
-        for (ItemDisplay d : parts) {
-            if (d.getVehicle() != null) d.leaveVehicle();
-        }
-    }
-
     /**
      * Calcula la jerarquia de huesos y manda la pose al cliente.
      *

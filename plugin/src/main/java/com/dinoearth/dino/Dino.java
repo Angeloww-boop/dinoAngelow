@@ -52,7 +52,8 @@ public final class Dino {
 
     private static final int ATTACK_TICKS = 9;
     private static final int ROAR_TICKS = 24;
-    private static final int DEATH_TICKS = 24;
+    // el lobo muerto desaparece a los 20 ticks: la caida tiene que terminar antes
+    private static final int DEATH_TICKS = 18;
     private static final int SPIT_TICKS = 16;
     private static final int ROAR_COOLDOWN = 140;
     private static final int EAT_TICKS = 40;
@@ -124,6 +125,10 @@ public final class Dino {
     private int dying = -1;
     private int spit = -1;
     private int spitCooldown = 40;
+    private float drawnYaw;      // ultimo giro con el que se dibujo (la muerte sigue desde ahi)
+    private float deathYaw;
+    private int fallSide = 1;
+    private float fallLift;
     private int poseEvery = 2;   // ticks entre poses (0 = nadie lo ve, no se manda nada)
     private int lastPose;
     private final Map<UUID, Integer> rammed = new HashMap<>();
@@ -228,7 +233,8 @@ public final class Dino {
         memL2 = form.index("mem_l2");
         updateViewRange();
         animate();
-        model.applyPose(wolf.getLocation(), wolf.getBodyYaw(), visualScale(), 0);
+        drawnYaw = wolf.getBodyYaw();
+        model.applyPose(wolf.getLocation(), drawnYaw, visualScale(), 0);
         lastPose = age;
     }
 
@@ -654,7 +660,12 @@ public final class Dino {
     public void onDeath() {
         if (flying) wolf.setGravity(true);
         dying = 0;
-        model.dismount();
+        // sigue montado en el lobo muerto (se mueve igual que el) y conserva hacia donde miraba
+        deathYaw = drawnYaw;
+        fallSide = ThreadLocalRandom.current().nextBoolean() ? 1 : -1;
+        // mitad del ancho, en bloques del modelo sin escalar: lo que hay que levantarlo para que caiga
+        // apoyado sobre el costado y no hundido en el piso
+        fallLift = (float) (wolf.getWidth() / 2 / Math.max(0.05f, visualScale()));
         play(isBabyForm() ? "hurt" : "death", 0.9f, isBabyForm() ? 0.8f : 1f);
     }
 
@@ -744,6 +755,7 @@ public final class Dino {
             play("ambient", 0.6f, 1f);
         }
 
+        drawnYaw = bodyYaw;
         // la pose solo se calcula y se manda cuando alguien la puede ver, y menos seguido de lejos
         if (rider != null || perch != null) poseEvery = 1;
         else if (age % 10 == 0 || poseEvery == 1) poseEvery = poseRate(loc);
@@ -1425,9 +1437,11 @@ public final class Dino {
 
     private boolean tickDeath() {
         dying++;
-        float k = Math.min(1f, dying / 10f);
+        float k = Math.min(1f, dying / 9f);
+        float e = k * k;    // cae cada vez mas rapido
         model.resetPose();
-        model.extra().rotateZ((float) Math.toRadians(90 * k * k));   // cae de costado
+        // cae de costado: gira 90 grados y sube lo justo para que el costado quede sobre el piso
+        model.extra().translate(0, fallLift * e, 0).rotateZ((float) Math.toRadians(90 * e * fallSide));
         model.pose(jaw).rx = 25 * k;
         model.pose(head).rx = 15 * k;
         if (legR >= 0) {
@@ -1452,7 +1466,7 @@ public final class Dino {
             model.pose(wingL2).ry = -145;
             for (int m : new int[]{memR, memL, memR2, memL2}) model.pose(m).scale = 0.4f;
         }
-        model.applyPose(wolf.getLocation(), rideYaw, visualScale(), 2);
+        model.applyPose(wolf.getLocation(), deathYaw, visualScale(), 2);
         if (dying > DEATH_TICKS) {
             model.remove();
             return false;

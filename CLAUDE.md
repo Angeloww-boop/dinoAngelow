@@ -100,5 +100,11 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   crafteos los arma el dueño con Shopkeepers), silbato (seguir/quedarse/patrullar el chunk del jugador + pasivo/defensivo/
   agresivo; patrullar saca el goal FOLLOW_OWNER y lo vuelve a poner con MobGoals: verificar que vuelva a seguir),
   nombre con etiqueta + cartel TextDisplay, `/dino dar` con aceptar/rechazar, jaula que guarda/suelta el dino.
+- v0.9.0 **sin probar en el juego**: `registry/DinoRegistry` (dinos.yml con la ultima posicion de cada domesticado;
+  se actualiza cada 10 s, al descargarse el chunk por EntityRemoveEvent.UNLOAD y se borra por DEATH/PLUGIN),
+  `/dino mis`, silbato de regreso (`RecallManager`: max 2 por llamada, 1 vez cada 5 min; dino en chunk descargado =
+  getChunkAtAsync + ticket del plugin solo de ese chunk hasta encontrarlo; `Dino.prepareTeleport` saca el modelo
+  porque un lobo con pasajeros no se teletransporta), avisos de ataque (lejos, cada 30 s) y de muerte (guardados si
+  el dueño no esta conectado).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

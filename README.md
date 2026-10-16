@@ -39,6 +39,9 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 | Silbato | **Click derecho a tu dino**: menú de órdenes. **Agachado + click derecho al aire**: órdenes a todos tus dinos a 16 bloques. Órdenes: **seguirme**, **quedarse**, **patrullar el chunk donde estás parado** (camina por ese chunk y no se va). Modos: **pasivo** (no ataca a nadie), **defensivo** (lo normal) y **agresivo** (además ataca monstruos cerca, menos creepers) |
 | Nombre | Etiqueta con nombre (renombrada en un yunque) + click derecho a tu dino. Arriba del modelo aparece el nombre y "de <dueño>" |
 | Regalar | `/dino dar <jugador>` mirando a tu dino. El otro recibe [Aceptar] / [Rechazar] y tiene 60 s |
+| Mis dinos | `/dino mis`: todos tus domesticados con especie, nombre, mundo, coordenadas, distancia y orden, aunque estén en chunks descargados. Al lado de cada uno, **[Llamar]** |
+| Llamar de regreso | En el silbato, **"Llamar dinos lejanos"** (o `/dino llamar`): elegís hasta **2** y vuelven a tu lado (después te siguen). **Una vez cada 5 minutos.** Si el dino está en un chunk descargado se carga **solo ese chunk, un momento** (nada más) |
+| Avisos | Si atacan a tu dino estando vos lejos (más de 24 bloques) te llega un aviso con coordenadas y quién fue (como mucho cada 30 s por dino). Si muere te avisa dónde y de qué; si no estabas conectado, te llega al entrar |
 | Jaula | Click derecho a tu dino con una jaula vacía: lo guarda adentro (color, sexo, edad, montura, hambre, vida, nombre y modo). Click derecho al piso con la jaula llena: lo suelta y **quien lo suelta queda como dueño** (sirve para venderlo) |
 | Drops | Cada especie suelta lo suyo (cuero, garras, dientes, cuernos, placas, membranas, plumas, glándula...) para craftear sus monturas con Shopkeepers. Lista en `/dino item` |
 | Presas | El parasaurolophus y el gallimimus salvajes huyen si te acercás. **Agachado** podés llegar hasta ellos y darles de comer |
@@ -68,7 +71,8 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 /dino pack [reload|info]
 ```
 
-Todos los jugadores: `/dino dar <jugador>`, `/dino aceptar`, `/dino rechazar`, `/dino pack`.
+Todos los jugadores: `/dino mis`, `/dino llamar [id] [id]`, `/dino dar <jugador>`, `/dino aceptar`, `/dino rechazar`,
+`/dino pack`. La espera y el máximo del silbato de regreso se cambian en `config.yml` (`recall`).
 
 Items (`/dino item <id>`): `silbato`, `jaula`, `montura_<especie>` (raptor, triceratops, trex, pteranodon,
 parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus) y los drops: `cuero_<especie>`,

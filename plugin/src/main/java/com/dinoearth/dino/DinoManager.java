@@ -38,6 +38,17 @@ public final class DinoManager {
         this.dex = dex;
     }
 
+    private com.dinoearth.registry.DinoRegistry registry;
+
+    public void setRegistry(com.dinoearth.registry.DinoRegistry registry) {
+        this.registry = registry;
+    }
+
+    /** Lista de domesticados con su ultima posicion (puede ser null si todavia no se creo). */
+    public com.dinoearth.registry.DinoRegistry registry() {
+        return registry;
+    }
+
     public Settings settings() {
         return settings;
     }
@@ -92,6 +103,7 @@ public final class DinoManager {
         if (species == null || species.rig == null) return null;
         Dino d = new Dino(wolf, species, keys, settings, this);
         active.put(wolf.getUniqueId(), d);
+        if (registry != null && wolf.isTamed()) registry.update(d);
         return d;
     }
 

@@ -760,6 +760,17 @@ public final class Dino {
                 new Vector3f(1, 1, 1), new Quaternionf()));
     }
 
+    /** Antes de teletransportarlo: un lobo con pasajeros no se puede mover, asi que se saca el modelo
+     *  (se vuelve a armar solo en el proximo tick, ya en el destino). */
+    public void prepareTeleport() {
+        if (perch != null) unperch();
+        if (flying) land();
+        model.remove();
+        removePlate();
+        wolf.eject();
+        wolf.getPathfinder().stopPathfinding();
+    }
+
     private void removePlate() {
         if (plate != null) plate.remove();
         plate = null;
@@ -964,6 +975,7 @@ public final class Dino {
         if (!model.isValid()) buildModel();   // alguien borro las displays (p. ej. /kill)
 
         age++;
+        if (age % 200 == 0 && wolf.isTamed() && manager.registry() != null) manager.registry().update(this);
         if (age % 20 == 0) {
             model.remount();
             if (plate != null && plate.isValid() && plate.getVehicle() != wolf) wolf.addPassenger(plate);

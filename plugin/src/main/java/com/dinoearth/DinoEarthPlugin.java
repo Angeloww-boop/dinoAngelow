@@ -10,6 +10,8 @@ import com.dinoearth.item.CageManager;
 import com.dinoearth.item.DinoItems;
 import com.dinoearth.item.ItemListener;
 import com.dinoearth.order.OrderMenu;
+import com.dinoearth.registry.DinoRegistry;
+import com.dinoearth.registry.RecallManager;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.pack.PackManager;
 import com.dinoearth.species.Species;
@@ -33,7 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -48,9 +49,9 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private DexManager dex;
     private DinoItems items;
     private CageManager cages;
+    private DinoRegistry registry;
+    private RecallManager recall;
 
-    /** Comandos que puede usar cualquier jugador; el resto es de admin. */
-    private static final Set<String> PLAYER_COMMANDS = Set.of("pack", "dar", "regalar", "aceptar", "rechazar");
     private static final int OFFER_TICKS = 60 * 20;
 
     /** Un dino ofrecido a otro jugador con /dino dar, esperando que lo acepte. */
@@ -90,7 +91,12 @@ public final class DinoEarthPlugin extends JavaPlugin {
             return;
         }
         cages = new CageManager(items, dinos, keys);
-        getServer().getPluginManager().registerEvents(new OrderMenu(dinos, items, keys), this);
+        registry = new DinoRegistry(this);
+        dinos.setRegistry(registry);
+        recall = new RecallManager(this, dinos, registry, keys, settings);
+        getServer().getPluginManager().registerEvents(recall, this);
+        getServer().getScheduler().runTaskTimer(this, registry::save, 600L, 600L);
+        getServer().getPluginManager().registerEvents(new OrderMenu(dinos, items, keys, recall), this);
         getServer().getPluginManager().registerEvents(new ItemListener(items, cages, dinos), this);
         getServer().getPluginManager().registerEvents(new DinoListener(this, dinos, eggs, keys, items, cages), this);
         getServer().getScheduler().runTaskTimer(this, () -> {
@@ -116,6 +122,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
         if (eggs != null) eggs.shutdown();
         if (feeders != null) feeders.shutdown();
         if (pack != null) pack.stop();
+        if (recall != null) recall.shutdown();
+        if (registry != null) registry.save();
     }
 
     // ------------------------------------------------------------ comandos
@@ -135,11 +143,25 @@ public final class DinoEarthPlugin extends JavaPlugin {
             case "rechazar" -> {
                 return reject(sender);
             }
+            case "mis", "misdinos" -> {
+                if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+                recall.list(player);
+                return true;
+            }
+            case "llamar" -> {
+                if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+                if (args.length < 2) {
+                    recall.openMenu(player);
+                } else {
+                    recall.recallById(player, List.of(args).subList(1, args.length));
+                }
+                return true;
+            }
             default -> {
             }
         }
         if (!sender.hasPermission(ADMIN)) {
-            return msg(sender, "Podés usar /dino dar <jugador> (regalar el dino que mirás) o /dino pack.", NamedTextColor.GRAY);
+            return msg(sender, "Comandos: /dino mis · /dino llamar · /dino dar <jugador> · /dino pack", NamedTextColor.GRAY);
         }
         switch (sub) {
             case "item", "items" -> giveItem(sender, args);
@@ -223,6 +245,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 msg(sender, "/dino tame [jugador]  (domestica el dino que estás mirando)", NamedTextColor.GRAY);
                 msg(sender, "/dino item <id> [cantidad] [jugador]  ·  /dino dar <jugador>  ·  /dino aceptar | rechazar",
                         NamedTextColor.GRAY);
+                msg(sender, "/dino mis  ·  /dino llamar [id] [id]", NamedTextColor.GRAY);
                 msg(sender, "/dino pack [reload|info]  ·  Especies: " + String.join(", ", ids()), NamedTextColor.GRAY);
             }
         }
@@ -347,6 +370,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         d.wolf().setTarget(null);
         d.setOrder(Dino.Order.STAY, player);
         d.refreshPlate();
+        registry.update(d);
         dex.addTamed(player, d.species(), d.variant());
         msg(sender, "¡Ahora el dino es tuyo! Quedó sentado: click derecho para que te siga.", NamedTextColor.GREEN);
         Player from = getServer().getPlayer(offer.from());
@@ -470,10 +494,15 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
-            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "item", "dar", "aceptar", "rechazar", "remove", "count",
-                    "comedero", "dinopedia", "hambre", "pack") : List.of("dar", "aceptar", "rechazar", "pack"), args[0]);
+            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "item", "mis", "llamar", "dar", "aceptar", "rechazar",
+                    "remove", "count", "comedero", "dinopedia", "hambre", "pack")
+                    : List.of("mis", "llamar", "dar", "aceptar", "rechazar", "pack"), args[0]);
         }
         String sub = args[0].toLowerCase();
+        if (sub.equals("llamar") && args.length <= 3 && sender instanceof Player p) {
+            return filter(registry.ownedBy(p.getUniqueId()).stream().map(e -> RecallManager.shortId(e.id())).toList(),
+                    args[args.length - 1]);
+        }
         if (args.length == 2 && (sub.equals("dar") || sub.equals("regalar"))) {
             return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[1]);
         }

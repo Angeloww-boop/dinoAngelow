@@ -35,6 +35,17 @@ hunger:
   # Puntos que entran en un comedero (un trozo de carne = 6-10, un fardo = 45)
   feeder-capacity: 600
 
+# Silbato de regreso: trae a tu lado dinos que estan lejos. Si el dino esta en un chunk descargado,
+# se carga solo ese chunk un momento. Maximo de dinos por llamada y espera entre llamadas (por jugador).
+recall:
+  max-dinos: 2
+  cooldown-minutes: 5
+
+# Avisos al dueño cuando atacan a su dino estando lejos (las muertes se avisan siempre; si no esta
+# conectado, le llegan al entrar).
+alerts:
+  attack-cooldown-seconds: 30
+
 # Valores por especie. Velocidades de montura en bloques por tick
 # (un jugador caminando ~0.22, corriendo ~0.28).
 species:

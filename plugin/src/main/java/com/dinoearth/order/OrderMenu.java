@@ -4,6 +4,7 @@ import com.dinoearth.Keys;
 import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
 import com.dinoearth.item.DinoItems;
+import com.dinoearth.registry.RecallManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -41,13 +42,14 @@ import java.util.function.Predicate;
  */
 public final class OrderMenu implements Listener {
 
-    private static final int HEADER = 4, FOLLOW = 10, STAY = 11, PATROL = 12, PASSIVE = 14, DEFENSIVE = 15,
+    private static final int HEADER = 4, FOLLOW = 10, STAY = 11, PATROL = 12, RECALL = 13, PASSIVE = 14, DEFENSIVE = 15,
             AGGRESSIVE = 16, CLOSE = 22;
     private static final double GROUP_RADIUS = 16;
 
     private final DinoManager dinos;
     private final DinoItems items;
     private final Keys keys;
+    private final RecallManager recall;
 
     /** Identifica nuestro menu (nunca por el titulo) y a que dinos se le dan las ordenes. */
     public static final class Holder implements InventoryHolder {
@@ -66,7 +68,8 @@ public final class OrderMenu implements Listener {
         }
     }
 
-    public OrderMenu(DinoManager dinos, DinoItems items, Keys keys) {
+    public OrderMenu(DinoManager dinos, DinoItems items, Keys keys, RecallManager recall) {
+        this.recall = recall;
         this.dinos = dinos;
         this.items = items;
         this.keys = keys;
@@ -108,7 +111,9 @@ public final class OrderMenu implements Listener {
             }
         }
         if (mine.isEmpty()) {
-            player.sendActionBar(Component.text("No tenés dinos a menos de 16 bloques.", NamedTextColor.RED));
+            // ninguno cerca: directo al menu de llamarlos de regreso
+            whistle(player);
+            recall.openMenu(player);
             return;
         }
         whistle(player);
@@ -188,6 +193,8 @@ public final class OrderMenu implements Listener {
                 lines("Te defiende a vos y a sí mismo.", "(lo normal)"), combat == Dino.Combat.DEFENSIVE));
         inv.setItem(AGGRESSIVE, icon(Material.IRON_SWORD, title("Agresivo", combat == Dino.Combat.AGGRESSIVE),
                 lines("Además ataca a los monstruos", "que vea cerca (menos creepers)."), combat == Dino.Combat.AGGRESSIVE));
+        inv.setItem(RECALL, icon(Material.GOAT_HORN, Component.text("Llamar dinos lejanos", NamedTextColor.GOLD),
+                lines("Elegí hasta 2 de tus dinos que estén", "lejos y vuelven a tu lado."), false));
         inv.setItem(CLOSE, icon(Material.BARRIER, Component.text("Cerrar", NamedTextColor.RED), List.of(), false));
     }
 
@@ -199,6 +206,11 @@ public final class OrderMenu implements Listener {
         int slot = event.getSlot();
         if (slot == CLOSE) {
             p.closeInventory();
+            return;
+        }
+        if (slot == RECALL) {
+            p.closeInventory();
+            recall.openMenu(p);
             return;
         }
         List<Dino> list = resolve(p, h);

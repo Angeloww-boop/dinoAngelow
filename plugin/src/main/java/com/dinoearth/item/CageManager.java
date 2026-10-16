@@ -1,14 +1,14 @@
 package com.dinoearth.item;
 
+import com.dinoearth.text.Fmt;
+import com.dinoearth.text.Lang;
 import com.dinoearth.Keys;
 import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
 import com.dinoearth.feeder.Protection;
 import com.dinoearth.species.Species;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
@@ -22,7 +22,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,11 +48,11 @@ public final class CageManager {
     /** Mete al dino en la jaula que el jugador tiene en la mano. */
     public void capture(Player player, Dino d, ItemStack hand) {
         if (isFull(hand)) {
-            player.sendActionBar(Component.text("Esa jaula ya tiene un dino adentro.", NamedTextColor.RED));
+            Lang.get().action(player, "jaula-llena");
             return;
         }
         if (d.rider() != null || d.isDying()) {
-            player.sendActionBar(Component.text("No se puede enjaular ahora.", NamedTextColor.RED));
+            Lang.get().action(player, "jaula-ahora-no");
             return;
         }
         Wolf wolf = d.wolf();
@@ -63,16 +62,14 @@ public final class CageManager {
         DinoItems.Def def = items.def(DinoItems.CAGE);
         if (def.modelFull() != null) meta.setItemModel(def.modelFull());
         Component who = d.name() != null ? d.name() : Component.text(s.name);
-        meta.itemName(Component.text("Jaula con ", NamedTextColor.GOLD).append(who.colorIfAbsent(NamedTextColor.GOLD)));
-        List<Component> lore = new ArrayList<>();
-        lore.add(DinoItems.line(s.name + " " + s.rig.variant(d.variant()).name() + " · " + (d.isMale() ? "macho" : "hembra")
-                + (d.isAdult() ? "" : " · cría " + Math.round(d.growth() * 100) + "%")));
         var max = wolf.getAttribute(Attribute.MAX_HEALTH);
         double ratio = max != null ? wolf.getHealth() / max.getValue() : 1;
-        lore.add(DinoItems.line("Vida: " + Math.round(ratio * 100) + "%" + (d.isSaddled() ? " · con montura" : "")));
-        lore.add(DinoItems.line("Click derecho al piso para soltarlo."));
-        lore.add(DinoItems.line("Quien lo suelta queda como dueño."));
-        meta.lore(lore);
+        Lang lang = Lang.get();
+        String age = d.isAdult() ? lang.plain(d.isMale() ? "edad.Adulto" : "edad.Adulta")
+                : lang.plain("edad.cria-porcentaje", "porcentaje", Math.round(d.growth() * 100));
+        lang.itemTexts(meta, "jaula-llena", "dino", who, "especie", s.name, "color", s.colorName(d.variant()),
+                "sexo", Fmt.sex(d.isMale()), "edad", age, "vida", Math.round(ratio * 100),
+                "montura", d.isSaddled() ? List.of(lang.raw("items.yml", "jaula-con-montura")) : List.of());
         meta.setMaxStackSize(1);
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(keys.cage, PersistentDataType.BYTE, (byte) 1);
@@ -100,29 +97,28 @@ public final class CageManager {
         } else {
             player.getInventory().setItemInMainHand(full);
         }
-        player.sendActionBar(Component.text("Guardaste a ", NamedTextColor.GREEN).append(who)
-                .append(Component.text(" en la jaula.", NamedTextColor.GREEN)));
+        Lang.get().action(player, "jaula-guardado", "dino", who);
     }
 
     /** Suelta al dino de la jaula sobre el bloque clickeado. */
     public void release(Player player, ItemStack hand, Block clicked, BlockFace face) {
         Block target = clicked.getRelative(face);
         if (!target.isPassable() || target.isLiquid() || !target.getRelative(BlockFace.DOWN).getType().isSolid()) {
-            player.sendActionBar(Component.text("Soltalo sobre un piso con espacio libre.", NamedTextColor.RED));
+            Lang.get().action(player, "jaula-piso");
             return;
         }
         if (!Protection.canBuild(player, target)) {
-            player.sendActionBar(Component.text("No podés soltar un dino acá.", NamedTextColor.RED));
+            Lang.get().action(player, "jaula-aca");
             return;
         }
         PersistentDataContainer pdc = hand.getItemMeta().getPersistentDataContainer();
         Species s = Species.byId(pdc.get(keys.type, PersistentDataType.STRING));
         if (s == null || s.rig == null) {
-            player.sendActionBar(Component.text("La jaula tiene una especie que ya no existe.", NamedTextColor.RED));
+            Lang.get().action(player, "jaula-especie");
             return;
         }
         if (!dinos.canOwnMore(player.getUniqueId())) {
-            player.sendActionBar(dinos.limitMessage(player));
+            dinos.limitMessage(player);
             return;
         }
         Location at = target.getLocation().add(0.5, 0, 0.5);
@@ -152,7 +148,6 @@ public final class CageManager {
         at.getWorld().spawnParticle(Particle.CLOUD, at.clone().add(0, 0.6, 0), 14, 0.5, 0.4, 0.5, 0.02);
         at.getWorld().playSound(at, "minecraft:block.chain.break", SoundCategory.PLAYERS, 1f, 0.8f);
         player.getInventory().setItemInMainHand(items.create(DinoItems.CAGE, 1));
-        String plain = d.name() != null ? PlainTextComponentSerializer.plainText().serialize(d.name()) : s.name;
-        player.sendActionBar(Component.text(plain + " salió de la jaula. Ahora es tuyo.", NamedTextColor.GREEN));
+        Lang.get().action(player, "jaula-soltado", "dino", d.name() != null ? d.name() : Component.text(s.name));
     }
 }

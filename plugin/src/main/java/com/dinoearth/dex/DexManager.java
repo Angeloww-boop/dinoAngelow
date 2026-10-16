@@ -4,14 +4,16 @@ import com.dinoearth.Keys;
 import com.dinoearth.Settings;
 import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
-import com.dinoearth.feeder.FeederManager;
 import com.dinoearth.gui.GuiFont;
+import com.dinoearth.mission.MissionManager;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.species.Species;
+import com.dinoearth.text.Fmt;
+import com.dinoearth.text.Lang;
+import com.dinoearth.text.Menu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -42,41 +44,35 @@ import java.util.UUID;
  * - Pagina de cada especie: foto grande del color que elijas, barras de vida/daño/velocidad/tamaño, colores vistos,
  *   sellos de investigacion y la lupa para rastrearla.
  * - Ficha de un dino (click derecho con el libro): su foto, sexo, edad, vida, hambre, dueño y ordenes.
+ * - Misiones del dia (MissionManager): tres tarjetas con su progreso y el boton para cambiar una.
  *
  * Sellos: tareas por especie (verlo, todos los colores, el color raro, domesticarlo, criarlo, montarlo...). Cada
  * sello da experiencia; una especie completa da mas y puede correr comandos (config.yml). Con el libro en la mano
  * se anotan los dinos desde mas lejos, aparecen huellas de especies que no conocés y la lupa marca hacia donde ir.
  *
- * Lo de cada jugador se guarda en el propio jugador (PDC). Los menus son de solo lectura: todo click se cancela.
+ * Todos los textos salen de menus/dinopedia.yml, textos.yml y messages.yml. Lo de cada jugador se guarda en el
+ * propio jugador (PDC). Los menus son de solo lectura: todo click se cancela.
  */
 public final class DexManager {
 
-    // ------------------------------------------------------------ casilleros (el dibujo esta en DexLayout)
+    // ------------------------------------------------------------ casilleros que dependen del dibujo
     private static final int[][] INDEX_ROWS = {{10, 11, 12, 13, 14, 15, 16}, {28, 29, 30, 31, 32, 33, 34}};
     private static final int[] COLOR_SLOTS = {36, 37, 38, 39, 46, 47, 48};
     private static final int[] STAMP_SLOTS = {41, 42, 43, 50, 51, 52};
-    private static final int RANK_SLOT = 0, PREV = 45, BACK = 49, NEXT = 53, TRACK = 44, HELP = 49, TRACKING = 51;
-
-    private static final TextColor INK_SOFT = DexLayout.INK_SOFT;
-    private static final TextColor DIM = NamedTextColor.GRAY;
+    private static final int[] MISSION_ICON = {0, 18, 36};
+    private static final int[] MISSION_REROLL = {8, 26, 44};
 
     // ------------------------------------------------------------ sellos y rangos
     public enum Stamp {
-        VISTO("Avistado", "Ver uno de cerca."),
-        COLORES("Coleccionista", "Ver todos sus colores comunes."),
-        RARO("Rareza", "Ver su color raro."),
-        DOMESTICADO("Domador", "Domesticar uno."),
-        CRIADO("Criador", "Que nazca una cría tuya de un huevo."),
-        JINETE("Jinete", "Montarlo."),
-        HOMBRO("Compañero", "Que vuele a tu lado."),
-        CAZADO("Cazador", "Derrotar uno.");
+        VISTO, COLORES, RARO, DOMESTICADO, CRIADO, JINETE, HOMBRO, CAZADO;
 
-        public final String label;
-        public final String task;
+        String label() {
+            return Lang.get().plain("sellos." + name() + ".nombre");
+        }
 
-        Stamp(String label, String task) {
-            this.label = label;
-            this.task = task;
+        String task(Species s) {
+            if (this == DOMESTICADO && s.eggTameOnly) return Lang.get().plain("sellos.DOMESTICADO.tarea-huevo");
+            return Lang.get().plain("sellos." + name() + ".tarea");
         }
 
         String model() {
@@ -84,16 +80,10 @@ public final class DexManager {
         }
     }
 
-    private record Rank(String name, double from, TextColor color) {
-    }
-
-    private static final List<Rank> RANKS = List.of(
-            new Rank("Aprendiz", 0, TextColor.color(0x7A5236)),
-            new Rank("Explorador", 0.10, TextColor.color(0x8A5A24)),
-            new Rank("Rastreador", 0.25, TextColor.color(0x5E646C)),
-            new Rank("Naturalista", 0.45, TextColor.color(0x9A7414)),
-            new Rank("Paleontólogo", 0.70, TextColor.color(0x23786E)),
-            new Rank("Leyenda jurásica", 1.0, TextColor.color(0x7A3C96)));
+    /** Desde que fraccion de sellos se tiene cada rango y su color de tinta (los nombres estan en textos.yml). */
+    private static final double[] RANK_FROM = {0, 0.10, 0.25, 0.45, 0.70, 1.0};
+    private static final TextColor[] RANK_COLOR = {TextColor.color(0x7A5236), TextColor.color(0x8A5A24),
+            TextColor.color(0x5E646C), TextColor.color(0x9A7414), TextColor.color(0x23786E), TextColor.color(0x7A3C96)};
 
     public static List<Stamp> stampsOf(Species s) {
         List<Stamp> out = new ArrayList<>();
@@ -123,8 +113,8 @@ public final class DexManager {
     private final Settings settings;
     private final GuiFont gui;
     private final Map<UUID, String> tracking = new HashMap<>();
-    private final Map<UUID, Integer> hudWait = new HashMap<>();
     private DinoManager dinos;
+    private MissionManager missions;
     private final double maxHealth, maxDamage, maxSpeed, maxSize;
 
     /** Identifica nuestros menus (nunca por el titulo). Cada casillero con accion tiene su Runnable. */
@@ -154,18 +144,24 @@ public final class DexManager {
         Bukkit.getScheduler().runTaskTimer(plugin, this::tickHud, 40L, 10L);
     }
 
+    public void setMissions(MissionManager missions) {
+        this.missions = missions;
+    }
+
+    private static Lang lang() {
+        return Lang.get();
+    }
+
+    private static com.dinoearth.text.Menu yml() {
+        return Lang.get().menu("dinopedia");
+    }
+
     // ------------------------------------------------------------ libro
     public ItemStack createBook() {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
         meta.setItemModel(NamespacedKey.fromString("dinoearth:dinopedia"));
-        meta.itemName(Component.text("Dinopedia", NamedTextColor.GOLD));
-        meta.lore(List.of(
-                line("Click derecho: abrir."),
-                line("Click derecho a un dinosaurio: su ficha."),
-                line("En la mano: anotás dinos desde más lejos,"),
-                line("ves huellas de especies que no conocés"),
-                line("y la lupa te marca hacia dónde ir.")));
+        lang().itemTexts(meta, "dinopedia");
         meta.setMaxStackSize(1);
         meta.getPersistentDataContainer().set(keys.dexBook, PersistentDataType.BYTE, (byte) 1);
         item.setItemMeta(meta);
@@ -231,13 +227,18 @@ public final class DexManager {
         return Species.ALL.stream().mapToInt(s -> stamps(p, s).size()).sum();
     }
 
-    private Rank rank(int done) {
+    private int rank(int done) {
         double f = done / (double) totalStamps();
-        Rank r = RANKS.get(0);
-        for (Rank k : RANKS) {
-            if (f >= k.from() - 1e-9) r = k;
+        int r = 0;
+        for (int i = 0; i < RANK_FROM.length; i++) {
+            if (f >= RANK_FROM[i] - 1e-9) r = i;
         }
         return r;
+    }
+
+    private static String rankName(int i) {
+        List<String> names = lang().list("textos.yml", "rangos");
+        return i < names.size() ? names.get(i) : String.valueOf(i);
     }
 
     /** El jugador vio un dino de esta especie y color. Avisa si es nuevo. */
@@ -248,15 +249,13 @@ public final class DexManager {
         p.getPersistentDataContainer().set(keys.dexSeen(s.id), PersistentDataType.STRING, String.join(",", seen));
         DinoRig.Variant v = s.rig.variant(variant);
         if (first) {
-            p.sendActionBar(Component.text("¡Nueva especie en la Dinopedia: " + s.name + "!", NamedTextColor.GOLD));
+            lang().action(p, "dex-especie-nueva", "especie", s.name);
             p.playSound(p, "minecraft:entity.player.levelup", SoundCategory.PLAYERS, 0.5f, 1.4f);
         } else if (v.weight() <= 5) {
-            p.sendActionBar(Component.text("¡Un " + s.name + " " + v.name().toLowerCase() + "! Es muy raro.",
-                    NamedTextColor.LIGHT_PURPLE));
+            lang().action(p, "dex-color-raro", "especie", s.name, "color", s.colorName(variant));
             p.playSound(p, "minecraft:entity.player.levelup", SoundCategory.PLAYERS, 0.5f, 1.8f);
         } else {
-            p.sendActionBar(Component.text("Dinopedia: nuevo color de " + s.name + " (" + v.name() + ")",
-                    NamedTextColor.YELLOW));
+            lang().action(p, "dex-color-nuevo", "especie", s.name, "color", s.colorName(variant));
         }
         refresh(p, s);
     }
@@ -300,32 +299,27 @@ public final class DexManager {
         if (!all.contains(stamp)) return;
         Set<Stamp> have = stamps(p, s);
         if (have.contains(stamp)) return;
-        Rank before = rank(doneStamps(p));
+        int before = rank(doneStamps(p));
         have.add(stamp);
         List<String> ids = have.stream().map(Enum::name).toList();
         p.getPersistentDataContainer().set(keys.dexStamps(s.id), PersistentDataType.STRING, String.join(",", ids));
 
         int xp = settings.dexXpStamp;
-        p.sendMessage(Component.text("Dinopedia · ", INK_SOFT)
-                .append(Component.text("sello «" + stamp.label + "» de " + s.name, NamedTextColor.GOLD))
-                .append(Component.text(xp > 0 ? " (+" + xp + " de experiencia)" : "", NamedTextColor.GRAY)));
+        lang().chat(p, "sello", "sello", stamp.label(), "especie", s.name, "xp", xp);
         p.playSound(p, "minecraft:ui.cartography_table.take_result", SoundCategory.PLAYERS, 0.8f, 1.1f);
         if (xp > 0) p.giveExp(xp);
 
         if (have.containsAll(all)) {
             int bonus = settings.dexXpSpecies;
-            p.sendMessage(Component.text("¡Completaste la página de " + s.name + " en la Dinopedia!", NamedTextColor.GOLD,
-                    TextDecoration.BOLD).append(Component.text(bonus > 0 ? " +" + bonus + " de experiencia" : "",
-                    NamedTextColor.GRAY).decoration(TextDecoration.BOLD, false)));
+            lang().chat(p, "pagina-completa", "especie", s.name, "xp", bonus);
             p.playSound(p, "minecraft:ui.toast.challenge_complete", SoundCategory.PLAYERS, 0.6f, 1.2f);
             if (bonus > 0) p.giveExp(bonus);
             run(settings.dexSpeciesCommands, p, s);
         }
         int done = doneStamps(p);
-        Rank after = rank(done);
+        int after = rank(done);
         if (after != before) {
-            p.sendMessage(Component.text("Nuevo rango de paleontólogo: ", INK_SOFT)
-                    .append(Component.text(after.name(), after.color(), TextDecoration.BOLD)));
+            lang().chat(p, "rango", "rango", rankName(after));
             p.playSound(p, "minecraft:entity.player.levelup", SoundCategory.PLAYERS, 0.7f, 0.9f);
         }
         if (done == totalStamps()) run(settings.dexAllCommands, p, s);
@@ -344,49 +338,41 @@ public final class DexManager {
 
     public void openIndex(Player p, int page) {
         Species.ALL.forEach(s -> refresh(p, s));
-        Menu menu = new Menu();
+        com.dinoearth.text.Menu menu = yml();
+        Menu holder = new Menu();
+        Inventory inv = Bukkit.createInventory(holder, 54, Component.empty());
         int perPage = INDEX_ROWS[0].length * 2;
         int pages = (Species.ALL.size() + perPage - 1) / perPage;
         page = Math.max(0, Math.min(pages - 1, page));
         int found = (int) Species.ALL.stream().filter(s -> discovered(p, s)).count();
         int total = totalStamps(), done = doneStamps(p);
-        Rank rank = rank(done);
-        int rankIndex = RANKS.indexOf(rank);
+        int rank = rank(done);
+
+        List<String> rankLines = new ArrayList<>();
+        for (int i = 0; i < RANK_FROM.length; i++) {
+            rankLines.add(menu.text(i <= rank ? "rango-tiene" : "rango-falta", "rango", rankName(i),
+                    "porcentaje", Math.round(RANK_FROM[i] * 100)));
+        }
+        List<String> missing = rank + 1 < RANK_FROM.length ? List.of(menu.text("falta",
+                "cantidad", (int) Math.ceil(RANK_FROM[rank + 1] * total) - done, "rango", rankName(rank + 1))) : List.of();
+        Object[] counts = {"especies", found, "especies_total", Species.ALL.size(), "sellos", done, "sellos_total", total};
+        put(inv, menu, "rango", menu.item("rango", null, "dinoearth:gui/rank" + rank,
+                concat(counts, "rango", rankName(rank), "falta", missing, "rangos", rankLines)));
+        ItemStack research = menu.item("investigacion", counts);
+        tag(research);
+        for (int slot : menu.slots("investigacion")) inv.setItem(slot, research);
 
         List<Integer> bars = new ArrayList<>();
         List<Boolean> completeBars = new ArrayList<>();
-
-        Inventory inv = Bukkit.createInventory(menu, 54, Component.empty());
-        List<Component> progress = new ArrayList<>(List.of(
-                line("Especies descubiertas: " + found + " de " + Species.ALL.size()),
-                line("Sellos de investigación: " + done + " de " + total)));
-        Rank next = rankIndex + 1 < RANKS.size() ? RANKS.get(rankIndex + 1) : null;
-        if (next != null) {
-            int need = (int) Math.ceil(next.from() * total) - done;
-            progress.add(line("Faltan " + need + " sellos para " + next.name() + "."));
-        }
-        List<Component> rankLore = new ArrayList<>(progress);
-        rankLore.add(Component.empty());
-        for (Rank r : RANKS) {
-            boolean got = RANKS.indexOf(r) <= rankIndex;
-            rankLore.add(Component.text((got ? "✔ " : "· ") + r.name() + " (" + Math.round(r.from() * 100) + "%)",
-                    got ? NamedTextColor.GOLD : NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false));
-        }
-        inv.setItem(RANK_SLOT, icon("dinoearth:gui/rank" + rankIndex,
-                Component.text("Rango: " + rank.name(), NamedTextColor.GOLD), rankLore));
-        for (int slot = 1; slot <= 8; slot++) {
-            inv.setItem(slot, icon("dinoearth:gui/blank", Component.text("Investigación", NamedTextColor.GOLD), progress));
-        }
-
         for (int i = 0; i < perPage; i++) {
             int idx = page * perPage + i;
             if (idx >= Species.ALL.size()) break;
             Species s = Species.ALL.get(idx);
-            int row = i / INDEX_ROWS[0].length, col = i % INDEX_ROWS[0].length;
-            int slot = INDEX_ROWS[row][col];
+            int slot = INDEX_ROWS[i / INDEX_ROWS[0].length][i % INDEX_ROWS[0].length];
             if (!discovered(p, s)) {
-                inv.setItem(slot, icon("dinoearth:icon/" + s.id + "/unknown", Component.text("???", NamedTextColor.DARK_GRAY),
-                        List.of(line("Todavía no lo viste."), line("Mirá uno de cerca para anotarlo."))));
+                ItemStack it = menu.item("especie-desconocida", null, "dinoearth:icon/" + s.id + "/unknown");
+                tag(it);
+                inv.setItem(slot, it);
                 bars.add(-1);
                 completeBars.add(false);
                 continue;
@@ -395,57 +381,45 @@ public final class DexManager {
             Set<Stamp> have = stamps(p, s);
             List<Stamp> all = stampsOf(s);
             boolean complete = have.size() == all.size();
-            List<Component> lore = new ArrayList<>();
-            for (String l : wrap(s.about, 36)) lore.add(line(l));
-            lore.add(Component.empty());
-            lore.add(line("Colores vistos: " + seen.size() + "/" + s.rig.variants().size()));
-            lore.add(Component.text("Sellos: " + have.size() + "/" + all.size() + (complete ? " ✔ completa" : ""),
-                    complete ? NamedTextColor.GOLD : DIM).decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.empty());
-            lore.add(Component.text("Click para abrir su página", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
-            inv.setItem(slot, icon(iconOf(s, seen), Component.text(s.name, complete ? NamedTextColor.GOLD : NamedTextColor.GREEN), lore));
+            ItemStack it = menu.item("especie", null, iconOf(s, seen), "especie", s.name,
+                    "descripcion", wrapLines(menu, "descripcion", s.about, 40),
+                    "colores", seen.size(), "colores_total", s.rig.variants().size(),
+                    "sellos", have.size(), "sellos_total", all.size(),
+                    "completa", complete ? List.of(menu.text("completa")) : List.of());
+            if (complete) glow(it);
+            tag(it);
+            inv.setItem(slot, it);
             bars.add((int) Math.round(8.0 * have.size() / all.size()));
             completeBars.add(complete);
-            menu.actions.put(slot, () -> openSpecies(p, s, null));
+            holder.actions.put(slot, () -> openSpecies(p, s, null));
         }
 
-        if (page > 0) {
-            int prev = page - 1;
-            inv.setItem(PREV, icon("dinoearth:gui/prev", Component.text("Página anterior", NamedTextColor.YELLOW), List.of()));
-            menu.actions.put(PREV, () -> openIndex(p, prev));
+        int current = page;
+        if (page > 0) action(holder, inv, menu, "anterior", menu.item("anterior"), () -> openIndex(p, current - 1));
+        if (page < pages - 1) action(holder, inv, menu, "siguiente", menu.item("siguiente"), () -> openIndex(p, current + 1));
+        put(inv, menu, "ayuda", menu.item("ayuda"));
+        if (missions != null) {
+            MissionManager.State st = missions.state(p);
+            int doneMissions = 0, totalMissions = 0;
+            for (int i = 0; i < MissionManager.PER_DAY; i++) {
+                if (st.get(i) == null) continue;
+                totalMissions++;
+                if (st.get(i).done) doneMissions++;
+            }
+            action(holder, inv, menu, "misiones", menu.item("misiones", "hechas", doneMissions, "total", totalMissions,
+                    "tiempo", Fmt.time(missions.msUntilReset())), () -> openMissions(p));
         }
-        if (page < pages - 1) {
-            int nextPage = page + 1;
-            inv.setItem(NEXT, icon("dinoearth:gui/next", Component.text("Página siguiente", NamedTextColor.YELLOW), List.of()));
-            menu.actions.put(NEXT, () -> openIndex(p, nextPage));
-        }
-        inv.setItem(HELP, icon("dinoearth:gui/help", Component.text("Cómo se usa", NamedTextColor.GOLD), List.of(
-                line("Las especies se anotan solas al verlas de cerca"),
-                line("(con la Dinopedia en la mano, desde más lejos)."),
-                line("Click derecho a un dino con el libro: su ficha."),
-                Component.empty(),
-                line("Huellas: con el libro en la mano te avisa si hay"),
-                line("una especie que no conocés cerca y hacia dónde."),
-                line("Lupa: en la página de una especie, rastreala."),
-                Component.empty(),
-                line("Sellos: cada especie tiene tareas (verla, sus"),
-                line("colores, domesticarla, montarla...). Cada sello"),
-                line("da experiencia y te sube de rango."))));
         String tracked = tracking.get(p.getUniqueId());
         Species trackedSpecies = tracked != null ? Species.byId(tracked) : null;
         if (trackedSpecies != null) {
-            inv.setItem(TRACKING, icon("dinoearth:gui/track", Component.text("Rastreando: " + trackedSpecies.name,
-                    NamedTextColor.GOLD), List.of(line("Con la Dinopedia en la mano te marca"),
-                    line("hacia dónde está el más cercano."), Component.empty(),
-                    Component.text("Click para dejar de rastrear", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false))));
-            int current = page;
-            menu.actions.put(TRACKING, () -> {
+            action(holder, inv, menu, "rastreando", menu.item("rastreando", "especie", trackedSpecies.name), () -> {
                 tracking.remove(p.getUniqueId());
                 openIndex(p, current);
             });
         }
-        open(p, menu, inv, DexLayout.index(gui, new DexLayout.IndexView(rank.name(), rank.color(), done, total, bars,
-                completeBars)));
+        action(holder, inv, menu, "cerrar", menu.item("cerrar"), p::closeInventory);
+        open(p, holder, inv, DexLayout.index(gui, new DexLayout.IndexView(menu.text("pagina-dinopedia"), rankName(rank),
+                RANK_COLOR[Math.min(rank, RANK_COLOR.length - 1)], done, total, bars, completeBars)));
     }
 
     // ------------------------------------------------------------ pagina de una especie
@@ -454,64 +428,54 @@ public final class DexManager {
             openIndex(p);
             return;
         }
+        com.dinoearth.text.Menu menu = yml();
         Set<String> seen = seen(p, s);
         if (variant == null || !seen.contains(variant)) variant = firstSeen(s, seen);
         String shown = variant;
-        Menu menu = new Menu();
-        String diet = switch (s.diet()) {
-            case MEAT -> "Carnívoro";
-            case PLANTS -> "Herbívoro";
-            case FISH -> "Piscívoro";
-        };
+        Menu holder = new Menu();
+        Inventory inv = Bukkit.createInventory(holder, 54, Component.empty());
         String dietIcon = switch (s.diet()) {
             case MEAT -> "meat";
             case PLANTS -> "leaf";
             case FISH -> "fish";
         };
-        Component title = DexLayout.species(gui, new DexLayout.SpeciesView(s.id, shown, s.name, dietIcon, diet, List.of(
+        Component title = DexLayout.species(gui, new DexLayout.SpeciesView(s.id, shown, s.name, dietIcon,
+                lang().plain("dieta-palabra." + s.diet().name()), List.of(
                 new DexLayout.Stat("heart", s.health / maxHealth, TextColor.color(0xB43A32)),
                 new DexLayout.Stat("sword", s.damage / maxDamage, TextColor.color(0x7C6A5A)),
                 new DexLayout.Stat("speed", s.speed / maxSpeed, TextColor.color(0x3C82BE)),
                 new DexLayout.Stat("size", s.hitbox / maxSize, TextColor.color(0x8A6A3A))),
-                temperWord(s), "Colores: " + seen.size() + "/" + s.rig.variants().size()));
+                temperWord(s), menu.text("pagina-colores", "vistos", seen.size(), "total", s.rig.variants().size())));
 
-        Inventory inv = Bukkit.createInventory(menu, 54, Component.empty());
-        List<Component> about = new ArrayList<>();
-        for (String l : wrap(s.about, 36)) about.add(line(l));
-        about.add(Component.empty());
-        about.add(line("Tamaño de un adulto: " + s.size));
-        if (s.tameable()) about.add(line("Domesticados por vos: " + tamed(p, s)));
-        ItemStack photo = icon("dinoearth:gui/blank", Component.text(s.name + " · " + s.rig.variant(shown).name(),
-                NamedTextColor.GREEN), about);
-        for (int r = 0; r < 4; r++) {
-            for (int c = 0; c < 4; c++) inv.setItem(r * 9 + c, photo);
-        }
-        ItemStack sheet = icon("dinoearth:gui/blank", Component.text("Ficha técnica", NamedTextColor.GOLD), technical(s));
-        for (int r = 0; r < 4; r++) {
-            for (int c = 5; c < 9; c++) inv.setItem(r * 9 + c, sheet);
-        }
+        ItemStack photo = menu.item("foto", "especie", s.name, "color", s.colorName(shown),
+                "descripcion", wrapLines(menu, "descripcion", s.about, 40), "tamano", s.size,
+                "domesticados", s.tameable() ? List.of(menu.text("domesticados", "cantidad", tamed(p, s))) : List.of());
+        tag(photo);
+        for (int slot : menu.slots("foto")) inv.setItem(slot, photo);
+        ItemStack sheet = technical(menu, s);
+        tag(sheet);
+        for (int slot : menu.slots("ficha")) inv.setItem(slot, sheet);
 
         int i = 0;
         for (DinoRig.Variant v : s.rig.variants().values()) {
             if (i >= COLOR_SLOTS.length) break;
             int slot = COLOR_SLOTS[i++];
-            String rare = v.weight() <= 5 ? " · raro" : "";
+            String rare = v.weight() <= 5 ? menu.text("raro") : "";
             if (seen.contains(v.id())) {
                 boolean current = v.id().equals(shown);
-                ItemStack it = icon("dinoearth:icon/" + s.id + "/" + v.id(), Component.text(v.name(), NamedTextColor.AQUA),
-                        List.of(line("Visto" + rare), Component.text(current ? "En la foto" : "Click para verlo en la foto",
-                                NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false)));
+                ItemStack it = menu.item("color", null, "dinoearth:icon/" + s.id + "/" + v.id(), "color", s.colorName(v.id()),
+                        "raro", rare, "click", current ? menu.text("en-foto") : menu.text("ver-color"));
                 if (current) {
-                    ItemMeta m = it.getItemMeta();
-                    m.setEnchantmentGlintOverride(true);
-                    it.setItemMeta(m);
+                    glow(it);
+                    tag(it);
+                    inv.setItem(slot, it);
                 } else {
-                    menu.actions.put(slot, () -> openSpecies(p, s, v.id()));
+                    action(holder, inv, slot, it, () -> openSpecies(p, s, v.id()));
                 }
-                inv.setItem(slot, it);
             } else {
-                inv.setItem(slot, icon("dinoearth:icon/" + s.id + "/unknown",
-                        Component.text("???", NamedTextColor.DARK_GRAY), List.of(line("Color sin ver" + rare))));
+                ItemStack it = menu.item("color-sin-ver", null, "dinoearth:icon/" + s.id + "/unknown", "raro", rare);
+                tag(it);
+                inv.setItem(slot, it);
             }
         }
 
@@ -520,72 +484,57 @@ public final class DexManager {
         for (int k = 0; k < all.size() && k < STAMP_SLOTS.length; k++) {
             Stamp st = all.get(k);
             boolean got = have.contains(st);
-            String task = st == Stamp.DOMESTICADO && s.eggTameOnly ? "Criar uno desde el huevo." : st.task;
-            inv.setItem(STAMP_SLOTS[k], icon("dinoearth:gui/stamp/" + st.model() + (got ? "" : "_off"),
-                    Component.text("Sello: " + st.label, got ? NamedTextColor.GOLD : NamedTextColor.GRAY),
-                    List.of(line(task), Component.text(got ? "✔ Conseguido" : "Pendiente",
-                            got ? NamedTextColor.GREEN : NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false))));
+            ItemStack it = menu.item("sello", null, "dinoearth:gui/stamp/" + st.model() + (got ? "" : "_off"),
+                    "sello", st.label(), "tarea", st.task(s), "estado", menu.text(got ? "sello-hecho" : "sello-pendiente"));
+            if (got) glow(it);
+            tag(it);
+            inv.setItem(STAMP_SLOTS[k], it);
         }
 
         boolean tracked = s.id.equals(tracking.get(p.getUniqueId()));
-        inv.setItem(TRACK, icon(tracked ? "dinoearth:gui/track" : "dinoearth:gui/track_off",
-                Component.text(tracked ? "Rastreando" : "Rastrear", NamedTextColor.GOLD), List.of(
-                        line("Con la Dinopedia en la mano te marca hacia"),
-                        line("dónde está el " + s.name + " más cercano"),
-                        line("(hasta " + Math.round(settings.dexTrackRange) + " bloques; primero los colores"),
-                        line("que todavía no viste)."), Component.empty(),
-                        Component.text(tracked ? "Click para dejar de rastrear" : "Click para rastrear",
-                                NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false))));
-        menu.actions.put(TRACK, () -> {
-            if (tracked) {
-                tracking.remove(p.getUniqueId());
-            } else {
-                tracking.put(p.getUniqueId(), s.id);
-                hudWait.remove(p.getUniqueId());
-            }
-            openSpecies(p, s, shown);
-        });
+        action(holder, inv, menu, "lupa", menu.item("lupa", null, tracked ? "dinoearth:gui/track" : "dinoearth:gui/track_off",
+                "titulo", menu.text(tracked ? "lupa-on" : "lupa-off"), "especie", s.name,
+                "bloques", Math.round(settings.dexTrackRange), "click", menu.text(tracked ? "lupa-desactivar" : "lupa-activar")),
+                () -> {
+                    if (tracked) tracking.remove(p.getUniqueId());
+                    else tracking.put(p.getUniqueId(), s.id);
+                    openSpecies(p, s, shown);
+                });
 
         List<Species> known = Species.ALL.stream().filter(x -> discovered(p, x)).toList();
         int at = known.indexOf(s);
         if (known.size() > 1) {
             Species prev = known.get((at - 1 + known.size()) % known.size());
             Species next = known.get((at + 1) % known.size());
-            inv.setItem(PREV, icon("dinoearth:gui/prev", Component.text("← " + prev.name, NamedTextColor.YELLOW), List.of()));
-            inv.setItem(NEXT, icon("dinoearth:gui/next", Component.text(next.name + " →", NamedTextColor.YELLOW), List.of()));
-            menu.actions.put(PREV, () -> openSpecies(p, prev, null));
-            menu.actions.put(NEXT, () -> openSpecies(p, next, null));
+            action(holder, inv, menu, "especie-anterior", menu.item("especie-anterior", "especie", prev.name),
+                    () -> openSpecies(p, prev, null));
+            action(holder, inv, menu, "especie-siguiente", menu.item("especie-siguiente", "especie", next.name),
+                    () -> openSpecies(p, next, null));
         }
-        inv.setItem(BACK, icon("dinoearth:dinopedia", Component.text("Volver al índice", NamedTextColor.YELLOW), List.of()));
-        menu.actions.put(BACK, () -> openIndex(p, Species.ALL.indexOf(s) / (INDEX_ROWS[0].length * 2)));
-        open(p, menu, inv, title);
+        action(holder, inv, menu, "volver", menu.item("volver"),
+                () -> openIndex(p, Species.ALL.indexOf(s) / (INDEX_ROWS[0].length * 2)));
+        open(p, holder, inv, title);
     }
 
-    private List<Component> technical(Species s) {
-        List<Component> out = new ArrayList<>();
-        out.add(line("Vida " + Math.round(s.health) + " · daño " + Math.round(s.damage) + " · velocidad "
-                + String.format("%.2f", s.speed).replace('.', ',')));
-        out.add(Component.empty());
-        out.add(head("Carácter"));
-        for (String l : wrap(temper(s), 40)) out.add(line(l));
-        out.add(head("Dieta"));
-        out.add(line("Come " + FeederManager.foodText(s.diet()) + "."));
-        out.add(head("Domesticar"));
-        out.add(line(s.eggTameOnly ? "Solo naciendo de un huevo." : s.tameable()
-                ? "Dándole " + s.diet().label + " (" + Math.round(s.tameChance * 100) + "% por bocado)." : "No se domestica."));
-        out.add(head("Montura"));
-        out.add(line(!s.rideable ? (s.perches ? "No se monta: vuela a tu lado." : "No se puede montar.")
-                : s.flies() ? "Sí: espacio despega, W vuela hacia donde mirás."
-                : s.roars ? "Sí: espacio ruge en vez de saltar."
-                : s.charges ? "Sí: corriendo arrolla lo que tenga adelante." : "Sí: rápido y salta alto."));
-        out.add(head("Crías"));
-        out.add(line(s.rig.hasEgg() ? "Macho y hembra domesticados y bien alimentados ponen huevos." : "No pone huevos."));
+    private ItemStack technical(com.dinoearth.text.Menu menu, Species s) {
+        Lang l = lang();
+        String tame = s.eggTameOnly ? l.plain("domesticar.solo-huevo") : s.tameable()
+                ? l.plain("domesticar.comida", "dieta", Fmt.diet(s.diet()), "chance", Math.round(s.tameChance * 100))
+                : l.plain("domesticar.imposible");
+        String ride = !s.rideable ? l.plain(s.perches ? "montura.hombro" : "montura.ninguna")
+                : l.plain(s.flies() ? "montura.vuela" : s.roars ? "montura.ruge" : s.charges ? "montura.embiste" : "montura.normal");
         String ability = ability(s);
+        List<String> abilityLines = new ArrayList<>();
         if (ability != null) {
-            out.add(head("Habilidad"));
-            for (String l : wrap(ability, 40)) out.add(line(l));
+            abilityLines.add(menu.text("habilidad"));
+            abilityLines.addAll(wrapLines(menu, "habilidad-linea", ability, 40));
         }
-        return out;
+        String temper = l.plain(s.territorial ? "caracter-largo.territorial" : "caracter-largo." + s.temper.name());
+        return menu.item("ficha", "vida", Math.round(s.health), "dano", Math.round(s.damage),
+                "velocidad", String.format("%.2f", s.speed).replace('.', ','),
+                "caracter", wrapLines(menu, "caracter", temper, 40), "comida", Fmt.food(s.diet()),
+                "domesticar", tame, "montura", ride, "crias", l.plain(s.rig.hasEgg() ? "crias.pone" : "crias.ninguna"),
+                "habilidad", abilityLines);
     }
 
     // ------------------------------------------------------------ ficha de un dino
@@ -593,11 +542,15 @@ public final class DexManager {
     public void showCard(Player p, Dino d) {
         Species s = d.species();
         discover(p, s, d.variant());
+        com.dinoearth.text.Menu menu = yml();
+        Lang l = lang();
         DinoRig.Variant v = s.rig.variant(d.variant());
         String name = d.name() != null ? PlainTextComponentSerializer.plainText().serialize(d.name()) : s.name;
-        Menu menu = new Menu();
+        Menu holder = new Menu();
+        Inventory inv = Bukkit.createInventory(holder, 54, Component.empty());
         boolean male = d.isMale();
-        String age = d.isAdult() ? (male ? "Adulto" : "Adulta") : "Cría (" + Math.round(d.growth() * 100) + "%)";
+        String age = d.isAdult() ? l.plain(male ? "edad.Adulto" : "edad.Adulta")
+                : l.plain("edad.cria-porcentaje", "porcentaje", Math.round(d.growth() * 100));
         var maxAttr = d.wolf().getAttribute(Attribute.MAX_HEALTH);
         double max = maxAttr != null ? maxAttr.getValue() : s.health;
         double hp = d.wolf().getHealth();
@@ -608,58 +561,118 @@ public final class DexManager {
         List<DexLayout.Line> lines = new ArrayList<>();
         if (tamed) {
             String owner = d.ownerName();
-            lines.add(new DexLayout.Line("de " + (owner != null ? owner : "?"), DexLayout.INK));
-            String order = switch (d.order()) {
-                case FOLLOW -> "Te sigue";
-                case STAY -> "Quieto";
-                case PATROL -> "Patrulla";
-            };
-            String combat = switch (d.combat()) {
-                case PASSIVE -> "Pasivo";
-                case DEFENSIVE -> "Defensivo";
-                case AGGRESSIVE -> "Agresivo";
-            };
-            lines.add(new DexLayout.Line(order, INK_SOFT));
-            lines.add(new DexLayout.Line(combat, INK_SOFT));
+            lines.add(new DexLayout.Line(menu.text("pagina-dueno", "player", owner != null ? owner : "?"), DexLayout.INK));
+            lines.add(new DexLayout.Line(l.plain("ordenes-ficha." + d.order().name()), DexLayout.INK_SOFT));
+            lines.add(new DexLayout.Line(l.plain("combate-ficha." + d.combat().name()), DexLayout.INK_SOFT));
         } else {
-            lines.add(new DexLayout.Line("Salvaje", DexLayout.INK_RED));
-            lines.add(new DexLayout.Line(temperWord(s), INK_SOFT));
+            lines.add(new DexLayout.Line(menu.text("pagina-salvaje"), DexLayout.INK_RED));
+            lines.add(new DexLayout.Line(temperWord(s), DexLayout.INK_SOFT));
         }
-        Component title = DexLayout.card(gui, new DexLayout.CardView(s.id, v.id(), name, d.name() != null ? s.name : "Ficha",
-                male, age, v.name(), v.weight() <= 5, hp / max, hunger, hungerColor, lines));
+        String color = s.colorName(v.id()) + (v.weight() <= 5 ? Lang.strip(menu.text("raro")) : "");
+        Component title = DexLayout.card(gui, new DexLayout.CardView(s.id, v.id(), name,
+                d.name() != null ? s.name : menu.text("pagina-ficha"), male, Fmt.sexTitle(male), age, color,
+                v.weight() <= 5, hp / max, hunger, hungerColor, lines));
 
-        Inventory inv = Bukkit.createInventory(menu, 54, Component.empty());
-        List<Component> about = new ArrayList<>();
-        for (String l : wrap(s.about, 36)) about.add(line(l));
-        ItemStack photo = icon("dinoearth:gui/blank", Component.text(name, NamedTextColor.GREEN), about);
-        for (int r = 0; r < 4; r++) {
-            for (int c = 0; c < 4; c++) inv.setItem(r * 9 + c, photo);
+        ItemStack photo = menu.item("ficha-foto", "dino", name, "descripcion", wrapLines(menu, "descripcion", s.about, 40));
+        tag(photo);
+        for (int slot : menu.slots("ficha-foto")) inv.setItem(slot, photo);
+        List<String> hungerLine = hunger != null ? List.of(menu.text("hambre", "hambre", Math.round(hunger * 100))) : List.of();
+        List<String> patrol = tamed && d.order() == Dino.Order.PATROL && d.patrolLabel() != null
+                ? List.of(menu.text("patrulla", "chunk", d.patrolLabel())) : List.of();
+        ItemStack info = menu.item("ficha-datos", "dino", name, "vida", Math.round(hp), "vida_max", Math.round(max),
+                "hambre", hungerLine, "patrulla", patrol, "sexo", Fmt.sex(male), "edad", age);
+        tag(info);
+        for (int slot : menu.slots("ficha-datos")) inv.setItem(slot, info);
+        action(holder, inv, menu, "ver-especie", menu.item("ver-especie", "especie", s.name), () -> openSpecies(p, s, v.id()));
+        action(holder, inv, menu, "cerrar", menu.item("cerrar"), p::closeInventory);
+        open(p, holder, inv, title);
+    }
+
+    // ------------------------------------------------------------ misiones
+    public void openMissions(Player p) {
+        if (missions == null) return;
+        com.dinoearth.text.Menu menu = yml();
+        MissionManager.State st = missions.state(p);
+        Menu holder = new Menu();
+        Inventory inv = Bukkit.createInventory(holder, 54, Component.empty());
+        List<DexLayout.MissionCard> cards = new ArrayList<>();
+        boolean canReroll = missions.canReroll(p);
+        for (int i = 0; i < MissionManager.PER_DAY; i++) {
+            MissionManager.Mission m = st.get(i);
+            if (m == null) {
+                cards.add(null);
+                ItemStack empty = menu.item("mision-vacia");
+                tag(empty);
+                inv.setItem(MISSION_ICON[i], empty);
+                continue;
+            }
+            cards.add(new DexLayout.MissionCard(m.text(), m.progress, m.target, m.done, menu.text("pagina-completada")));
+            ItemStack icon = menu.item("mision", null, missionIcon(m), "mision", m.text(), "progreso", m.progress,
+                    "total", m.target, "xp", missions.xpEach(), "estado", menu.text(m.done ? "mision-hecha" : "mision-en-curso"));
+            if (m.done) glow(icon);
+            tag(icon);
+            inv.setItem(MISSION_ICON[i], icon);
+            if (!m.done && canReroll) {
+                int index = i;
+                action(holder, inv, MISSION_REROLL[i], menu.item("cambiar"), () -> {
+                    missions.reroll(p, index);
+                    openMissions(p);
+                });
+            }
         }
-        List<Component> facts = new ArrayList<>();
-        facts.add(line("Vida: " + Math.round(hp) + " / " + Math.round(max)));
-        if (tamed && d.tracksHunger()) {
-            int h = Math.round(d.hunger() * 100);
-            facts.add(line("Hambre: " + h + "%" + (h <= 0 ? " — ¡muerto de hambre!" : "")));
-        }
-        if (tamed && d.order() == Dino.Order.PATROL && d.patrolLabel() != null) facts.add(line("Patrulla el " + d.patrolLabel()));
-        facts.add(line(male ? "Macho" : "Hembra"));
-        facts.add(line(d.isAdult() ? "Adulto" : "Cría: " + Math.round(d.growth() * 100) + "% crecida"));
-        ItemStack info = icon("dinoearth:gui/blank", Component.text(name, NamedTextColor.GOLD), facts);
-        for (int r = 0; r < 5; r++) {
-            for (int c = 5; c < 9; c++) inv.setItem(r * 9 + c, info);
-        }
-        inv.setItem(BACK, icon("dinoearth:dinopedia", Component.text("Ver la página de " + s.name, NamedTextColor.YELLOW),
-                List.of()));
-        menu.actions.put(BACK, () -> openSpecies(p, s, v.id()));
-        open(p, menu, inv, title);
+        action(holder, inv, menu, "volver", menu.item("volver"), () -> openIndex(p));
+        open(p, holder, inv, DexLayout.missions(gui, new DexLayout.MissionsView(menu.text("pagina-misiones"),
+                menu.text("pagina-cambian", "tiempo", Fmt.time(missions.msUntilReset())), cards)));
+    }
+
+    private static String missionIcon(MissionManager.Mission m) {
+        Species s = m.speciesObj();
+        return switch (m.type) {
+            case AVISTAR, CAZAR, DOMESTICAR -> s != null ? "dinoearth:icon/" + s.id + "/" + s.rig.variants().keySet().iterator().next()
+                    : "dinoearth:gui/missions";
+            case COLOR -> s != null ? "dinoearth:icon/" + s.id + "/" + m.variant : "dinoearth:gui/missions";
+            case CRIAR -> "dinoearth:gui/stamp/criado";
+            case MONTAR -> "dinoearth:gui/stamp/jinete";
+            case COMEDERO -> "dinoearth:gui/stamp/domesticado";
+        };
     }
 
     // ------------------------------------------------------------ menus
-    private void open(Player p, Menu menu, Inventory inv, Component title) {
-        Inventory real = Bukkit.createInventory(menu, 54, title);
+    private void open(Player p, Menu holder, Inventory inv, Component title) {
+        Inventory real = Bukkit.createInventory(holder, 54, title);
         real.setContents(inv.getContents());
-        menu.inventory = real;
+        holder.inventory = real;
         p.openInventory(real);
+    }
+
+    private void put(Inventory inv, com.dinoearth.text.Menu menu, String id, ItemStack item) {
+        tag(item);
+        int slot = menu.slot(id);
+        if (slot >= 0 && slot < inv.getSize()) inv.setItem(slot, item);
+    }
+
+    private void action(Menu holder, Inventory inv, com.dinoearth.text.Menu menu, String id, ItemStack item, Runnable run) {
+        int slot = menu.slot(id);
+        if (slot < 0 || slot >= inv.getSize()) return;
+        action(holder, inv, slot, item, run);
+    }
+
+    private void action(Menu holder, Inventory inv, int slot, ItemStack item, Runnable run) {
+        tag(item);
+        inv.setItem(slot, item);
+        holder.actions.put(slot, run);
+    }
+
+    private void tag(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(keys.dexIcon, PersistentDataType.BYTE, (byte) 1);
+        item.setItemMeta(meta);
+    }
+
+    private static void glow(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        meta.setEnchantmentGlintOverride(true);
+        item.setItemMeta(meta);
     }
 
     /** Click en un menu nuestro (el evento ya viene cancelado). Abre lo que corresponda al tick siguiente. */
@@ -711,17 +724,13 @@ public final class DexManager {
         }
         Dino target = bestNew != null ? bestNew : best;
         if (target == null) {
-            if (hudTick % 4 == 0) {
-                p.sendActionBar(Component.text("No hay rastros de " + s.name + " cerca", INK_SOFT));
-            }
+            if (hudTick % 4 == 0) lang().action(p, "rastreo-nada", "especie", s.name);
             return;
         }
-        Location to = target.wolf().getLocation();
         double meters = Math.sqrt(target == bestNew ? bn : bd);
-        Component bar = gui.arrow(relativeAngle(at, to), NamedTextColor.GOLD)
-                .append(Component.text(" " + s.name + " · " + Math.round(meters) + " m", NamedTextColor.YELLOW));
-        if (target == bestNew) bar = bar.append(Component.text(" · color nuevo", NamedTextColor.LIGHT_PURPLE));
-        p.sendActionBar(bar);
+        lang().action(p, target == bestNew ? "rastreo-color-nuevo" : "rastreo",
+                "flecha", gui.arrow(relativeAngle(at, target.wolf().getLocation()), NamedTextColor.GOLD),
+                "especie", s.name, "metros", Math.round(meters));
     }
 
     /** Huellas de especies que el jugador no conoce, sin decir cual ni a que distancia. */
@@ -739,11 +748,11 @@ public final class DexManager {
             }
         }
         if (near == null) return;
-        String size = near.species().hitbox >= 3 ? "enormes" : near.species().hitbox >= 2 ? "grandes"
-                : near.species().hitbox >= 1.2 ? "medianas" : "chiquitas";
-        p.sendActionBar(gui.footprint(INK_SOFT)
-                .append(Component.text(" Huellas " + size + " de algo que no conocés ", NamedTextColor.GRAY))
-                .append(gui.arrow(relativeAngle(at, near.wolf().getLocation()), NamedTextColor.GOLD)));
+        double h = near.species().hitbox;
+        String size = lang().plain(h >= 3 ? "huellas.enormes" : h >= 2 ? "huellas.grandes" : h >= 1.2 ? "huellas.medianas"
+                : "huellas.chiquitas");
+        lang().action(p, "huellas", "huella", gui.footprint(DexLayout.INK_SOFT), "tamano", size,
+                "flecha", gui.arrow(relativeAngle(at, near.wolf().getLocation()), NamedTextColor.GOLD));
     }
 
     private static double relativeAngle(Location from, Location to) {
@@ -755,16 +764,11 @@ public final class DexManager {
     }
 
     // ------------------------------------------------------------ utilidades
-    private ItemStack icon(String model, Component name, List<Component> lore) {
-        ItemStack item = new ItemStack(Material.PAPER);
-        ItemMeta meta = item.getItemMeta();
-        meta.setItemModel(NamespacedKey.fromString(model));
-        meta.itemName(name);
-        meta.lore(lore);
-        meta.setMaxStackSize(1);
-        meta.getPersistentDataContainer().set(keys.dexIcon, PersistentDataType.BYTE, (byte) 1);
-        item.setItemMeta(meta);
-        return item;
+    private static Object[] concat(Object[] a, Object... b) {
+        Object[] out = new Object[a.length + b.length];
+        System.arraycopy(a, 0, out, 0, a.length);
+        System.arraycopy(b, 0, out, a.length, b.length);
+        return out;
     }
 
     private static String firstSeen(Species s, Set<String> seen) {
@@ -783,46 +787,29 @@ public final class DexManager {
     }
 
     private static String temperWord(Species s) {
-        if (s.territorial) return "Territorial";
-        return switch (s.temper) {
-            case CARNIVORE -> "Neutral";
-            case HERBIVORE -> "Tranquilo";
-            case HOSTILE -> "Hostil";
-            case PACK -> "En manada";
-            case PREY -> "Asustadizo";
-        };
-    }
-
-    private static String temper(Species s) {
-        if (s.territorial) return "Salvaje te persigue. Domesticado es leal.";
-        return switch (s.temper) {
-            case CARNIVORE -> "Neutral: caza animales chicos y se defiende.";
-            case HERBIVORE -> "Tranquilo, pero embiste si lo atacan.";
-            case HOSTILE -> "Hostil: ataca a los jugadores que ve.";
-            case PACK -> "Anda en manada y ataca a los heridos o si son muchos.";
-            case PREY -> "Huye en manada. Acercate agachado para darle de comer.";
-        };
+        return lang().plain(s.territorial ? "caracter.territorial" : "caracter." + s.temper.name());
     }
 
     private static String ability(Species s) {
-        if (s.perches) return "Te sigue volando a tu lado (agachado + click derecho: vuela o camina) y chilla si hay monstruos cerca.";
-        if (s.tail == Species.TailAttack.SPIKES) return "Coletazo con púas al que le pega por atrás.";
-        if (s.tail == Species.TailAttack.CLUB) return "Maza en la cola que tira lejos; las flechas casi no le hacen daño.";
-        if (s.temper == Species.Temper.PREY) return "Si uno se asusta, avisa y sale corriendo toda la manada.";
-        if (s.spits) return "Escupe veneno: ceguera y veneno.";
-        if (s.roars) return "Rugido: lentitud y oscuridad a los que estén cerca.";
-        if (s.charges) return "Embestida que tira lejos.";
-        if (s.flies()) return "Vuela. Si lo lastimás salvaje, se escapa por el aire.";
-        if (s.temper == Species.Temper.PACK) return "Caza en grupo.";
-        return null;
+        String key;
+        if (s.perches) key = "escolta";
+        else if (s.tail == Species.TailAttack.SPIKES) key = "puas";
+        else if (s.tail == Species.TailAttack.CLUB) key = "maza";
+        else if (s.temper == Species.Temper.PREY) key = "presa";
+        else if (s.spits) key = "escupe";
+        else if (s.roars) key = "ruge";
+        else if (s.charges) key = "embiste";
+        else if (s.flies()) key = "vuela";
+        else if (s.temper == Species.Temper.PACK) key = "manada";
+        else return null;
+        return lang().plain("habilidad." + key);
     }
 
-    private static Component head(String text) {
-        return Component.text(text, NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false);
-    }
-
-    private static Component line(String text) {
-        return Component.text(text, DIM).decoration(TextDecoration.ITALIC, false);
+    /** Parte un texto largo en renglones de lore con la plantilla del menu (que tiene %linea%). */
+    private static List<String> wrapLines(com.dinoearth.text.Menu menu, String template, String text, int width) {
+        List<String> out = new ArrayList<>();
+        for (String l : wrap(text, width)) out.add(menu.text(template, "linea", l));
+        return out;
     }
 
     private static List<String> wrap(String text, int width) {

@@ -85,7 +85,8 @@ public final class Species {
     }
 
     public final String id;
-    public final String name;
+    /** Nombre, tamaño y descripcion: salen de textos.yml (applyTexts). */
+    public String name;
     public final List<String> aliases;
     public final Body body;
     public final Temper temper;
@@ -126,8 +127,8 @@ public final class Species {
     /** Puntos de comida que le entran de vacio a lleno. */
     public final int stomach;
     /** Para la Dinopedia: tamaño de un adulto y una frase sobre la especie. */
-    public final String size;
-    public final String about;
+    public String size = "";
+    public String about = "";
     /** Distancia de dibujado de un adulto (1 = 64 bloques, segun la "distancia de entidades" del jugador). */
     public final double viewRange;
     /** Cuantos aparecen juntos con /dino spawn. */
@@ -167,11 +168,25 @@ public final class Species {
         perches = b.perches;
         hungerMinutes = b.hungerMinutes;
         stomach = b.stomach;
-        size = b.size;
-        about = b.about;
         group = b.group;
         viewRange = b.viewRange;
         drops = b.drops;
+    }
+
+    /** Nombre, tamaño, descripcion (textos.yml: especies.<id>). */
+    public void applyTexts(com.dinoearth.text.Lang lang) {
+        String base = "especies." + id;
+        if (lang.has("textos.yml", base + ".nombre")) name = lang.plain(base + ".nombre");
+        if (lang.has("textos.yml", base + ".tamano")) size = lang.plain(base + ".tamano");
+        if (lang.has("textos.yml", base + ".descripcion")) about = lang.plain(base + ".descripcion");
+    }
+
+    /** Nombre de un color de esta especie (textos.yml: especies.<id>.colores.<color>). */
+    public String colorName(String variant) {
+        String vid = rig.variant(variant).id();
+        com.dinoearth.text.Lang lang = com.dinoearth.text.Lang.get();
+        String path = "especies." + id + ".colores." + vid;
+        return lang != null && lang.has("textos.yml", path) ? lang.plain(path) : rig.variant(vid).name();
     }
 
     public boolean tameable() {
@@ -226,83 +241,70 @@ public final class Species {
     }
 
     // ------------------------------------------------------------ especies
-    public static final Species RAPTOR = new Builder("raptor", "Velociraptor", Body.BIPED, Temper.CARNIVORE)
+    public static final Species RAPTOR = new Builder("raptor", Body.BIPED, Temper.CARNIVORE)
             .aliases("velociraptor").stats(30, 6, 0.36).hitbox(1.7).stride(2.4)
             .tame(0.25).ride(0.32, 0.5, 0.58).hunger(80, 40)
-            .about("2 × 3,6 bloques", "Cazador ágil y astuto. Domesticado es una montura rápida y saltarina.")
             .drops(new Drop(Material.CHICKEN, 1, 2)).build();
 
-    public static final Species TRICERATOPS = new Builder("triceratops", "Triceratops", Body.QUADRUPED, Temper.HERBIVORE)
+    public static final Species TRICERATOPS = new Builder("triceratops", Body.QUADRUPED, Temper.HERBIVORE)
             .aliases("trike", "tricera").stats(80, 9, 0.27).hitbox(2.4).knockback(1.5).stride(1.7).maleScale(1.08f)
             .tame(0.2).ride(0.24, 0.36, 0.42).charges().view(1.5).hunger(100, 90)
-            .about("2,2 × 5,3 bloques", "Tranquilo hasta que lo molestan. Montado y corriendo arrolla lo que tenga adelante.")
             .drops(new Drop(Material.BEEF, 2, 4)).build();
 
-    public static final Species DILOPHOSAURUS = new Builder("dilophosaurus", "Dilophosaurus", Body.BIPED, Temper.HOSTILE)
+    public static final Species DILOPHOSAURUS = new Builder("dilophosaurus", Body.BIPED, Temper.HOSTILE)
             .aliases("dilo").stats(24, 5, 0.33).hitbox(1.45).stride(2.6).spits()
-            .about("2 × 3,3 bloques", "Abre la gola del cuello y escupe veneno que ciega. Mejor verlo de lejos.")
             .drops().build();
 
-    public static final Species COMPSOGNATHUS = new Builder("compsognathus", "Compsognathus", Body.BIPED, Temper.PACK)
+    public static final Species COMPSOGNATHUS = new Builder("compsognathus", Body.BIPED, Temper.PACK)
             .aliases("compy", "compi").stats(6, 2, 0.4).hitbox(0.55).stride(5.5).group(5).view(0.5)
-            .about("0,6 × 1,4 bloques", "Chiquito y cobarde solo, peligroso en banda: ataca a los heridos.")
             .drops(new Drop(Material.CHICKEN, 0, 1)).build();
 
-    public static final Species TREX = new Builder("trex", "Tyrannosaurus rex", Body.BIPED, Temper.CARNIVORE)
+    public static final Species TREX = new Builder("trex", Body.BIPED, Temper.CARNIVORE)
             .aliases("t-rex", "rex", "tiranosaurio", "tyrannosaurus").stats(160, 14, 0.3).hitbox(3.2).knockback(1.2)
             .stride(1.3).swing(26).territorial().eggTameOnly().roars().ride(0.26, 0.42, 0).view(2).hunger(70, 120)
-            .about("3,4 × 7,3 bloques", "El rey. Su rugido paraliza de miedo. Solo se domestica criándolo desde el huevo.")
             .drops(new Drop(Material.BEEF, 4, 8))
             .build();
 
-    public static final Species PTERANODON = new Builder("pteranodon", "Pteranodon", Body.FLYER, Temper.CARNIVORE)
+    public static final Species PTERANODON = new Builder("pteranodon", Body.FLYER, Temper.CARNIVORE)
             .aliases("ptera", "ptero", "pterodactilo", "pterodactyl").stats(28, 4, 0.3).hitbox(1.6).stride(3.2)
             .food(FISH).tame(0.2).ride(0.16, 0.22, 0.55).fly(0.55, 0.9).view(1.5).hunger(80, 36)
-            .about("6,5 bloques de ala a ala", "Reptil volador que pesca en las costas. Domesticado te lleva por el aire.")
             .drops(new Drop(Material.CHICKEN, 1, 2))
             .build();
 
-    public static final Species PARASAUROLOPHUS = new Builder("parasaurolophus", "Parasaurolophus", Body.QUADRUPED, Temper.PREY)
+    public static final Species PARASAUROLOPHUS = new Builder("parasaurolophus", Body.QUADRUPED, Temper.PREY)
             .aliases("para", "parasaurio").stats(60, 6, 0.3).hitbox(2.2).stride(1.8).group(4).view(1.5)
             .tame(0.15).ride(0.27, 0.42, 0.5).hunger(100, 80)
-            .about("2,4 × 5,2 bloques", "Anda en manada y huye. Cuando uno se asusta trompetea con la cresta y salen todos corriendo.")
             .drops(new Drop(Material.BEEF, 2, 3)).build();
 
-    public static final Species GALLIMIMUS = new Builder("gallimimus", "Gallimimus", Body.BIPED, Temper.PREY)
+    public static final Species GALLIMIMUS = new Builder("gallimimus", Body.BIPED, Temper.PREY)
             .aliases("galli", "gallimimo").stats(24, 3, 0.42).hitbox(1.95).stride(2.0).swing(46).group(5)
             .tame(0.15).ride(0.36, 0.64, 0.62).hunger(70, 40)
-            .about("2,2 × 3,7 bloques", "El \"avestruz\" de los dinosaurios: huye en bandada y domesticado es la montura más rápida.")
             .drops(new Drop(Material.CHICKEN, 1, 2)).build();
 
-    public static final Species STEGOSAURUS = new Builder("stegosaurus", "Stegosaurus", Body.QUADRUPED, Temper.HERBIVORE)
+    public static final Species STEGOSAURUS = new Builder("stegosaurus", Body.QUADRUPED, Temper.HERBIVORE)
             .aliases("stego", "estegosaurio").stats(90, 10, 0.25).hitbox(2.2).knockback(0.8).stride(1.7).view(1.5)
             .tame(0.15).ride(0.22, 0.34, 0.4).tail(TailAttack.SPIKES).hunger(110, 90)
-            .about("2,4 × 4,5 bloques", "Placas en el lomo y púas en la cola: al que le pega por atrás le da un coletazo.")
             .drops(new Drop(Material.BEEF, 2, 4)).build();
 
-    public static final Species ANKYLOSAURUS = new Builder("ankylosaurus", "Ankylosaurus", Body.QUADRUPED, Temper.HERBIVORE)
+    public static final Species ANKYLOSAURUS = new Builder("ankylosaurus", Body.QUADRUPED, Temper.HERBIVORE)
             .aliases("anky", "anquilosaurio").stats(110, 8, 0.22).hitbox(2.0).knockback(1.5).stride(2.2).view(1.5)
             .tame(0.15).ride(0.2, 0.3, 0.35).tail(TailAttack.CLUB).armored().hunger(110, 90)
-            .about("1,6 × 4,3 bloques", "Un tanque acorazado: las flechas casi no le hacen nada y la maza de la cola tira lejos.")
             .drops(new Drop(Material.BEEF, 2, 4)).build();
 
-    public static final Species GIGANOTOSAURUS = new Builder("giganotosaurus", "Giganotosaurus", Body.BIPED, Temper.CARNIVORE)
+    public static final Species GIGANOTOSAURUS = new Builder("giganotosaurus", Body.BIPED, Temper.CARNIVORE)
             .aliases("giga", "giganotosaurio").stats(150, 15, 0.33).hitbox(3.35).knockback(1.2).stride(1.3).swing(28)
             .territorial().eggTameOnly().roars().ride(0.28, 0.46, 0).view(2).hunger(65, 120)
-            .about("3,3 × 7,6 bloques", "El gigante argentino, rival del T-Rex: un poco más rápido y más largo. Solo se cría desde el huevo.")
             .drops(new Drop(Material.BEEF, 4, 8))
             .build();
 
-    public static final Species CARNOTAURUS = new Builder("carnotaurus", "Carnotaurus", Body.BIPED, Temper.CARNIVORE)
+    public static final Species CARNOTAURUS = new Builder("carnotaurus", Body.BIPED, Temper.CARNIVORE)
             .aliases("carno", "carnotauro").stats(45, 8, 0.4).hitbox(2.25).knockback(0.8).stride(2.0).swing(40)
             .tame(0.12).ride(0.34, 0.56, 0.55).charges().view(1.5).hunger(80, 50)
-            .about("2,4 × 4,4 bloques", "El \"toro carnívoro\" argentino: cuernos sobre los ojos y patas largas. Montado y corriendo embiste.")
             .drops(new Drop(Material.BEEF, 2, 4)).build();
 
-    public static final Species DIMORPHODON = new Builder("dimorphodon", "Dimorphodon", Body.FLYER, Temper.CARNIVORE)
+    public static final Species DIMORPHODON = new Builder("dimorphodon", Body.FLYER, Temper.CARNIVORE)
             .aliases("dimo", "dimorfodonte").stats(10, 2, 0.32).hitbox(0.75).stride(5).group(2).view(0.8)
             .food(FISH).tame(0.33).perches().hunger(90, 16)
-            .about("0,7 bloques, 2 de ala a ala", "Pterosaurio chiquito y cabezón. Domesticado vuela a tu lado y chilla si hay monstruos cerca.")
             .drops().build();
 
     public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS, TREX, PTERANODON,
@@ -330,13 +332,12 @@ public final class Species {
         Set<Material> food;
         double hungerMinutes;
         int stomach = 40;
-        String size = "?", about = "";
         int group = 1;
         List<Drop> drops = List.of();
 
-        Builder(String id, String name, Body body, Temper temper) {
+        Builder(String id, Body body, Temper temper) {
             this.id = id;
-            this.name = name;
+            this.name = id;
             this.body = body;
             this.temper = temper;
         }
@@ -439,12 +440,6 @@ public final class Species {
         Builder hunger(double minutes, int stomachPoints) {
             hungerMinutes = minutes;
             stomach = stomachPoints;
-            return this;
-        }
-
-        Builder about(String adultSize, String text) {
-            size = adultSize;
-            about = text;
             return this;
         }
 

@@ -52,6 +52,7 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 | Comedero | Se pone en el suelo y se carga con click derecho con su comida (agachado = la pila entera). Los dinos domesticados con hambre a menos de 16 bloques **van solos a comer**. Hay de carne, de plantas y de pescado. No tiene inventario: la comida se convierte en puntos y no se puede sacar. Lo rompe el dueño (agachado si tiene comida) |
 | Dinopedia | Libreta de paleontólogo con menús dibujados. **Índice**: las especies (silueta las que no viste), tu rango y una barra de investigación. **Página de cada especie**: foto grande del color que elijas, barras de vida/daño/velocidad/tamaño, colores vistos, sellos y la lupa. **Ficha** (click derecho a un dino con el libro): su foto, sexo, edad, color, vida, hambre, dueño y órdenes. Cada especie y cada color se anotan solos al ver un dino de cerca |
 | Sellos y rangos | Cada especie tiene sellos: verla, todos sus colores comunes, el color raro, domesticarla (o derrotarla si no se domestica), criar una de huevo, montarla (o que vuele a tu lado). Cada sello da experiencia, completar una especie da más y podés poner comandos de premio en `config.yml` (`dinopedia`). Con los sellos subís de rango: Aprendiz, Explorador, Rastreador, Naturalista, Paleontólogo y Leyenda jurásica |
+| Misiones del día | Cada jugador tiene **3 misiones propias por día** (distintas a las de los demás): avistar dinos de una especie, ver un color que te falta, domesticar, criar una cría de huevo, recorrer bloques montado, derrotar salvajes o cargar comederos. Solo piden especies que alguien vio en el server en los últimos días. Se ven en la Dinopedia (botón **Misiones del día** o `/dino misiones`), cada avance muestra una bossbar unos segundos y se puede **cambiar una misión por día**. Premios (experiencia y comandos) en `config.yml` (`missions`) |
 | Llevar la Dinopedia | En la mano: anotás dinos desde **32 bloques** (sin ella, 16), te avisa con **huellas** cuando hay una especie que no conocés cerca (y hacia dónde) y, si activaste la **lupa** en la página de una especie, la barra de acción te marca con una flecha dónde está la más cercana y a cuántos metros (primero los colores que te faltan) |
 | Criar | Dar comida a un macho y una hembra adultos domesticados → la hembra pone un **huevo** |
 | Huevo | Click derecho en el suelo. Se mueve, se agrieta y a los 5 min nace una cría al azar, domesticada por quien lo puso. Click derecho = ver %, golpe = recogerlo |
@@ -68,13 +69,14 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 /dino remove [radio] [especie]
 /dino count
 /dino stats                         (cuánto consume: dinos, entidades, red estimada, tick, dueños con más dinos)
+/dino reload                        (recarga messages.yml, textos.yml, items.yml y menus/*.yml)
 /dino comedero <carne|plantas|pescado> [cantidad]
 /dino dinopedia [jugador]
 /dino hambre [%]                    (pone el hambre de los domesticados a 10 bloques, para probar)
 /dino pack [reload|info]
 ```
 
-Todos los jugadores: `/dino mis`, `/dino llamar [id] [id]`, `/dino dar <jugador>`, `/dino aceptar`, `/dino rechazar`,
+Todos los jugadores: `/dino mis`, `/dino llamar [id] [id]`, `/dino misiones`, `/dino dar <jugador>`, `/dino aceptar`, `/dino rechazar`,
 `/dino pack`. La espera y el máximo del silbato de regreso se cambian en `config.yml` (`recall`).
 
 Límite de domesticados: `limits.max-tamed-per-player` en `config.yml` (20 por defecto, 0 = sin límite). Cuentan todos
@@ -94,6 +96,23 @@ con Shopkeepers.
 Especies: `raptor`, `triceratops` (`trike`), `dilophosaurus` (`dilo`), `compsognathus` (`compy`), `trex` (`rex`),
 `pteranodon` (`ptera`, `pterodactilo`), `parasaurolophus` (`para`), `gallimimus` (`galli`), `stegosaurus` (`stego`),
 `ankylosaurus` (`anky`), `giganotosaurus` (`giga`), `carnotaurus` (`carno`), `dimorphodon` (`dimo`).
+
+## Textos y menús
+
+Nada de lo que ve el jugador está escrito en el código: todo sale de archivos en `plugins/DinoEarth/` (se crean solos
+y al actualizar el plugin se les agregan las claves nuevas sin tocar lo que cambiaste; `/dino reload` los recarga).
+
+| Archivo | Qué tiene |
+|---|---|
+| `messages.yml` | Mensajes de `chat`, `actionbar` y `bossbar` |
+| `textos.yml` | Palabras que se meten adentro de los mensajes: nombres y descripciones de las especies y sus colores, órdenes, causas de muerte, tiempos, misiones, sellos, rangos |
+| `items.yml` | Nombre y lore de cada item (drops, monturas, silbato, jaula, huevo, comedero, Dinopedia) |
+| `menus/silbato.yml`, `menus/llamar.yml` | Menús con el formato del server (título, tamaño, relleno, items y slots) |
+| `menus/dinopedia.yml` | La Dinopedia: es la excepción (el fondo va dibujado), pero el nombre y el lore de cada item siguen el formato |
+
+Formato: prefijo `&9&lDINOEARTH &8»`, texto `&f`, variables `&#ff00d9`, símbolos `&8`, chat terminado en punto
+blanco, actionbar `&8| &f...`, lore con `&8| &f` y separadores `&f`, Volver/Cerrar en el slot 49 (`&#EE193B`),
+indicadores `&#41FF00✔ Click para ...` y `&#EE193B✘ Click para ...`. Sin `¡` ni `!`.
 
 ## Rendimiento
 
@@ -140,6 +159,7 @@ El zip es determinista: su hash solo cambia cuando cambia el contenido, así los
 | `generator/icons.py` | Íconos de la Dinopedia (cada color renderizado, silueta, libro) |
 | `generator/gui.py` | Menús dibujados de la Dinopedia: fondos, fotos grandes, fuentes y botones (`font_widths.json` = anchos de las letras de vanilla) |
 | `generator/gui_preview.py` | Dibuja los menús como en el juego para revisarlos sin entrar (ver CLAUDE.md) |
+| `plugin/src/main/resources/messages.yml`, `textos.yml`, `items.yml`, `menus/` | Textos y menús (ver "Textos y menús"); `items.yml` lo genera `generator/items.py` |
 | `generator/build.py` | Genera texturas, modelos JSON, el zip del pack y los rigs del plugin |
 | `generator/sounds.py`, `sounds_species.py`, `synth.py` | Síntesis de sonidos (necesita `generator/.venv`) |
 | `generator/preview.py` | Regenera todo y renderiza `preview.png` (`python generator/preview.py triceratops` = una sola especie, `monturas` = las monturas de cerca) |

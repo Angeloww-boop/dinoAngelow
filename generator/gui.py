@@ -24,7 +24,8 @@ WIDTHS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "font_widths.j
 W, H = 176, 222
 TITLE_X, TITLE_Y = 8, 6
 RENDER_X, RENDER_Y, RENDER = 16, 20, 64          # foto grande del dino (pagina izquierda)
-ROWS = [6, 20, 31, 42, 53, 56, 64, 75, 86, 92, 97]       # renglones donde se puede escribir (y de arriba del texto)
+ROWS = [6, 20, 29, 31, 42, 53, 56, 64, 65, 75, 86, 92, 97, 101]
+MISSION_ROWS = [0, 2, 4]                          # fila de casilleros de cada tarjeta de mision       # renglones donde se puede escribir (y de arriba del texto)
 
 # ---------------------------------------------------------------- colores
 LEATHER = (98, 60, 34)
@@ -227,6 +228,25 @@ def bg_index():
     return img
 
 
+def bg_missions():
+    """Pagina de misiones: tres tarjetas, cada una con su icono a la izquierda y lugar para cambiarla a la derecha."""
+    img = Img(W, H)
+    cover(img)
+    page(img, 5, 4, W - 6, 124)
+    rule(img, 8, W - 9, 15)
+    rule(img, 8, W - 9, 17, dashed=True)
+    for row in MISSION_ROWS:
+        x0, y0 = slot_xy(0, row)
+        top, bottom = y0 - 2, y0 + 17
+        for y in range(top, bottom + 1):
+            for x in range(7, W - 8):
+                edge = y in (top, bottom) or x in (7, W - 9)
+                img.blend(x, y, INK_SOFT if edge else PAPER_L, 0.55 if edge else 0.35)
+        slot_frame(img, 0, row)
+    inventory_area(img)
+    return img
+
+
 def spread(stamps):
     """Libro abierto: foto del dino a la izquierda, datos a la derecha."""
     img = Img(W, H)
@@ -263,9 +283,8 @@ def spread(stamps):
                 x = tx + i if sgn > 0 else tx + 11 - i
                 img.blend(x, ty + j + i // 3, TAPE, 0.55)
     # pagina derecha: renglones
-    for t in ROWS:
-        if 20 <= t <= (75 if stamps else 97) and t != 92:
-            rule(img, 92, W - 9, t + 9)
+    for t in [20, 31, 42, 53, 64, 75] + ([] if stamps else [86, 97]):
+        rule(img, 92, W - 9, t + 9)
     if stamps:
         for col in range(4):
             slot_frame(img, col, 4)
@@ -415,6 +434,30 @@ def button_icons():
         return c.finish(outline=0.6)
 
     out["help"] = help_icon()
+
+    def missions_icon():
+        c = items.Canvas()
+        c.fill(lambda x, y: 3 <= x <= 12 and 2 <= y <= 14, lambda x, y: shade(PAPER, 1.0 - (y - 2) * 0.01))
+        c.fill(lambda x, y: (2 <= x <= 13) and (y <= 3 or y >= 13) and 1 <= y <= 15,
+               lambda x, y: (150, 104, 60))
+        for i, yy in enumerate((5, 8, 11)):
+            c.dot(5, yy, (60, 140, 60) if i < 2 else (150, 140, 120))
+            for xx in range(7, 11):
+                c.dot(xx, yy, INK)
+        return c.finish(outline=0.6)
+
+    def reroll_icon():
+        c = items.Canvas()
+        c.stroke([(12, 6), (10, 3.5), (6.5, 3.2), (3.8, 5.5), (3.2, 8.5)], 1.8, lambda t, x, y: GOLD)
+        c.stroke([(4, 10), (6, 12.5), (9.5, 12.8), (12.2, 10.5), (12.8, 7.5)], 1.8, lambda t, x, y: GOLD)
+        for x, y in ((12, 3), (13, 4), (13, 5), (11, 6), (12, 6)):
+            c.dot(x, y, GOLD)
+        for x, y in ((3, 12), (2, 11), (2, 10), (4, 10), (3, 10)):
+            c.dot(x, y, GOLD)
+        return c.finish(outline=0.5)
+
+    out["missions"] = missions_icon()
+    out["reroll"] = reroll_icon()
     for i, col in enumerate(RANK_COLORS):
         out[f"rank{i}"] = medal(col)
     return out
@@ -565,6 +608,7 @@ def build_gui(species, raws, files):
     image("bg/index", bg_index().px, 0, "bg_index")
     image("bg/species", spread(True).px, 0, "bg_species")
     image("bg/card", spread(False).px, 0, "bg_card")
+    image("bg/missions", bg_missions().px, 0, "bg_missions")
     for sp in species:
         sid = sp["id"]
         cells = [(vid, big_render(raws[(sid, vid)])) for vid in sp["variants"]]

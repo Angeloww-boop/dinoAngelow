@@ -1,14 +1,13 @@
 package com.dinoearth.egg;
 
+import com.dinoearth.text.Fmt;
+import com.dinoearth.text.Lang;
 import com.dinoearth.Keys;
 import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
 import com.dinoearth.model.DinoModel;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.species.Species;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -95,12 +94,7 @@ public final class EggManager {
         ItemStack item = new ItemStack(Material.TURTLE_EGG, amount);
         ItemMeta meta = item.getItemMeta();
         meta.setItemModel(species.rig.eggIcon());
-        meta.itemName(Component.text("Huevo de " + species.name, NamedTextColor.GOLD));
-        meta.lore(List.of(
-                Component.text("Ponelo en el suelo y esperá a que eclosione.", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false),
-                Component.text("La cría saldrá de un color al azar y será tuya.", NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false)));
+        Lang.get().itemTexts(meta, "huevo", "especie", species.name);
         meta.setMaxStackSize(16);
         meta.getPersistentDataContainer().set(keys.eggItem, PersistentDataType.STRING, species.id);
         item.setItemMeta(meta);
@@ -232,8 +226,7 @@ public final class EggManager {
                     if (egg.waited++ % 1200 == 0) {
                         Player p = Bukkit.getPlayer(UUID.fromString(owner));
                         if (p != null) {
-                            p.sendMessage(Component.text("Tu huevo de " + egg.species.name + " está listo para nacer, "
-                                    + "pero ya tenés el máximo de dinos. Nace cuando tengas lugar.", NamedTextColor.GOLD));
+                            Lang.get().chat(p, "huevo-esperando", "especie", egg.species.name);
                         }
                     }
                     continue;
@@ -268,11 +261,12 @@ public final class EggManager {
         if (baby != null && online != null) {
             dinos.dex().addTamed(online, egg.species, baby.variant());
             dinos.dex().onHatch(online, egg.species);
+            var missions = com.dinoearth.mission.MissionManager.get();
+            if (missions != null) missions.onHatch(online, egg.species);
         }
         if (baby != null && online != null && online.getWorld() == world && online.getLocation().distanceSquared(at) < 48 * 48) {
-            String sexo = baby.isMale() ? "macho" : "hembra";
-            online.sendActionBar(Component.text("¡Nació una cría de " + egg.species.name + " "
-                    + egg.species.rig.variant(baby.variant()).name() + " (" + sexo + ")!", NamedTextColor.GREEN));
+            Lang.get().action(online, "nacio", "especie", egg.species.name, "color", egg.species.colorName(baby.variant()),
+                    "sexo", Fmt.sex(baby.isMale()));
         }
     }
 

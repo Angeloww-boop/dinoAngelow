@@ -17,7 +17,6 @@ resource-pack:
     public-address: ""
   # true = quien rechace el pack no puede jugar
   required: false
-  prompt: "Este servidor usa texturas de dinosaurios. ¡Aceptalas para verlos!"
 
 # Minutos (con el chunk cargado) que tarda una cria en ser adulta
 growth-minutes: 40
@@ -50,6 +49,21 @@ alerts:
 # guardados en una jaula no cuentan (pero no se pueden soltar si ya tiene el maximo). Los huevos de un jugador que
 # llego al maximo esperan a que tenga lugar para nacer.
 # Para dar mas a algunos (VIP, rangos): permiso dinoearth.limit.<numero> (vale el mayor) o dinoearth.limit.unlimited
+# Misiones diarias de la Dinopedia: 3 por jugador, distintas para cada uno, que cambian todos los dias a la hora
+# reset-hour (en la zona horaria timezone). Solo piden especies que alguien vio en el server en los ultimos
+# recent-days dias (o que estan cargadas ahora). Cada jugador puede cambiar rerolls-per-day misiones por dia.
+# Premios: experiencia y comandos de consola por cada mision y por completar las 3 (%player% = jugador,
+# %mision% = tipo de mision). Los textos estan en messages.yml, textos.yml y menus/dinopedia.yml.
+missions:
+  timezone: 'America/Argentina/Buenos_Aires'
+  reset-hour: 0
+  rerolls-per-day: 1
+  recent-days: 3
+  reward-xp: 100
+  reward-commands: []
+  all-done-xp: 200
+  all-done-commands: []
+
 limits:
   max-tamed-per-player: 20
 

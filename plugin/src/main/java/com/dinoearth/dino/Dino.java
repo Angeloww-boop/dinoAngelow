@@ -163,6 +163,7 @@ public final class Dino {
     private int poseEvery = 2;   // ticks entre poses (0 = nadie lo ve, no se manda nada)
     private int lastPose;
     private boolean wasStill, quiet;
+    private double rideDist;         // bloques montado desde la ultima vez que se conto para las misiones
     private final Map<UUID, Integer> rammed = new HashMap<>();
 
     public Dino(Wolf wolf, Species species, Keys keys, Settings settings, DinoManager manager) {
@@ -417,8 +418,7 @@ public final class Dino {
         if (starving) {
             if (rider != null) {
                 wolf.removePassenger(rider);
-                rider.sendActionBar(Component.text(species.name + " tiene demasiada hambre para llevarte.",
-                        NamedTextColor.RED));
+                com.dinoearth.text.Lang.get().action(rider, "hambre-no-lleva", "especie", species.name);
             }
             if (flying) wildFlight = 0;
             // se echa, como si estuviera mal (salvo que este yendo a comer)
@@ -747,7 +747,10 @@ public final class Dino {
         }
         Component text = nameComp.colorIfAbsent(NamedTextColor.WHITE);
         String owner = wolf.isTamed() ? ownerName() : null;
-        if (owner != null) text = text.appendNewline().append(Component.text("de " + owner, NamedTextColor.GRAY));
+        if (owner != null) {
+            text = text.appendNewline().append(com.dinoearth.text.Lang.parse(
+                    com.dinoearth.text.Lang.get().text("cartel-dueno", "player", owner)));
+        }
         if (plate == null || !plate.isValid()) {
             plate = wolf.getWorld().spawn(wolf.getLocation(), TextDisplay.class, t -> {
                 t.setPersistent(false);
@@ -997,7 +1000,7 @@ public final class Dino {
             alertCooldown = 400;
             roar = 0;
             play("roar", 0.7f, 1.2f);
-            p.sendActionBar(Component.text("¡Tu " + species.name + " chilla: hay monstruos cerca!", NamedTextColor.GOLD));
+            com.dinoearth.text.Lang.get().action(p, "monstruos", "especie", species.name);
         }
     }
 
@@ -1095,6 +1098,14 @@ public final class Dino {
         float moved = last.getWorld() == loc.getWorld() ? (float) delta.length() : 0f;
         if (moved > 2) moved = 0; // teleport
         last = loc;
+        if (rider != null && moved > 0) {
+            rideDist += moved;
+            if (age % 20 == 0) {
+                var missions = com.dinoearth.mission.MissionManager.get();
+                if (missions != null) missions.onRide(rider, rideDist);
+                rideDist = 0;
+            }
+        }
         float size = Math.max(0.2f, visualScale() * (isBabyForm() ? rig.baby().height() / rig.adult().height() : 1f));
         float target = Math.min(1f, moved / (0.3f * Math.max(0.5f, size)));
         speed += (target - speed) * 0.25f;
@@ -1580,6 +1591,8 @@ public final class Dino {
             double r = manager.dex().discoverRange(p);
             if (p.getWorld() == loc.getWorld() && p.getLocation().distanceSquared(loc) < r * r && p.hasLineOfSight(wolf)) {
                 manager.dex().discover(p, species, variant);
+                var missions = com.dinoearth.mission.MissionManager.get();
+                if (missions != null) missions.onSight(p, this);
             }
         }
     }

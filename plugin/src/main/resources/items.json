@@ -6,12 +6,7 @@
       "species": "raptor",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_raptor",
-      "name": "Cuero de velociraptor",
-      "lore": [
-        "Lo suelta el Velociraptor.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_raptor"
     },
     {
       "id": "garra_raptor",
@@ -19,12 +14,7 @@
       "species": "raptor",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/garra_raptor",
-      "name": "Garra de velociraptor",
-      "lore": [
-        "Lo suelta el Velociraptor.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/garra_raptor"
     },
     {
       "id": "montura_raptor",
@@ -32,12 +22,7 @@
       "species": "raptor",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_raptor",
-      "name": "Montura de Velociraptor",
-      "lore": [
-        "Click derecho sobre tu Velociraptor adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_raptor"
     },
     {
       "id": "cuero_triceratops",
@@ -45,12 +30,7 @@
       "species": "triceratops",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_triceratops",
-      "name": "Cuero de triceratops",
-      "lore": [
-        "Lo suelta el Triceratops.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_triceratops"
     },
     {
       "id": "cuerno_triceratops",
@@ -58,12 +38,7 @@
       "species": "triceratops",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuerno_triceratops",
-      "name": "Cuerno de triceratops",
-      "lore": [
-        "Lo suelta el Triceratops.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuerno_triceratops"
     },
     {
       "id": "montura_triceratops",
@@ -71,12 +46,7 @@
       "species": "triceratops",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_triceratops",
-      "name": "Montura de Triceratops",
-      "lore": [
-        "Click derecho sobre tu Triceratops adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_triceratops"
     },
     {
       "id": "glandula_dilophosaurus",
@@ -84,12 +54,7 @@
       "species": "dilophosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/glandula_dilophosaurus",
-      "name": "Glándula venenosa",
-      "lore": [
-        "Lo suelta el Dilophosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/glandula_dilophosaurus"
     },
     {
       "id": "cresta_dilophosaurus",
@@ -97,12 +62,7 @@
       "species": "dilophosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cresta_dilophosaurus",
-      "name": "Cresta de dilophosaurus",
-      "lore": [
-        "Lo suelta el Dilophosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cresta_dilophosaurus"
     },
     {
       "id": "diente_compsognathus",
@@ -110,12 +70,7 @@
       "species": "compsognathus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/diente_compsognathus",
-      "name": "Diente de compsognathus",
-      "lore": [
-        "Lo suelta el Compsognathus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/diente_compsognathus"
     },
     {
       "id": "cuero_trex",
@@ -123,12 +78,7 @@
       "species": "trex",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_trex",
-      "name": "Cuero de T-Rex",
-      "lore": [
-        "Lo suelta el Tyrannosaurus rex.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_trex"
     },
     {
       "id": "diente_trex",
@@ -136,12 +86,7 @@
       "species": "trex",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/diente_trex",
-      "name": "Diente de T-Rex",
-      "lore": [
-        "Lo suelta el Tyrannosaurus rex.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/diente_trex"
     },
     {
       "id": "montura_trex",
@@ -149,12 +94,7 @@
       "species": "trex",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_trex",
-      "name": "Montura de Tyrannosaurus rex",
-      "lore": [
-        "Click derecho sobre tu Tyrannosaurus rex adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_trex"
     },
     {
       "id": "membrana_pteranodon",
@@ -162,12 +102,7 @@
       "species": "pteranodon",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/membrana_pteranodon",
-      "name": "Membrana de pteranodon",
-      "lore": [
-        "Lo suelta el Pteranodon.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/membrana_pteranodon"
     },
     {
       "id": "cresta_pteranodon",
@@ -175,12 +110,7 @@
       "species": "pteranodon",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cresta_pteranodon",
-      "name": "Cresta de pteranodon",
-      "lore": [
-        "Lo suelta el Pteranodon.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cresta_pteranodon"
     },
     {
       "id": "montura_pteranodon",
@@ -188,12 +118,7 @@
       "species": "pteranodon",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_pteranodon",
-      "name": "Montura de Pteranodon",
-      "lore": [
-        "Click derecho sobre tu Pteranodon adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_pteranodon"
     },
     {
       "id": "cuero_parasaurolophus",
@@ -201,12 +126,7 @@
       "species": "parasaurolophus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_parasaurolophus",
-      "name": "Cuero de parasaurolophus",
-      "lore": [
-        "Lo suelta el Parasaurolophus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_parasaurolophus"
     },
     {
       "id": "cresta_parasaurolophus",
@@ -214,12 +134,7 @@
       "species": "parasaurolophus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cresta_parasaurolophus",
-      "name": "Cresta de parasaurolophus",
-      "lore": [
-        "Lo suelta el Parasaurolophus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cresta_parasaurolophus"
     },
     {
       "id": "montura_parasaurolophus",
@@ -227,12 +142,7 @@
       "species": "parasaurolophus",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_parasaurolophus",
-      "name": "Montura de Parasaurolophus",
-      "lore": [
-        "Click derecho sobre tu Parasaurolophus adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_parasaurolophus"
     },
     {
       "id": "cuero_gallimimus",
@@ -240,12 +150,7 @@
       "species": "gallimimus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_gallimimus",
-      "name": "Cuero de gallimimus",
-      "lore": [
-        "Lo suelta el Gallimimus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_gallimimus"
     },
     {
       "id": "pluma_gallimimus",
@@ -253,12 +158,7 @@
       "species": "gallimimus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/pluma_gallimimus",
-      "name": "Pluma de gallimimus",
-      "lore": [
-        "Lo suelta el Gallimimus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/pluma_gallimimus"
     },
     {
       "id": "montura_gallimimus",
@@ -266,12 +166,7 @@
       "species": "gallimimus",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_gallimimus",
-      "name": "Montura de Gallimimus",
-      "lore": [
-        "Click derecho sobre tu Gallimimus adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_gallimimus"
     },
     {
       "id": "cuero_stegosaurus",
@@ -279,12 +174,7 @@
       "species": "stegosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_stegosaurus",
-      "name": "Cuero de stegosaurus",
-      "lore": [
-        "Lo suelta el Stegosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_stegosaurus"
     },
     {
       "id": "placa_stegosaurus",
@@ -292,12 +182,7 @@
       "species": "stegosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/placa_stegosaurus",
-      "name": "Placa de stegosaurus",
-      "lore": [
-        "Lo suelta el Stegosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/placa_stegosaurus"
     },
     {
       "id": "montura_stegosaurus",
@@ -305,12 +190,7 @@
       "species": "stegosaurus",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_stegosaurus",
-      "name": "Montura de Stegosaurus",
-      "lore": [
-        "Click derecho sobre tu Stegosaurus adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_stegosaurus"
     },
     {
       "id": "cuero_ankylosaurus",
@@ -318,12 +198,7 @@
       "species": "ankylosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_ankylosaurus",
-      "name": "Cuero de ankylosaurus",
-      "lore": [
-        "Lo suelta el Ankylosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_ankylosaurus"
     },
     {
       "id": "mazo_ankylosaurus",
@@ -331,12 +206,7 @@
       "species": "ankylosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/mazo_ankylosaurus",
-      "name": "Mazo de ankylosaurus",
-      "lore": [
-        "Lo suelta el Ankylosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/mazo_ankylosaurus"
     },
     {
       "id": "montura_ankylosaurus",
@@ -344,12 +214,7 @@
       "species": "ankylosaurus",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_ankylosaurus",
-      "name": "Montura de Ankylosaurus",
-      "lore": [
-        "Click derecho sobre tu Ankylosaurus adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_ankylosaurus"
     },
     {
       "id": "cuero_giganotosaurus",
@@ -357,12 +222,7 @@
       "species": "giganotosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_giganotosaurus",
-      "name": "Cuero de giganotosaurus",
-      "lore": [
-        "Lo suelta el Giganotosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_giganotosaurus"
     },
     {
       "id": "diente_giganotosaurus",
@@ -370,12 +230,7 @@
       "species": "giganotosaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/diente_giganotosaurus",
-      "name": "Diente de giganotosaurus",
-      "lore": [
-        "Lo suelta el Giganotosaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/diente_giganotosaurus"
     },
     {
       "id": "montura_giganotosaurus",
@@ -383,12 +238,7 @@
       "species": "giganotosaurus",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_giganotosaurus",
-      "name": "Montura de Giganotosaurus",
-      "lore": [
-        "Click derecho sobre tu Giganotosaurus adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_giganotosaurus"
     },
     {
       "id": "cuero_carnotaurus",
@@ -396,12 +246,7 @@
       "species": "carnotaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuero_carnotaurus",
-      "name": "Cuero de carnotaurus",
-      "lore": [
-        "Lo suelta el Carnotaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuero_carnotaurus"
     },
     {
       "id": "cuerno_carnotaurus",
@@ -409,12 +254,7 @@
       "species": "carnotaurus",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/cuerno_carnotaurus",
-      "name": "Cuerno de carnotaurus",
-      "lore": [
-        "Lo suelta el Carnotaurus.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/cuerno_carnotaurus"
     },
     {
       "id": "montura_carnotaurus",
@@ -422,12 +262,7 @@
       "species": "carnotaurus",
       "material": "SADDLE",
       "max_stack": 1,
-      "model": "dinoearth:items/montura_carnotaurus",
-      "name": "Montura de Carnotaurus",
-      "lore": [
-        "Click derecho sobre tu Carnotaurus adulto.",
-        "Con tijeras se la sacás y te la devuelve."
-      ]
+      "model": "dinoearth:items/montura_carnotaurus"
     },
     {
       "id": "membrana_dimorphodon",
@@ -435,25 +270,14 @@
       "species": "dimorphodon",
       "material": "PAPER",
       "max_stack": 64,
-      "model": "dinoearth:items/membrana_dimorphodon",
-      "name": "Membrana de dimorphodon",
-      "lore": [
-        "Lo suelta el Dimorphodon.",
-        "Se usa para craftear monturas."
-      ]
+      "model": "dinoearth:items/membrana_dimorphodon"
     },
     {
       "id": "silbato",
       "kind": "whistle",
       "material": "STICK",
       "max_stack": 1,
-      "model": "dinoearth:items/silbato",
-      "name": "Silbato de dinos",
-      "lore": [
-        "Click derecho a tu dino: darle órdenes.",
-        "Agachado y click derecho al aire: órdenes a todos",
-        "tus dinos a 16 bloques."
-      ]
+      "model": "dinoearth:items/silbato"
     },
     {
       "id": "jaula",
@@ -461,13 +285,7 @@
       "material": "PAPER",
       "max_stack": 16,
       "model": "dinoearth:items/jaula",
-      "model_full": "dinoearth:items/jaula_llena",
-      "name": "Jaula para dinos",
-      "lore": [
-        "Click derecho a tu dino: lo guarda adentro.",
-        "Click derecho al piso con la jaula llena: lo suelta.",
-        "Quien lo suelta queda como dueño."
-      ]
+      "model_full": "dinoearth:items/jaula_llena"
     }
   ],
   "drops": {

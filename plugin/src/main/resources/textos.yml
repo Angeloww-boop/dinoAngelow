@@ -1,0 +1,309 @@
+# Palabras y frases sueltas que el plugin mete adentro de los mensajes y menus (messages.yml, menus/*.yml).
+# Van sin colores salvo que se diga lo contrario: el color lo pone el mensaje donde se usan.
+
+sexo:
+  macho: 'macho'
+  hembra: 'hembra'
+  Macho: 'Macho'
+  Hembra: 'Hembra'
+edad:
+  adulto: 'adulto'
+  adulta: 'adulta'
+  Adulto: 'Adulto'
+  Adulta: 'Adulta'
+  cria: 'cría'
+  cria-porcentaje: 'Cría (%porcentaje%%)'
+spawn:
+  cria: 'cría'
+ordenes:
+  # como esta el dino (en /dino mis y en el menu de llamar)
+  FOLLOW: 'siguiéndote'
+  STAY: 'sentado'
+  PATROL: 'patrullando'
+ordenes-ficha:
+  FOLLOW: 'Te sigue'
+  STAY: 'Quieto'
+  PATROL: 'Patrulla'
+combate-ficha:
+  PASSIVE: 'Pasivo'
+  DEFENSIVE: 'Defensivo'
+  AGGRESSIVE: 'Agresivo'
+# lo que se avisa al dar una orden con el silbato (uno / varios)
+orden-hecha:
+  FOLLOW: ['te sigue', 'te siguen']
+  STAY: ['se queda acá', 'se quedan acá']
+  PATROL: ['patrulla este chunk', 'patrullan este chunk']
+  PASSIVE: ['está en modo pasivo', 'están en modo pasivo']
+  DEFENSIVE: ['está en modo defensivo', 'están en modo defensivo']
+  AGGRESSIVE: ['está en modo agresivo', 'están en modo agresivo']
+varios-dinos: '%cantidad% dinos'
+# como se nombra a un dino en /dino mis y en el menu de llamar (%sexo% es el simbolo)
+dino-con-nombre: '%nombre% (%especie% %color% %sexo%)'
+dino-sin-nombre: '%especie% %color% %sexo%'
+# segunda linea del cartel sobre un dino con nombre (con colores)
+cartel-dueno: '&fde &#ff00d9%player%'
+dietas:
+  MEAT: 'carne'
+  PLANTS: 'plantas'
+  FISH: 'pescado'
+comida:
+  MEAT: 'carne cruda'
+  PLANTS: 'trigo, zanahoria, manzana, remolacha, bayas, sandía o fardos'
+  FISH: 'bacalao, salmón o pez tropical crudo'
+tiempo:
+  segundos: '%s% s'
+  minutos: '%m% min'
+  minutos-segundos: '%m% min %s% s'
+  horas: '%h% h %m% min'
+lugar:
+  # %mundo% %x% %y% %z% y la distancia
+  con-distancia: '%mundo% %x% %y% %z% (%bloques% bloques)'
+  otro-mundo: '%mundo% %x% %y% %z% (otro mundo)'
+llamar:
+  cargado: 'Cargado, llega al toque.'
+  lejos: 'Lejos, se carga su chunk un momento.'
+stats:
+  top: '%player% %cantidad%'
+  nadie: 'nadie'
+  sin-limite: 'sin límite'
+causas:
+  desconocida: 'causa desconocida'
+  mato: 'lo mató %quien%'
+  FALL: 'una caída'
+  LAVA: 'la lava'
+  FIRE: 'el fuego'
+  FIRE_TICK: 'el fuego'
+  DROWNING: 'se ahogó'
+  VOID: 'cayó al vacío'
+  SUFFOCATION: 'se asfixió'
+  STARVATION: 'el hambre'
+  BLOCK_EXPLOSION: 'una explosión'
+  ENTITY_EXPLOSION: 'una explosión'
+  LIGHTNING: 'un rayo'
+  FREEZE: 'el frío'
+pack:
+  desactivado: 'desactivado'
+  no-listo: 'modo %modo%, no está listo&8: &f%motivo%'
+  descargando: 'todavía descargando el pack, probá en unos segundos'
+  listo: 'modo %modo%, %url% &8(&fsha1 %hash%&8)'
+  aviso: ' &8- &fAVISO&8: &f%aviso%'
+  # problemas del pack (salen en la consola y en /dino pack info)
+  problemas:
+    modo: 'resource-pack.mode desconocido %modo%, usá url, host u off'
+    falta-url: 'falta resource-pack.url en config.yml, subí el DinoEarth-ResourcePack.zip (por ejemplo a mc-packs.net) y pegá el link directo, o usá resource-pack.mode host'
+    url-invalida: 'la URL no es válida, %url%'
+    url-respuesta: 'la URL respondió %codigo% (%url%)'
+    no-es-zip: 'lo que hay en la URL no es un .zip, tiene que ser un link de descarga directa (%url%)'
+    otra-version: 'el zip de la URL no es el de esta versión del plugin, subí el DinoEarth-ResourcePack.zip nuevo y usá /dino pack reload'
+    descarga: 'no se pudo descargar %url%, %error%'
+    sin-pack: 'este jar no trae el pack adentro'
+    falta-direccion: 'poné resource-pack.host.public-address en config.yml (la IP o dominio con el que entran los jugadores)'
+    puerto: 'no se pudo abrir el puerto %puerto%, %error%'
+
+# ---------------------------------------------------------------- dinopedia
+caracter:
+  # una palabra (se escribe en la pagina)
+  territorial: 'Territorial'
+  CARNIVORE: 'Neutral'
+  HERBIVORE: 'Tranquilo'
+  HOSTILE: 'Hostil'
+  PACK: 'En manada'
+  PREY: 'Asustadizo'
+caracter-largo:
+  territorial: 'Salvaje te persigue. Domesticado es leal.'
+  CARNIVORE: 'Neutral, caza animales chicos y se defiende.'
+  HERBIVORE: 'Tranquilo, pero embiste si lo atacan.'
+  HOSTILE: 'Hostil, ataca a los jugadores que ve.'
+  PACK: 'Anda en manada y ataca a los heridos o si son muchos.'
+  PREY: 'Huye en manada. Acercate agachado para darle de comer.'
+dieta-palabra:
+  MEAT: 'Carnívoro'
+  PLANTS: 'Herbívoro'
+  FISH: 'Piscívoro'
+domesticar:
+  solo-huevo: 'Solo naciendo de un huevo.'
+  comida: 'Dándole %dieta% (%chance%% por bocado).'
+  imposible: 'No se domestica.'
+montura:
+  hombro: 'No se monta, vuela a tu lado.'
+  ninguna: 'No se puede montar.'
+  vuela: 'Sí, espacio despega y W vuela hacia donde mirás.'
+  ruge: 'Sí, espacio ruge en vez de saltar.'
+  embiste: 'Sí, corriendo arrolla lo que tenga adelante.'
+  normal: 'Sí, rápido y salta alto.'
+crias:
+  pone: 'Macho y hembra domesticados y bien alimentados ponen huevos.'
+  ninguna: 'No pone huevos.'
+habilidad:
+  escolta: 'Te sigue volando a tu lado (agachado + click derecho, vuela o camina) y chilla si hay monstruos cerca.'
+  puas: 'Coletazo con púas al que le pega por atrás.'
+  maza: 'Maza en la cola que tira lejos, las flechas casi no le hacen daño.'
+  presa: 'Si uno se asusta, avisa y sale corriendo toda la manada.'
+  escupe: 'Escupe veneno, ceguera y veneno.'
+  ruge: 'Rugido, lentitud y oscuridad a los que estén cerca.'
+  embiste: 'Embestida que tira lejos.'
+  vuela: 'Vuela. Si lo lastimás salvaje, se escapa por el aire.'
+  manada: 'Caza en grupo.'
+sellos:
+  VISTO: {nombre: 'Avistado', tarea: 'Ver uno de cerca.'}
+  COLORES: {nombre: 'Coleccionista', tarea: 'Ver todos sus colores comunes.'}
+  RARO: {nombre: 'Rareza', tarea: 'Ver su color raro.'}
+  DOMESTICADO: {nombre: 'Domador', tarea: 'Domesticar uno.', tarea-huevo: 'Criar uno desde el huevo.'}
+  CRIADO: {nombre: 'Criador', tarea: 'Que nazca una cría tuya de un huevo.'}
+  JINETE: {nombre: 'Jinete', tarea: 'Montarlo.'}
+  HOMBRO: {nombre: 'Compañero', tarea: 'Que vuele a tu lado.'}
+  CAZADO: {nombre: 'Cazador', tarea: 'Derrotar uno.'}
+rangos:
+  - 'Aprendiz'
+  - 'Explorador'
+  - 'Rastreador'
+  - 'Naturalista'
+  - 'Paleontólogo'
+  - 'Leyenda jurásica'
+huellas:
+  enormes: 'enormes'
+  grandes: 'grandes'
+  medianas: 'medianas'
+  chiquitas: 'chiquitas'
+
+# ---------------------------------------------------------------- misiones (descripcion de cada tipo)
+misiones:
+  AVISTAR: 'Avistá %cantidad% %especie%'
+  COLOR: 'Avistá un %especie% %color%'
+  DOMESTICAR: 'Domesticá un %especie%'
+  CRIAR: 'Criá una cría de huevo'
+  MONTAR: 'Recorré %cantidad% bloques montado'
+  CAZAR: 'Derrotá %cantidad% %especie%'
+  COMEDERO: 'Cargá %cantidad% puntos en comederos'
+  ninguna: 'Sin misión'
+
+especies:
+  raptor:
+    nombre: 'Velociraptor'
+    tamano: '2 × 3,6 bloques'
+    descripcion: 'Cazador ágil y astuto. Domesticado es una montura rápida y saltarina.'
+    colores:
+      arena: 'Arena'
+      gris: 'Gris azulado'
+      verde: 'Selva'
+      rojizo: 'Rojizo'
+      oscuro: 'Oscuro'
+      albino: 'Albino'
+  triceratops:
+    nombre: 'Triceratops'
+    tamano: '2,2 × 5,3 bloques'
+    descripcion: 'Tranquilo hasta que lo molestan. Montado y corriendo arrolla lo que tenga adelante.'
+    colores:
+      pardo: 'Pardo'
+      oliva: 'Oliva'
+      pizarra: 'Pizarra'
+      rojizo: 'Rojizo'
+      albino: 'Albino'
+  dilophosaurus:
+    nombre: 'Dilophosaurus'
+    tamano: '2 × 3,3 bloques'
+    descripcion: 'Abre la gola del cuello y escupe veneno que ciega. Mejor verlo de lejos.'
+    colores:
+      amarillo: 'Amarillo'
+      verde: 'Verde'
+      pardo: 'Pardo'
+      albino: 'Albino'
+  compsognathus:
+    nombre: 'Compsognathus'
+    tamano: '0,6 × 1,4 bloques'
+    descripcion: 'Chiquito y cobarde solo, peligroso en banda: ataca a los heridos.'
+    colores:
+      verde: 'Verde'
+      pardo: 'Pardo'
+      gris: 'Gris'
+      albino: 'Albino'
+  trex:
+    nombre: 'Tyrannosaurus rex'
+    tamano: '3,4 × 7,3 bloques'
+    descripcion: 'El rey. Su rugido paraliza de miedo. Solo se domestica criándolo desde el huevo.'
+    colores:
+      pardo: 'Pardo'
+      oscuro: 'Oscuro'
+      verde: 'Verde musgo'
+      rojizo: 'Rojizo'
+      albino: 'Albino'
+  pteranodon:
+    nombre: 'Pteranodon'
+    tamano: '6,5 bloques de ala a ala'
+    descripcion: 'Reptil volador que pesca en las costas. Domesticado te lleva por el aire.'
+    colores:
+      gaviota: 'Gaviota'
+      pardo: 'Pardo'
+      pizarra: 'Pizarra'
+      celeste: 'Celeste'
+      albino: 'Albino'
+  parasaurolophus:
+    nombre: 'Parasaurolophus'
+    tamano: '2,4 × 5,2 bloques'
+    descripcion: 'Anda en manada y huye. Cuando uno se asusta trompetea con la cresta y salen todos corriendo.'
+    colores:
+      verde: 'Verde'
+      pardo: 'Pardo'
+      azul: 'Azul'
+      rojizo: 'Rojizo'
+      albino: 'Albino'
+  gallimimus:
+    nombre: 'Gallimimus'
+    tamano: '2,2 × 3,7 bloques'
+    descripcion: 'El "avestruz" de los dinosaurios: huye en bandada y domesticado es la montura más rápida.'
+    colores:
+      arena: 'Arena'
+      gris: 'Gris'
+      verde: 'Verde'
+      naranja: 'Naranja'
+      albino: 'Albino'
+  stegosaurus:
+    nombre: 'Stegosaurus'
+    tamano: '2,4 × 4,5 bloques'
+    descripcion: 'Placas en el lomo y púas en la cola: al que le pega por atrás le da un coletazo.'
+    colores:
+      oliva: 'Oliva'
+      pardo: 'Pardo'
+      gris: 'Gris'
+      rojizo: 'Rojizo'
+      albino: 'Albino'
+  ankylosaurus:
+    nombre: 'Ankylosaurus'
+    tamano: '1,6 × 4,3 bloques'
+    descripcion: 'Un tanque acorazado: las flechas casi no le hacen nada y la maza de la cola tira lejos.'
+    colores:
+      pardo: 'Pardo'
+      musgo: 'Musgo'
+      piedra: 'Piedra'
+      arcilla: 'Arcilla'
+      albino: 'Albino'
+  giganotosaurus:
+    nombre: 'Giganotosaurus'
+    tamano: '3,3 × 7,6 bloques'
+    descripcion: 'El gigante argentino, rival del T-Rex: un poco más rápido y más largo. Solo se cría desde el huevo.'
+    colores:
+      arena: 'Arena'
+      gris: 'Gris'
+      rojizo: 'Rojizo'
+      verde: 'Verde'
+      albino: 'Albino'
+  carnotaurus:
+    nombre: 'Carnotaurus'
+    tamano: '2,4 × 4,4 bloques'
+    descripcion: 'El "toro carnívoro" argentino: cuernos sobre los ojos y patas largas. Montado y corriendo embiste.'
+    colores:
+      rojo: 'Rojo'
+      pardo: 'Pardo'
+      gris: 'Gris'
+      verde: 'Verde'
+      albino: 'Albino'
+  dimorphodon:
+    nombre: 'Dimorphodon'
+    tamano: '0,7 bloques, 2 de ala a ala'
+    descripcion: 'Pterosaurio chiquito y cabezón. Domesticado vuela a tu lado y chilla si hay monstruos cerca.'
+    colores:
+      loro: 'Loro'
+      tucan: 'Tucán'
+      pardo: 'Pardo'
+      cielo: 'Cielo'
+      albino: 'Albino'

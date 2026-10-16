@@ -131,264 +131,268 @@
    "",
    177
   ],
+  "bg/missions": [
+   "",
+   177
+  ],
   "bg/species": [
    "",
    177
   ],
   "render/ankylosaurus/albino": [
-   "",
-   63
-  ],
-  "render/ankylosaurus/arcilla": [
-   "",
-   63
-  ],
-  "render/ankylosaurus/musgo": [
-   "",
-   63
-  ],
-  "render/ankylosaurus/pardo": [
-   "",
-   63
-  ],
-  "render/ankylosaurus/piedra": [
-   "",
-   63
-  ],
-  "render/carnotaurus/albino": [
-   "",
-   63
-  ],
-  "render/carnotaurus/gris": [
-   "",
-   63
-  ],
-  "render/carnotaurus/pardo": [
-   "",
-   63
-  ],
-  "render/carnotaurus/rojo": [
-   "",
-   63
-  ],
-  "render/carnotaurus/verde": [
-   "",
-   63
-  ],
-  "render/compsognathus/albino": [
-   "",
-   63
-  ],
-  "render/compsognathus/gris": [
-   "",
-   63
-  ],
-  "render/compsognathus/pardo": [
-   "",
-   63
-  ],
-  "render/compsognathus/verde": [
-   "",
-   63
-  ],
-  "render/dilophosaurus/albino": [
-   "",
-   63
-  ],
-  "render/dilophosaurus/amarillo": [
-   "",
-   63
-  ],
-  "render/dilophosaurus/pardo": [
-   "",
-   63
-  ],
-  "render/dilophosaurus/verde": [
-   "",
-   63
-  ],
-  "render/dimorphodon/albino": [
-   "",
-   63
-  ],
-  "render/dimorphodon/cielo": [
-   "",
-   63
-  ],
-  "render/dimorphodon/loro": [
-   "",
-   63
-  ],
-  "render/dimorphodon/pardo": [
-   "",
-   63
-  ],
-  "render/dimorphodon/tucan": [
-   "",
-   63
-  ],
-  "render/gallimimus/albino": [
-   "",
-   63
-  ],
-  "render/gallimimus/arena": [
-   "",
-   63
-  ],
-  "render/gallimimus/gris": [
-   "",
-   63
-  ],
-  "render/gallimimus/naranja": [
-   "",
-   63
-  ],
-  "render/gallimimus/verde": [
-   "",
-   63
-  ],
-  "render/giganotosaurus/albino": [
-   "",
-   63
-  ],
-  "render/giganotosaurus/arena": [
    "",
    63
   ],
-  "render/giganotosaurus/gris": [
-   "",
+  "render/ankylosaurus/arcilla": [
+   "",
    63
   ],
-  "render/giganotosaurus/rojizo": [
-   "",
+  "render/ankylosaurus/musgo": [
+   "",
    63
   ],
-  "render/giganotosaurus/verde": [
-   "",
+  "render/ankylosaurus/pardo": [
+   "",
    63
   ],
-  "render/parasaurolophus/albino": [
-   "",
+  "render/ankylosaurus/piedra": [
+   "",
    63
   ],
-  "render/parasaurolophus/azul": [
-   "",
+  "render/carnotaurus/albino": [
+   "",
    63
   ],
-  "render/parasaurolophus/pardo": [
-   "",
+  "render/carnotaurus/gris": [
+   "",
    63
   ],
-  "render/parasaurolophus/rojizo": [
-   "",
+  "render/carnotaurus/pardo": [
+   "",
    63
   ],
-  "render/parasaurolophus/verde": [
-   "",
+  "render/carnotaurus/rojo": [
+   "",
    63
   ],
-  "render/pteranodon/albino": [
-   "",
+  "render/carnotaurus/verde": [
+   "",
    63
   ],
-  "render/pteranodon/celeste": [
-   "",
-   63
-  ],
-  "render/pteranodon/gaviota": [
-   "",
-   63
-  ],
-  "render/pteranodon/pardo": [
-   "",
-   63
-  ],
-  "render/pteranodon/pizarra": [
-   "",
-   63
-  ],
-  "render/raptor/albino": [
-   "",
-   63
-  ],
-  "render/raptor/arena": [
-   "",
-   63
-  ],
-  "render/raptor/gris": [
-   "",
-   63
-  ],
-  "render/raptor/oscuro": [
-   "",
-   63
-  ],
-  "render/raptor/rojizo": [
-   "",
-   63
-  ],
-  "render/raptor/verde": [
-   "",
-   63
-  ],
-  "render/stegosaurus/albino": [
-   "",
-   63
-  ],
-  "render/stegosaurus/gris": [
-   "",
-   63
-  ],
-  "render/stegosaurus/oliva": [
-   "",
-   63
-  ],
-  "render/stegosaurus/pardo": [
-   "",
-   63
-  ],
-  "render/stegosaurus/rojizo": [
-   "",
-   63
-  ],
-  "render/trex/albino": [
-   "",
-   63
-  ],
-  "render/trex/oscuro": [
-   "",
-   63
-  ],
-  "render/trex/pardo": [
+  "render/compsognathus/albino": [
    "",
    63
   ],
-  "render/trex/rojizo": [
-   "",
+  "render/compsognathus/gris": [
+   "",
    63
   ],
-  "render/trex/verde": [
-   "",
+  "render/compsognathus/pardo": [
+   "",
    63
   ],
-  "render/triceratops/albino": [
-   "",
+  "render/compsognathus/verde": [
+   "",
    63
   ],
-  "render/triceratops/oliva": [
-   "",
+  "render/dilophosaurus/albino": [
+   "",
    63
   ],
-  "render/triceratops/pardo": [
+  "render/dilophosaurus/amarillo": [
+   "",
+   63
+  ],
+  "render/dilophosaurus/pardo": [
+   "",
+   63
+  ],
+  "render/dilophosaurus/verde": [
+   "",
+   63
+  ],
+  "render/dimorphodon/albino": [
+   "",
+   63
+  ],
+  "render/dimorphodon/cielo": [
+   "",
+   63
+  ],
+  "render/dimorphodon/loro": [
+   "",
+   63
+  ],
+  "render/dimorphodon/pardo": [
+   "",
+   63
+  ],
+  "render/dimorphodon/tucan": [
+   "",
+   63
+  ],
+  "render/gallimimus/albino": [
+   "",
+   63
+  ],
+  "render/gallimimus/arena": [
+   "",
+   63
+  ],
+  "render/gallimimus/gris": [
+   "",
+   63
+  ],
+  "render/gallimimus/naranja": [
+   "",
+   63
+  ],
+  "render/gallimimus/verde": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/albino": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/arena": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/gris": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/rojizo": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/verde": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/albino": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/azul": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/pardo": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/rojizo": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/verde": [
+   "",
+   63
+  ],
+  "render/pteranodon/albino": [
+   "",
+   63
+  ],
+  "render/pteranodon/celeste": [
+   "",
+   63
+  ],
+  "render/pteranodon/gaviota": [
+   "",
+   63
+  ],
+  "render/pteranodon/pardo": [
+   "",
+   63
+  ],
+  "render/pteranodon/pizarra": [
+   "",
+   63
+  ],
+  "render/raptor/albino": [
    "",
    63
   ],
-  "render/triceratops/pizarra": [
+  "render/raptor/arena": [
+   "",
+   63
+  ],
+  "render/raptor/gris": [
+   "",
+   63
+  ],
+  "render/raptor/oscuro": [
+   "",
+   63
+  ],
+  "render/raptor/rojizo": [
+   "",
+   63
+  ],
+  "render/raptor/verde": [
+   "",
+   63
+  ],
+  "render/stegosaurus/albino": [
+   "",
+   63
+  ],
+  "render/stegosaurus/gris": [
+   "",
+   63
+  ],
+  "render/stegosaurus/oliva": [
+   "",
+   63
+  ],
+  "render/stegosaurus/pardo": [
+   "",
+   63
+  ],
+  "render/stegosaurus/rojizo": [
+   "",
+   63
+  ],
+  "render/trex/albino": [
+   "",
+   63
+  ],
+  "render/trex/oscuro": [
+   "",
+   63
+  ],
+  "render/trex/pardo": [
+   "",
+   63
+  ],
+  "render/trex/rojizo": [
+   "",
+   63
+  ],
+  "render/trex/verde": [
+   "",
+   63
+  ],
+  "render/triceratops/albino": [
+   "",
+   63
+  ],
+  "render/triceratops/oliva": [
    "",
    63
   ],
-  "render/triceratops/rojizo": [
+  "render/triceratops/pardo": [
+   "",
+   63
+  ],
+  "render/triceratops/pizarra": [
    "",
+   63
+  ],
+  "render/triceratops/rojizo": [
+   "",
    63
   ]
  },
@@ -398,13 +402,16 @@
   "render_y": 20
  },
  "rows": {
+  "101": "dinoearth:gui_t101",
   "20": "dinoearth:gui_t20",
+  "29": "dinoearth:gui_t29",
   "31": "dinoearth:gui_t31",
   "42": "dinoearth:gui_t42",
   "53": "dinoearth:gui_t53",
   "56": "dinoearth:gui_t56",
   "6": "dinoearth:gui_t6",
   "64": "dinoearth:gui_t64",
+  "65": "dinoearth:gui_t65",
   "75": "dinoearth:gui_t75",
   "86": "dinoearth:gui_t86",
   "92": "dinoearth:gui_t92",

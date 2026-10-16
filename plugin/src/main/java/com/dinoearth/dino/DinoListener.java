@@ -1,5 +1,7 @@
 package com.dinoearth.dino;
 
+import com.dinoearth.text.Fmt;
+import com.dinoearth.text.Lang;
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.dinoearth.Keys;
@@ -11,8 +13,6 @@ import com.dinoearth.item.CageManager;
 import com.dinoearth.item.DinoItems;
 import com.dinoearth.species.Species;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -170,7 +170,11 @@ public final class DinoListener implements Listener {
         }
         event.setDroppedExp((int) Math.round(species.health / 5 * size));
         Player killer = wolf.getKiller();
-        if (killer != null && !killer.getUniqueId().equals(wolf.getOwnerUniqueId())) dex.onKill(killer, species);
+        if (killer != null && !killer.getUniqueId().equals(wolf.getOwnerUniqueId())) {
+            dex.onKill(killer, species);
+            var missions = com.dinoearth.mission.MissionManager.get();
+            if (missions != null) missions.onKill(killer, species);
+        }
         dinos.onDeath(wolf);
     }
 
@@ -182,8 +186,7 @@ public final class DinoListener implements Listener {
             event.setCancelled(true);
             if (event.getHand() == EquipmentSlot.HAND) {
                 Interaction box = (Interaction) event.getRightClicked();
-                player.sendActionBar(Component.text("Huevo de " + eggs.speciesName(box) + ": "
-                        + eggs.percent(box) + "% listo", NamedTextColor.GOLD));
+                Lang.get().action(player, "huevo", "especie", eggs.speciesName(box), "porcentaje", eggs.percent(box));
             }
             return;
         }
@@ -230,13 +233,12 @@ public final class DinoListener implements Listener {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
             if (species.eggTameOnly) {
-                player.sendActionBar(Component.text("Un " + species.name + " salvaje no se domestica: criá uno desde el huevo.",
-                        NamedTextColor.RED));
+                Lang.get().action(player, "salvaje-solo-huevo", "especie", species.name);
                 return;
             }
             if (!food || wolf.isAngry()) return;
             if (!dinos.canOwnMore(player.getUniqueId())) {
-                player.sendActionBar(dinos.limitMessage(player));
+                dinos.limitMessage(player);
                 return;
             }
             if (!creative) hand.subtract();
@@ -250,6 +252,8 @@ public final class DinoListener implements Listener {
                 d.onTamed();
                 if (dinos.registry() != null) dinos.registry().update(d);
                 dex.addTamed(player, species, d.variant());
+                var missions = com.dinoearth.mission.MissionManager.get();
+                if (missions != null) missions.onTame(player, species);
             } else {
                 wolf.getWorld().spawnParticle(Particle.SMOKE, fx, 7, 0.4, 0.3, 0.4, 0.02);
             }
@@ -265,25 +269,25 @@ public final class DinoListener implements Listener {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
             if (!owner) {
-                player.sendActionBar(Component.text("Solo el dueño le puede poner nombre.", NamedTextColor.RED));
+                Lang.get().action(player, "nombre-solo-dueno");
                 return;
             }
             var meta = hand.getItemMeta();
             if (meta == null || !meta.hasDisplayName() || meta.displayName() == null) {
-                player.sendActionBar(Component.text("Primero escribile un nombre a la etiqueta en un yunque.", NamedTextColor.RED));
+                Lang.get().action(player, "nombre-etiqueta");
                 return;
             }
             d.setName(meta.displayName());
             if (!creative) hand.subtract();
             wolf.getWorld().playSound(wolf.getLocation(), "minecraft:entity.villager.yes", SoundCategory.NEUTRAL, 0.6f, 1.3f);
-            player.sendActionBar(Component.text("Ahora se llama ", NamedTextColor.GREEN).append(d.name()));
+            Lang.get().action(player, "nombre-hecho", "dino", d.name());
             return;
         }
         if (items.is(hand, DinoItems.Kind.CAGE)) {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
             if (!owner) {
-                player.sendActionBar(Component.text("Solo podés enjaular a tus propios dinos.", NamedTextColor.RED));
+                Lang.get().action(player, "jaula-solo-propios");
                 return;
             }
             cages.capture(player, d, hand);
@@ -299,7 +303,7 @@ public final class DinoListener implements Listener {
             if (!d.isAdult()) d.addGrowth(FEED_GROWTH);
             wolf.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, fx, 6, 0.4, 0.3, 0.4);
             wolf.getWorld().playSound(wolf.getLocation(), "minecraft:entity.generic.eat", SoundCategory.NEUTRAL, 0.9f, 0.9f);
-            player.sendActionBar(Component.text("Hambre: " + Math.round(d.hunger() * 100) + "%", NamedTextColor.GREEN));
+            Lang.get().action(player, "hambre", "porcentaje", Math.round(d.hunger() * 100));
             return;
         }
         if (!owner) return;
@@ -307,8 +311,7 @@ public final class DinoListener implements Listener {
             // muerto de hambre no se para ni se deja montar
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
-            player.sendActionBar(Component.text(species.name + " está muerto de hambre: dale " + species.diet().label
-                    + " o llenale un comedero.", NamedTextColor.RED));
+            Lang.get().action(player, "muerto-de-hambre", "especie", species.name, "dieta", Fmt.diet(species.diet()));
             return;
         }
 
@@ -318,13 +321,11 @@ public final class DinoListener implements Listener {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
             if (!saddleItem || !species.id.equals(held.species())) {
-                player.sendActionBar(Component.text("Necesita una ", NamedTextColor.RED)
-                        .append(Component.text(items.def(items.saddleId(species)).name(), NamedTextColor.GOLD))
-                        .append(Component.text(".", NamedTextColor.RED)));
+                Lang.get().action(player, "montura-necesita", "montura", items.plainName(items.saddleId(species)));
                 return;
             }
             if (!d.isAdult()) {
-                player.sendActionBar(Component.text("Todavía es muy chico para montarlo.", NamedTextColor.RED));
+                Lang.get().action(player, "montura-chico");
             } else if (!d.isSaddled()) {
                 d.setSaddled(true);
                 if (!creative) hand.subtract();
@@ -348,7 +349,7 @@ public final class DinoListener implements Listener {
             d.addGrowth(FEED_GROWTH);
             wolf.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, fx, 8, 0.4, 0.3, 0.4);
             wolf.getWorld().playSound(wolf.getLocation(), "minecraft:entity.generic.eat", SoundCategory.NEUTRAL, 0.8f, 1.3f);
-            player.sendActionBar(Component.text("Crecimiento: " + Math.round(d.growth() * 100) + "%", NamedTextColor.GREEN));
+            Lang.get().action(player, "crecimiento", "porcentaje", Math.round(d.growth() * 100));
             return;
         }
         if (species.food() != Species.MEAT) {
@@ -385,8 +386,7 @@ public final class DinoListener implements Listener {
                 dex.onEscort(player, species);
             }
             d.toggleEscort(player);
-            player.sendActionBar(Component.text(d.isEscorting(player) ? species.name + " vuela a tu lado."
-                    : species.name + " baja y camina con vos.", NamedTextColor.GREEN));
+            Lang.get().action(player, d.isEscorting(player) ? "escolta-vuela" : "escolta-camina", "especie", species.name);
             return;
         }
         if (d.canRide() && !player.isSneaking() && !food && d.rider() == null) {
@@ -507,7 +507,7 @@ public final class DinoListener implements Listener {
                 .anyMatch(i -> feeders.isFeeder(i) || eggs.isEgg(i));
         if (taken) return;
         if (!Protection.canBuild(player, target)) {
-            player.sendActionBar(Component.text("No podés poner un comedero acá.", NamedTextColor.RED));
+            Lang.get().action(player, "comedero-aca");
             return;
         }
         feeders.place(diet, at, player);

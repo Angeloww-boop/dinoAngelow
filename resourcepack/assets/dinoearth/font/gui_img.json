@@ -29,11 +29,20 @@
   },
   {
    "type": "bitmap",
+   "file": "dinoearth:gui/bg_missions.png",
+   "ascent": 13,
+   "height": 222,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
    "file": "dinoearth:gui/render/raptor.png",
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -42,7 +51,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -51,7 +60,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -60,7 +69,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -69,7 +78,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -78,7 +87,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -87,7 +96,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -96,7 +105,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -105,7 +114,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -114,7 +123,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -123,7 +132,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -132,7 +141,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   },
   {
@@ -141,7 +150,7 @@
    "ascent": -7,
    "height": 64,
    "chars": [
-    ""
+    ""
    ]
   }
  ]

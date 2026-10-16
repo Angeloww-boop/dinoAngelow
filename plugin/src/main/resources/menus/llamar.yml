@@ -1,0 +1,78 @@
+# Silbato de regreso: elegir que dinos lejanos llamar (desde el silbato o con /dino llamar).
+menu_title: '&8| &9Llamar de regreso'
+size: 54
+items:
+  'relleno':
+    material: black_stained_glass_pane
+    slots:
+      - 0-9
+      - 17
+      - 18
+      - 26
+      - 27
+      - 35
+      - 36-44
+      - 45-53
+    display_name: ' '
+  # un item por dino lejano, en estos slots (el icono es el de su especie y color)
+  'dino':
+    slots:
+      - 10-16
+      - 19-25
+      - 28-34
+    display_name: '&#ff00d9%dino%'
+    lore:
+      - '&f'
+      - '&8| &fEspecie &8» &#ff00d9%especie% %color% %sexo%'
+      - '&8| &fDónde &8» &#ff00d9%donde%'
+      - '&8| &fEstado &8» &#ff00d9%orden%'
+      - '&8| &f%carga%'
+      - '&f'
+      - '%click%'
+  'info':
+    material: clock
+    slot: 47
+    display_name: '&#ff00d9%estado%'
+    lore:
+      - '&f'
+      - '&8| &fHasta &#ff00d9%max%&f dinos por llamada,'
+      - '&8| &funa vez cada &#ff00d9%tiempo%&f.'
+      - '&f'
+  'llamar':
+    material: goat_horn
+    slot: 51
+    display_name: '&#ff00d9Llamar &8(&f%elegidos%&8/&f%max%&8)'
+    lore:
+      - '&f'
+      - '&8| &fTrae a los elegidos a tu lado.'
+      - '&8| &fDespués te siguen.'
+      - '&f'
+      - '&#41FF00✔ Click para llamar'
+  'anterior':
+    material: arrow
+    slot: 45
+    display_name: '&#ff00d9Página anterior'
+    lore:
+      - '&f'
+      - '&#41FF00✔ Click para ver'
+  'siguiente':
+    material: arrow
+    slot: 53
+    display_name: '&#ff00d9Página siguiente'
+    lore:
+      - '&f'
+      - '&#41FF00✔ Click para ver'
+  # barrier en el 49: Volver si se abrio desde el silbato, Cerrar si se abrio con /dino llamar
+  'volver':
+    material: barrier
+    display_name: '&#EE193BVolver'
+    slot: 49
+  'cerrar':
+    material: barrier
+    display_name: '&#EE193BCerrar'
+    slot: 49
+textos:
+  listo: 'Listo para llamar'
+  espera: 'Esperá %tiempo%'
+  elegir: '&#41FF00✔ Click para elegir'
+  sacar: '&#EE193B✘ Click para sacar de la llamada'

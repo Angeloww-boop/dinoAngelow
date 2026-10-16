@@ -14,6 +14,7 @@ import geometry as G
 from build import NS, ROOT, png_bytes, write_if_changed
 
 ITEMS_JSON = os.path.join(ROOT, "plugin", "src", "main", "resources", "items.json")
+ITEMS_YML = os.path.join(ROOT, "plugin", "src", "main", "resources", "items.yml")
 
 IVORY = (232, 222, 192)
 BONE_TIP = (110, 92, 70)
@@ -231,7 +232,8 @@ def put(files, path, pix):
 
 
 def build_items(species, sets, files):
-    items, drops = [], {}
+    """items.json = datos (modelo, material, drops); items.yml = textos (nombre y lore con el formato del server)."""
+    items, drops, texts = [], {}, {}
     names = {sp["id"]: sp["name"] for sp in species}
     for sp in species:
         sid = sp["id"]
@@ -240,27 +242,94 @@ def build_items(species, sets, files):
         for iid, name, shape, key, lo, hi, chance in DROPS.get(sid, []):
             put(files, f"items/{iid}", draw(shape, pal, key))
             items.append({"id": iid, "kind": "drop", "species": sid, "material": "PAPER", "max_stack": 64,
-                          "model": f"{NS}:items/{iid}", "name": name,
-                          "lore": [f"Lo suelta el {names[sid]}.", "Se usa para craftear monturas."]})
+                          "model": f"{NS}:items/{iid}"})
+            texts[iid] = (name, [f"Lo suelta el &#ff00d9{names[sid]}&f.", "Se usa para craftear monturas."])
             drops[sid].append({"item": iid, "min": lo, "max": hi, "chance": chance})
         if sp["saddle"]:
             iid = f"montura_{sid}"
             put(files, f"items/{iid}", saddle_icon(sets, sid, sp["scale"]))
             items.append({"id": iid, "kind": "saddle", "species": sid, "material": "SADDLE", "max_stack": 1,
-                          "model": f"{NS}:items/{iid}", "name": f"Montura de {names[sid]}",
-                          "lore": [f"Click derecho sobre tu {names[sid]} adulto.",
-                                   "Con tijeras se la sacás y te la devuelve."]})
+                          "model": f"{NS}:items/{iid}"})
+            texts[iid] = (f"Montura de {names[sid]}", [f"Click derecho sobre tu &#ff00d9{names[sid]}&f adulto.",
+                                                      "Con tijeras se la sacás y te la devuelve."])
     put(files, "items/silbato", whistle())
     items.append({"id": "silbato", "kind": "whistle", "material": "STICK", "max_stack": 1,
-                  "model": f"{NS}:items/silbato", "name": "Silbato de dinos",
-                  "lore": ["Click derecho a tu dino: darle órdenes.",
-                           "Agachado y click derecho al aire: órdenes a todos", "tus dinos a 16 bloques."]})
+                  "model": f"{NS}:items/silbato"})
+    texts["silbato"] = ("Silbato de dinos", ["Click derecho a tu dino &8» &#ff00d9darle órdenes&f.",
+                                             "Agachado y click derecho al aire &8» &#ff00d9órdenes a todos",
+                                             "&#ff00d9tus dinos&f a 16 bloques."])
     put(files, "items/jaula", cage())
     put(files, "items/jaula_llena", cage(full=True))
     items.append({"id": "jaula", "kind": "cage", "material": "PAPER", "max_stack": 16,
-                  "model": f"{NS}:items/jaula", "model_full": f"{NS}:items/jaula_llena", "name": "Jaula para dinos",
-                  "lore": ["Click derecho a tu dino: lo guarda adentro.",
-                           "Click derecho al piso con la jaula llena: lo suelta.",
-                           "Quien lo suelta queda como dueño."]})
+                  "model": f"{NS}:items/jaula", "model_full": f"{NS}:items/jaula_llena"})
+    texts["jaula"] = ("Jaula para dinos", ["Click derecho a tu dino &8» &#ff00d9lo guarda adentro&f.",
+                                           "Click derecho al piso con la jaula llena &8» &#ff00d9lo suelta&f.",
+                                           "Quien lo suelta queda como dueño."])
     write_if_changed(ITEMS_JSON, json.dumps({"items": items, "drops": drops}, indent=2, ensure_ascii=False).encode())
+    write_if_changed(ITEMS_YML, items_yml(texts).encode("utf-8"))
     return items
+
+
+def q(text):
+    return "'" + text.replace("'", "''") + "'"
+
+
+def items_yml(texts):
+    """Formato del server: nombre &#ff00d9, lore con '&8| &f' y separadores '&f'."""
+    out = ["# Nombre y descripcion de los items de DinoEarth. Los genera generator/items.py; el dueño los puede cambiar.",
+           "# Formato: display_name y lore como en los menus (&8| &f para cada linea, &f para separar).", ""]
+    for iid, (name, lore) in texts.items():
+        out.append(f"{iid}:")
+        out.append(f"  display_name: {q('&#ff00d9' + name)}")
+        out.append("  lore:")
+        out.append("    - '&f'")
+        for line in lore:
+            out.append(f"    - {q('&8| &f' + line)}")
+        out.append("    - '&f'")
+    out.append(STATIC_ITEMS)
+    return "\n".join(out) + "\n"
+
+
+# items que arma el plugin (no son de items.json): huevo, comedero, Dinopedia y la jaula con un dino adentro
+STATIC_ITEMS = """
+# ---------------------------------------------------------------- items del plugin
+huevo:
+  display_name: '&#ff00d9Huevo de %especie%'
+  lore:
+    - '&f'
+    - '&8| &fPonelo en el suelo y esperá a que eclosione.'
+    - '&8| &fLa cría sale de un color al azar y es tuya.'
+    - '&f'
+comedero:
+  display_name: '&#ff00d9Comedero de %dieta%'
+  lore:
+    - '&f'
+    - '&8| &fPonelo en el suelo y llenalo con &#ff00d9%comida%&f.'
+    - '&8| &fLos dinos domesticados con hambre vienen a comer solos.'
+    - '&8| &fAgachado carga la pila entera. No se puede vaciar.'
+    - '&f'
+dinopedia:
+  display_name: '&#ff00d9Dinopedia'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho &8» &#ff00d9abrir&f.'
+    - '&8| &fClick derecho a un dinosaurio &8» &#ff00d9su ficha&f.'
+    - '&8| &fEn la mano anotás dinos desde más lejos, ves'
+    - '&8| &fhuellas de especies que no conocés y la lupa'
+    - '&8| &fte marca hacia dónde ir.'
+    - '&f'
+jaula-llena:
+  display_name: '&#ff00d9Jaula con %dino%'
+  lore:
+    - '&f'
+    - '&8| &fEspecie &8» &#ff00d9%especie% %color%'
+    - '&8| &fSexo &8» &#ff00d9%sexo%'
+    - '&8| &fEdad &8» &#ff00d9%edad%'
+    - '&8| &fVida &8» &#ff00d9%vida%%'
+    - '%montura%'
+    - '&f'
+    - '&8| &fClick derecho al piso para soltarlo.'
+    - '&8| &fQuien lo suelta queda como dueño.'
+    - '&f'
+jaula-con-montura: '&8| &fTiene &#ff00d9montura&f.'
+"""

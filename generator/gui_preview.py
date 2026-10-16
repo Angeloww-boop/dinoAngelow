@@ -21,8 +21,10 @@ from font_widths import find_jar
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACK = os.path.join(ROOT, "resourcepack")
 TITLE_X, TITLE_Y = 8, 6
-NAMED = {"white": "#FFFFFF", "gray": "#AAAAAA", "dark_gray": "#555555", "gold": "#FFAA00", "yellow": "#FFFF55",
-         "black": "#000000"}
+NAMED = {"black": "#000000", "dark_blue": "#0000AA", "dark_green": "#00AA00", "dark_aqua": "#00AAAA",
+         "dark_red": "#AA0000", "dark_purple": "#AA00AA", "gold": "#FFAA00", "gray": "#AAAAAA", "dark_gray": "#555555",
+         "blue": "#5555FF", "green": "#55FF55", "aqua": "#55FFFF", "red": "#FF5555", "light_purple": "#FF55FF",
+         "yellow": "#FFFF55", "white": "#FFFFFF"}
 
 
 class Assets:
@@ -129,6 +131,15 @@ def draw_text(canvas, assets, comp, x, y, color=(64, 64, 64), font="minecraft:de
 
 def item_texture(assets, model_id):
     ns, path = model_id.split(":")
+    if ns == "minecraft":      # item de vanilla: su textura de item (o de bloque, para vidrios y camas)
+        for cand in (f"textures/item/{path}.png", f"textures/block/{path}.png", f"textures/item/{path.replace('_stained_glass_pane', '_stained_glass')}.png",
+                     f"textures/block/{path.replace('_pane', '')}.png"):
+            try:
+                img = assets.image("minecraft", cand)
+                return img.crop((0, 0, img.width, img.width)).resize((16, 16), Image.NEAREST)
+            except KeyError:
+                continue
+        return None
     if path.endswith("/?"):
         base = os.path.join(PACK, "assets", ns, "items", path[:-2])
         first = sorted(f for f in os.listdir(base) if f != "unknown.json")[0]

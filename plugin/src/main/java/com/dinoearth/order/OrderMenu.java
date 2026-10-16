@@ -5,11 +5,11 @@ import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
 import com.dinoearth.item.DinoItems;
 import com.dinoearth.registry.RecallManager;
+import com.dinoearth.text.Fmt;
+import com.dinoearth.text.Lang;
+import com.dinoearth.text.Menu;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -25,26 +25,30 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
  * Silbato de ordenes. Click derecho a tu dino: menu para ese dino. Agachado y click derecho al aire:
  * el mismo menu para todos tus dinos a 16 bloques. Ordenes: seguirte, quedarse, patrullar el chunk
- * donde estas parado; y como pelea: pasivo, defensivo o agresivo.
+ * donde estas parado; y como pelea: pasivo, defensivo o agresivo. El menu sale de menus/silbato.yml.
  */
 public final class OrderMenu implements Listener {
 
-    private static final int HEADER = 4, FOLLOW = 10, STAY = 11, PATROL = 12, RECALL = 13, PASSIVE = 14, DEFENSIVE = 15,
-            AGGRESSIVE = 16, CLOSE = 22;
     private static final double GROUP_RADIUS = 16;
+    /** id del item en el yml -> orden / modo que pone. */
+    private static final Map<String, Dino.Order> ORDERS = Map.of(
+            "seguir", Dino.Order.FOLLOW, "quedarse", Dino.Order.STAY, "patrullar", Dino.Order.PATROL);
+    private static final Map<String, Dino.Combat> COMBATS = Map.of(
+            "pasivo", Dino.Combat.PASSIVE, "defensivo", Dino.Combat.DEFENSIVE, "agresivo", Dino.Combat.AGGRESSIVE);
 
     private final DinoManager dinos;
     private final DinoItems items;
@@ -73,6 +77,7 @@ public final class OrderMenu implements Listener {
         this.dinos = dinos;
         this.items = items;
         this.keys = keys;
+        recall.setWhistleBack(this::reopen);
     }
 
     // ------------------------------------------------------------ usar el silbato
@@ -85,7 +90,7 @@ public final class OrderMenu implements Listener {
         Dino d = event.getRightClicked() instanceof Wolf w ? dinos.get(w) : null;
         if (d == null) return;
         if (!d.wolf().isTamed() || !player.getUniqueId().equals(d.wolf().getOwnerUniqueId())) {
-            player.sendActionBar(Component.text("Ese dino no es tuyo.", NamedTextColor.RED));
+            Lang.get().action(player, "silbato-no-tuyo");
             return;
         }
         whistle(player);
@@ -100,24 +105,33 @@ public final class OrderMenu implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         Player player = event.getPlayer();
         if (!player.isSneaking()) {
-            player.sendActionBar(Component.text("Click derecho a tu dino, o agachado para darle órdenes a todos los cercanos.",
-                    NamedTextColor.GRAY));
+            Lang.get().action(player, "silbato-uso");
             return;
         }
+        List<UUID> mine = near(player);
+        whistle(player);
+        if (mine.isEmpty()) {
+            // ninguno cerca: directo al menu de llamarlos de regreso
+            recall.openMenu(player, false);
+            return;
+        }
+        open(player, mine, true);
+    }
+
+    private List<UUID> near(Player player) {
         List<UUID> mine = new ArrayList<>();
         for (Dino d : dinos.all()) {
             if (owned(player, d) && d.wolf().getLocation().distanceSquared(player.getLocation()) <= GROUP_RADIUS * GROUP_RADIUS) {
                 mine.add(d.wolf().getUniqueId());
             }
         }
-        if (mine.isEmpty()) {
-            // ninguno cerca: directo al menu de llamarlos de regreso
-            whistle(player);
-            recall.openMenu(player);
-            return;
-        }
-        whistle(player);
-        open(player, mine, true);
+        return mine;
+    }
+
+    /** "Volver" desde el menu de llamar: el menu de grupo con los que tenga cerca (o nada). */
+    private void reopen(Player p) {
+        List<UUID> mine = near(p);
+        if (!mine.isEmpty()) open(p, mine, true);
     }
 
     private static void whistle(Player p) {
@@ -144,58 +158,74 @@ public final class OrderMenu implements Listener {
         Holder h = new Holder(targets, group);
         List<Dino> list = resolve(p, h);
         if (list.isEmpty()) return;
-        Component title = group ? Component.text("Órdenes · " + list.size() + " dinos")
-                : Component.text("Órdenes · ").append(label(list.get(0)));
-        Inventory inv = Bukkit.createInventory(h, 27, title);
+        Menu menu = Lang.get().menu("silbato");
+        Inventory inv = Bukkit.createInventory(h, menu.size(), menu.title());
         h.inventory = inv;
-        fill(p, inv, list, group);
+        fill(p, menu, inv, list, group);
         p.openInventory(inv);
     }
 
-    private void fill(Player p, Inventory inv, List<Dino> list, boolean group) {
-        ItemStack pane = icon(Material.GRAY_STAINED_GLASS_PANE, Component.text(" "), List.of(), false);
-        for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, pane);
+    private void fill(Player p, Menu menu, Inventory inv, List<Dino> list, boolean group) {
+        inv.clear();
+        Set<String> dynamic = Set.of("dino", "grupo", "seguir", "quedarse", "patrullar", "pasivo", "defensivo",
+                "agresivo", "llamar");
+        menu.fill(inv, dynamic, this::tag);
         Dino first = list.get(0);
         Dino.Order order = all(list, d -> d.order() == first.order()) ? first.order() : null;
         Dino.Combat combat = all(list, d -> d.combat() == first.combat()) ? first.combat() : null;
 
-        List<Component> info = new ArrayList<>();
         if (group) {
-            for (int i = 0; i < Math.min(8, list.size()); i++) info.add(line(Component.text("· ").append(label(list.get(i)))));
-            if (list.size() > 8) info.add(line(Component.text("y " + (list.size() - 8) + " más")));
+            List<String> lines = new ArrayList<>();
+            for (int i = 0; i < Math.min(8, list.size()); i++) {
+                lines.add(Lang.apply(menu.text("linea-grupo"), "dino", label(list.get(i))));
+            }
+            if (list.size() > 8) lines.add(menu.text("linea-grupo-mas", "cantidad", list.size() - 8));
+            put(inv, menu, "grupo", menu.item("grupo", "cantidad", list.size(), "lista", lines));
         } else {
-            info.add(line(Component.text(first.species().name + " " + first.species().rig.variant(first.variant()).name()
-                    + " · " + (first.isMale() ? "macho" : "hembra") + (first.isAdult() ? "" : " · cría"))));
-            String owner = first.ownerName();
-            if (owner != null) info.add(line(Component.text("Dueño: " + owner)));
             var max = first.wolf().getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
-            info.add(line(Component.text("Vida: " + Math.round(first.wolf().getHealth()) + " / "
-                    + (max != null ? Math.round(max.getValue()) : "?"))));
-            if (first.tracksHunger()) info.add(line(Component.text("Hambre: " + Math.round(first.hunger() * 100) + "%")));
+            String owner = first.ownerName();
+            List<String> hunger = first.tracksHunger()
+                    ? List.of(menu.text("linea-hambre", "hambre", Math.round(first.hunger() * 100))) : List.of();
+            put(inv, menu, "dino", menu.item("dino", "dino", label(first), "especie", first.species().name,
+                    "color", first.species().colorName(first.variant()), "sexo", Fmt.sex(first.isMale()),
+                    "dueno", owner != null ? owner : "?", "vida", Math.round(first.wolf().getHealth()),
+                    "vida_max", max != null ? Math.round(max.getValue()) : "?", "hambre", hunger));
         }
-        inv.setItem(HEADER, icon(Material.NAME_TAG, group ? Component.text("Tus dinos cerca: " + list.size(), NamedTextColor.GOLD)
-                : label(first).color(NamedTextColor.GOLD), info, false));
 
         String chunk = (p.getLocation().getBlockX() >> 4) + ", " + (p.getLocation().getBlockZ() >> 4);
-        String patrolNow = !group && first.patrolLabel() != null ? "Ahora: " + first.patrolLabel() : null;
-        inv.setItem(FOLLOW, icon(Material.LEAD, title("Seguirme", order == Dino.Order.FOLLOW),
-                lines("Te sigue a donde vayas."), order == Dino.Order.FOLLOW));
-        inv.setItem(STAY, icon(Material.RED_BED, title("Quedarse acá", order == Dino.Order.STAY),
-                lines("Se sienta y espera."), order == Dino.Order.STAY));
-        List<Component> patrol = new ArrayList<>(lines("Patrulla el chunk donde estás parado",
-                "(chunk " + chunk + ") y no se va de ahí."));
-        if (patrolNow != null) patrol.add(line(Component.text(patrolNow, NamedTextColor.YELLOW)));
-        inv.setItem(PATROL, icon(Material.FILLED_MAP, title("Patrullar este chunk", order == Dino.Order.PATROL),
-                patrol, order == Dino.Order.PATROL));
-        inv.setItem(PASSIVE, icon(Material.POPPY, title("Pasivo", combat == Dino.Combat.PASSIVE),
-                lines("No ataca a nadie, ni aunque lo ataquen."), combat == Dino.Combat.PASSIVE));
-        inv.setItem(DEFENSIVE, icon(Material.SHIELD, title("Defensivo", combat == Dino.Combat.DEFENSIVE),
-                lines("Te defiende a vos y a sí mismo.", "(lo normal)"), combat == Dino.Combat.DEFENSIVE));
-        inv.setItem(AGGRESSIVE, icon(Material.IRON_SWORD, title("Agresivo", combat == Dino.Combat.AGGRESSIVE),
-                lines("Además ataca a los monstruos", "que vea cerca (menos creepers)."), combat == Dino.Combat.AGGRESSIVE));
-        inv.setItem(RECALL, icon(Material.GOAT_HORN, Component.text("Llamar dinos lejanos", NamedTextColor.GOLD),
-                lines("Elegí hasta 2 de tus dinos que estén", "lejos y vuelven a tu lado."), false));
-        inv.setItem(CLOSE, icon(Material.BARRIER, Component.text("Cerrar", NamedTextColor.RED), List.of(), false));
+        List<String> patrolNow = !group && first.patrolLabel() != null
+                ? List.of(menu.text("linea-patrulla", "chunk", first.patrolLabel())) : List.of();
+        for (Map.Entry<String, Dino.Order> e : ORDERS.entrySet()) {
+            boolean on = order == e.getValue();
+            put(inv, menu, e.getKey(), state(menu.item(e.getKey(), "chunk", chunk, "patrulla_actual", patrolNow,
+                    "estado", menu.text(on ? "activo" : "elegir")), on));
+        }
+        for (Map.Entry<String, Dino.Combat> e : COMBATS.entrySet()) {
+            boolean on = combat == e.getValue();
+            put(inv, menu, e.getKey(), state(menu.item(e.getKey(), "estado", menu.text(on ? "activo" : "elegir")), on));
+        }
+        put(inv, menu, "llamar", menu.item("llamar", "max", dinos.settings().recallMax));
+    }
+
+    private static ItemStack state(ItemStack item, boolean on) {
+        if (on) {
+            ItemMeta meta = item.getItemMeta();
+            meta.setEnchantmentGlintOverride(true);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private void put(Inventory inv, Menu menu, String id, ItemStack item) {
+        tag(item);
+        int slot = menu.slot(id);
+        if (slot >= 0 && slot < inv.getSize()) inv.setItem(slot, item);
+    }
+
+    private void tag(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(keys.menuIcon, PersistentDataType.BYTE, (byte) 1);
+        item.setItemMeta(meta);
     }
 
     @EventHandler
@@ -204,13 +234,14 @@ public final class OrderMenu implements Listener {
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player p) || event.getClickedInventory() != event.getInventory()) return;
         int slot = event.getSlot();
-        if (slot == CLOSE) {
+        Menu menu = Lang.get().menu("silbato");
+        if (slot == menu.slot("cerrar")) {
             p.closeInventory();
             return;
         }
-        if (slot == RECALL) {
+        if (slot == menu.slot("llamar")) {
             p.closeInventory();
-            recall.openMenu(p);
+            recall.openMenu(p, true);
             return;
         }
         List<Dino> list = resolve(p, h);
@@ -218,46 +249,27 @@ public final class OrderMenu implements Listener {
             p.closeInventory();
             return;
         }
-        String one, many;
-        switch (slot) {
-            case FOLLOW -> {
-                list.forEach(d -> d.setOrder(Dino.Order.FOLLOW, p));
-                one = "te sigue";
-                many = "te siguen";
-            }
-            case STAY -> {
-                list.forEach(d -> d.setOrder(Dino.Order.STAY, p));
-                one = "se queda acá";
-                many = "se quedan acá";
-            }
-            case PATROL -> {
-                list.forEach(d -> d.setOrder(Dino.Order.PATROL, p));
-                one = "patrulla este chunk";
-                many = "patrullan este chunk";
-            }
-            case PASSIVE -> {
-                list.forEach(d -> d.setCombat(Dino.Combat.PASSIVE));
-                one = "está en modo pasivo";
-                many = "están en modo pasivo";
-            }
-            case DEFENSIVE -> {
-                list.forEach(d -> d.setCombat(Dino.Combat.DEFENSIVE));
-                one = "está en modo defensivo";
-                many = "están en modo defensivo";
-            }
-            case AGGRESSIVE -> {
-                list.forEach(d -> d.setCombat(Dino.Combat.AGGRESSIVE));
-                one = "está en modo agresivo";
-                many = "están en modo agresivo";
-            }
-            default -> {
-                return;
+        String key = null;
+        for (var e : ORDERS.entrySet()) {
+            if (slot == menu.slot(e.getKey())) {
+                list.forEach(d -> d.setOrder(e.getValue(), p));
+                key = e.getValue().name();
             }
         }
-        Component who = list.size() == 1 ? label(list.get(0)) : Component.text(list.size() + " dinos");
-        p.sendActionBar(who.append(Component.text(" " + (list.size() == 1 ? one : many), NamedTextColor.GREEN)));
+        for (var e : COMBATS.entrySet()) {
+            if (slot == menu.slot(e.getKey())) {
+                list.forEach(d -> d.setCombat(e.getValue()));
+                key = e.getValue().name();
+            }
+        }
+        if (key == null) return;
+        Lang lang = Lang.get();
+        List<String> said = lang.list("textos.yml", "orden-hecha." + key);
+        String action = said.size() > 1 && list.size() > 1 ? said.get(1) : said.isEmpty() ? "" : said.get(0);
+        Component who = list.size() == 1 ? label(list.get(0)) : Component.text(lang.plain("varios-dinos", "cantidad", list.size()));
+        lang.action(p, "orden", "dinos", who, "accion", action);
         p.playSound(p.getLocation(), "minecraft:ui.button.click", SoundCategory.PLAYERS, 0.5f, 1.4f);
-        fill(p, event.getInventory(), list, h.group);
+        fill(p, menu, event.getInventory(), list, h.group);
     }
 
     @EventHandler
@@ -269,35 +281,8 @@ public final class OrderMenu implements Listener {
         return list.stream().allMatch(test);
     }
 
-    // ------------------------------------------------------------ iconos
+    /** Nombre del dino: el de la etiqueta o el de su especie. */
     public static Component label(Dino d) {
         return d.name() != null ? d.name() : Component.text(d.species().name);
-    }
-
-    private static Component title(String text, boolean on) {
-        return Component.text((on ? "» " : "") + text, on ? NamedTextColor.GREEN : NamedTextColor.WHITE)
-                .decoration(TextDecoration.ITALIC, false);
-    }
-
-    private static List<Component> lines(String... text) {
-        List<Component> out = new ArrayList<>();
-        for (String t : text) out.add(line(Component.text(t)));
-        return out;
-    }
-
-    private static Component line(Component c) {
-        return c.colorIfAbsent(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false);
-    }
-
-    private ItemStack icon(Material material, Component name, List<Component> lore, boolean glow) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.itemName(name.decoration(TextDecoration.ITALIC, false));
-        meta.lore(lore);
-        meta.setEnchantmentGlintOverride(glow);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-        meta.getPersistentDataContainer().set(keys.menuIcon, PersistentDataType.BYTE, (byte) 1);
-        item.setItemMeta(meta);
-        return item;
     }
 }

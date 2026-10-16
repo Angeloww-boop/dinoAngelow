@@ -5,9 +5,6 @@ import com.dinoearth.species.Species;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -33,7 +30,7 @@ public final class DinoItems {
     public enum Kind { DROP, SADDLE, WHISTLE, CAGE }
 
     public record Def(String id, Kind kind, String species, Material material, int maxStack, NamespacedKey model,
-                      NamespacedKey modelFull, String name, List<String> lore) {
+                      NamespacedKey modelFull) {
     }
 
     public record Drop(String item, int min, int max, double chance) {
@@ -51,15 +48,12 @@ public final class DinoItems {
         JsonObject root = JsonParser.parseReader(new InputStreamReader(json, StandardCharsets.UTF_8)).getAsJsonObject();
         for (JsonElement e : root.getAsJsonArray("items")) {
             JsonObject o = e.getAsJsonObject();
-            List<String> lore = new ArrayList<>();
-            for (JsonElement l : o.getAsJsonArray("lore")) lore.add(l.getAsString());
             String id = o.get("id").getAsString();
             defs.put(id, new Def(id, Kind.valueOf(o.get("kind").getAsString().toUpperCase()),
                     o.has("species") ? o.get("species").getAsString() : null,
                     Material.valueOf(o.get("material").getAsString()), o.get("max_stack").getAsInt(),
                     NamespacedKey.fromString(o.get("model").getAsString()),
-                    o.has("model_full") ? NamespacedKey.fromString(o.get("model_full").getAsString()) : null,
-                    o.get("name").getAsString(), List.copyOf(lore)));
+                    o.has("model_full") ? NamespacedKey.fromString(o.get("model_full").getAsString()) : null));
         }
         JsonObject d = root.getAsJsonObject("drops");
         for (String species : d.keySet()) {
@@ -77,6 +71,11 @@ public final class DinoItems {
         return List.copyOf(defs.keySet());
     }
 
+    /** Nombre del item sin colores (items.yml). */
+    public String plainName(String id) {
+        return com.dinoearth.text.Lang.get().itemName(id);
+    }
+
     public Def def(String id) {
         return defs.get(id);
     }
@@ -87,8 +86,7 @@ public final class DinoItems {
         ItemStack item = new ItemStack(def.material(), Math.max(1, amount));
         ItemMeta meta = item.getItemMeta();
         meta.setItemModel(def.model());
-        meta.itemName(Component.text(def.name(), def.kind() == Kind.DROP ? NamedTextColor.WHITE : NamedTextColor.GOLD));
-        meta.lore(def.lore().stream().map(DinoItems::line).toList());
+        com.dinoearth.text.Lang.get().itemTexts(meta, id);
         meta.setMaxStackSize(def.maxStack());
         meta.getPersistentDataContainer().set(keys.item, PersistentDataType.STRING, id);
         item.setItemMeta(meta);
@@ -136,7 +134,4 @@ public final class DinoItems {
         return out;
     }
 
-    static Component line(String text) {
-        return Component.text(text, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false);
-    }
 }

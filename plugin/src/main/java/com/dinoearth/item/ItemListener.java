@@ -1,9 +1,8 @@
 package com.dinoearth.item;
 
+import com.dinoearth.text.Lang;
 import com.destroystokyo.paper.event.inventory.PrepareResultEvent;
 import com.dinoearth.dino.DinoManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -81,8 +80,7 @@ public final class ItemListener implements Listener {
         if (cages.isFull(item)) {
             cages.release(event.getPlayer(), item, event.getClickedBlock(), event.getBlockFace());
         } else {
-            event.getPlayer().sendActionBar(Component.text("Click derecho a tu dino para guardarlo en la jaula.",
-                    NamedTextColor.GRAY));
+            Lang.get().action(event.getPlayer(), "jaula-uso");
         }
     }
 }

@@ -1,0 +1,119 @@
+# Menu del silbato de ordenes (click derecho a tu dino, o agachado al aire para todos los cercanos).
+menu_title: '&8| &9Silbato'
+size: 54
+items:
+  'relleno':
+    material: black_stained_glass_pane
+    slots:
+      - 0-9
+      - 17
+      - 18
+      - 26
+      - 27
+      - 35
+      - 36-44
+      - 45-53
+    display_name: ' '
+  # cabecera cuando es un solo dino
+  'dino':
+    material: name_tag
+    slot: 4
+    display_name: '&#ff00d9%dino%'
+    lore:
+      - '&f'
+      - '&8| &fEspecie &8» &#ff00d9%especie% %color%'
+      - '&8| &fSexo &8» &#ff00d9%sexo%'
+      - '&8| &fDueño &8» &#ff00d9%dueno%'
+      - '&8| &fVida &8» &#ff00d9%vida%&8/&#ff00d9%vida_max%'
+      - '%hambre%'
+      - '&f'
+  # cabecera cuando son varios
+  'grupo':
+    material: name_tag
+    slot: 4
+    display_name: '&#ff00d9Tus dinos cerca &8- &f%cantidad%'
+    lore:
+      - '&f'
+      - '%lista%'
+      - '&f'
+  'seguir':
+    material: lead
+    slot: 11
+    display_name: '&#ff00d9Seguirme'
+    lore:
+      - '&f'
+      - '&8| &fTe sigue a donde vayas.'
+      - '&f'
+      - '%estado%'
+  'quedarse':
+    material: red_bed
+    slot: 13
+    display_name: '&#ff00d9Quedarse acá'
+    lore:
+      - '&f'
+      - '&8| &fSe sienta y espera.'
+      - '&f'
+      - '%estado%'
+  'patrullar':
+    material: filled_map
+    slot: 15
+    display_name: '&#ff00d9Patrullar este chunk'
+    lore:
+      - '&f'
+      - '&8| &fPatrulla el chunk donde estás parado'
+      - '&8| &8(&fchunk &#ff00d9%chunk%&8) &fy no se va de ahí.'
+      - '%patrulla_actual%'
+      - '&f'
+      - '%estado%'
+  'llamar':
+    material: goat_horn
+    slot: 22
+    display_name: '&#ff00d9Llamar dinos lejanos'
+    lore:
+      - '&f'
+      - '&8| &fElegí hasta &#ff00d9%max%&f de tus dinos que estén'
+      - '&8| &flejos y vuelven a tu lado.'
+      - '&f'
+      - '&#41FF00✔ Click para abrir'
+  'pasivo':
+    material: poppy
+    slot: 29
+    display_name: '&#ff00d9Pasivo'
+    lore:
+      - '&f'
+      - '&8| &fNo ataca a nadie, ni aunque lo ataquen.'
+      - '&f'
+      - '%estado%'
+  'defensivo':
+    material: shield
+    slot: 31
+    display_name: '&#ff00d9Defensivo'
+    lore:
+      - '&f'
+      - '&8| &fTe defiende a vos y a sí mismo.'
+      - '&8| &fEs el modo normal.'
+      - '&f'
+      - '%estado%'
+  'agresivo':
+    material: iron_sword
+    slot: 33
+    display_name: '&#ff00d9Agresivo'
+    lore:
+      - '&f'
+      - '&8| &fAdemás ataca a los monstruos'
+      - '&8| &fque vea cerca, menos creepers.'
+      - '&f'
+      - '%estado%'
+  'cerrar':
+    material: barrier
+    display_name: '&#EE193BCerrar'
+    slot: 49
+textos:
+  # lineas que se agregan al lore solo cuando corresponde
+  linea-hambre: '&8| &fHambre &8» &#ff00d9%hambre%%'
+  linea-grupo: '&8| &8• &#ff00d9%dino%'
+  linea-grupo-mas: '&8| &fy &#ff00d9%cantidad%&f más.'
+  linea-patrulla: '&8| &fAhora patrulla el &#ff00d9%chunk%&f.'
+  # ultima linea del lore de cada orden
+  activo: '&8| &fYa está &#ff00d9activo&f.'
+  elegir: '&#41FF00✔ Click para seleccionar'

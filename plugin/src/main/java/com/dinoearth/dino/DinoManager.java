@@ -158,10 +158,9 @@ public final class DinoManager {
         return limit == 0 || ownedCount(owner) < limit;
     }
 
-    public net.kyori.adventure.text.Component limitMessage(org.bukkit.entity.Player p) {
-        return net.kyori.adventure.text.Component.text("Ya tenés " + ownedCount(p.getUniqueId()) + " dinos, el máximo ("
-                + tamedLimit(p) + "). Guardá alguno en una jaula o regalalo.",
-                net.kyori.adventure.text.format.NamedTextColor.RED);
+    /** Le avisa (barra de accion) que llego al maximo de dinos. */
+    public void limitMessage(org.bukkit.entity.Player p) {
+        com.dinoearth.text.Lang.get().action(p, "limite", "cantidad", ownedCount(p.getUniqueId()), "limite", tamedLimit(p));
     }
 
     // ------------------------------------------------------------ tick (y cuanto tarda, para /dino stats)

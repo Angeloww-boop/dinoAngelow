@@ -16,6 +16,25 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - En la PC: Java 21 + Maven, Python 3.14. Sonidos: `generator/.venv` con numpy + soundfile
   (en otra máquina: `python -m venv generator/.venv && generator/.venv/Scripts/pip install numpy soundfile`).
 
+## Estilo OBLIGATORIO de textos y menús (pedido por Angeloww, 0.13)
+
+- **Prohibido hardcodear texto visible en el código.** Todo va en YML: `messages.yml` (secciones `chat`, `actionbar`,
+  `bossbar`), `textos.yml` (palabras sueltas: especies, colores, órdenes, causas, tiempos, misiones...), `items.yml`
+  (nombre/lore de items; lo genera `generator/items.py`), `menus/*.yml`. Se leen con `text/Lang` (`Lang.get()`):
+  `chat`, `action`, `bossbar`, `plain/text`, `itemTexts`, `menu("nombre")` (`text/Menu`). Placeholders `%clave%`
+  (valores texto, Component o lista de lineas para el lore). Al agregar claves nuevas, `Lang` las suma solas al
+  archivo del dueño. Los logs de consola sí pueden quedar en el código.
+- Español, **sin "¡" ni "!" en ningún lado**. Chat termina en punto blanco (`&f.` solo si lo anterior no era blanco).
+- Colores: texto `&f`, variables/nombres `&#ff00d9`, símbolos y separadores `&8`, prefijo `&9&lDINOEARTH &8»`.
+  Actionbar `&8| &fTexto &#ff00d9variable&f texto.`; bossbar `&#ff00d9var &ftexto &8- &ftexto &#ff00d9var`.
+- Menús: `menu_title: '&8| &9Nombre'`, `size: 54`, `items:` con `relleno` (black_stained_glass_pane en 0-9, 17, 18,
+  26, 27, 35, 36-44, 45-53), lore con `'&8| &f...'` y separadores `'&f'` (nunca vacío), barrier en el 49 (`Volver` si
+  es submenu, `Cerrar` si vuelve al juego, color `&#EE193B`, sin lore), indicadores `'&#41FF00✔ Click para abrir'` /
+  `'&#EE193B✘ Click para remover'`. La Dinopedia es la excepción acordada (fondo dibujado, sin titulo de texto ni
+  relleno) pero sus items siguen el formato.
+- Claves YAML: nunca `no`, `si`, `yes`, `on`, `off`, `y`, `n` sin comillas (SnakeYAML las lee como booleanos).
+- Para revisar: `TextCheck` (plugin/src/test) parsea todos los textos con Lang.parse y avisa códigos sin entender o ¡/!.
+
 ## Cómo funciona
 
 - **Sin ModelEngine.** Cada dino = un **lobo invisible** (IA, hitbox, vida, domesticación) + una
@@ -133,5 +152,9 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   El pack no cambio (sha1 a471063d…).
 - v0.12.0 **sin probar en el juego**: el dimorphodon ya no va en el hombro, vuela al lado del dueño (simulado en
   Python con la misma cuenta: queda ~1,5 bloques al costado a cualquier velocidad, nunca mas de 3 atras).
+- v0.13.0 **sin probar en el juego**: todos los textos y menús pasan a YML con el estilo del server (ver arriba),
+  `/dino reload`, menú de llamar con páginas (21 por página) y Volver/Cerrar; misiones diarias personales
+  (`mission/MissionManager`: 3 por jugador, solo especies vistas en el server en `recent-days`, 1 cambio por día,
+  premios en `missions.*`, PDC del jugador + `misiones.yml` con las especies vistas) en la Dinopedia y `/dino misiones`.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

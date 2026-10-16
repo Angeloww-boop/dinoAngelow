@@ -6,15 +6,15 @@ import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
 import com.dinoearth.order.OrderMenu;
 import com.dinoearth.species.Species;
+import com.dinoearth.text.Fmt;
+import com.dinoearth.text.Lang;
+import com.dinoearth.text.Menu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
@@ -37,7 +37,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -66,7 +65,6 @@ public final class RecallManager implements Listener {
 
     private static final double HERE = 16;          // a esta distancia ya "esta con vos"
     private static final int FIND_TICKS = 200;      // cuanto se espera a que aparezca al cargar su chunk
-    private static final int CONFIRM = 49, INFO = 45, CLOSE = 53;
 
     private final Plugin plugin;
     private final DinoManager dinos;
@@ -81,7 +79,13 @@ public final class RecallManager implements Listener {
     public static final class Holder implements InventoryHolder {
         private final List<UUID> ids = new ArrayList<>();
         private final Set<UUID> chosen = new LinkedHashSet<>();
+        private final boolean fromWhistle;
+        private int page;
         private Inventory inventory;
+
+        private Holder(boolean fromWhistle) {
+            this.fromWhistle = fromWhistle;
+        }
 
         @Override
         public Inventory getInventory() {
@@ -99,26 +103,22 @@ public final class RecallManager implements Listener {
 
     // ------------------------------------------------------------ /dino mis
     public void list(Player p) {
+        Lang lang = Lang.get();
         List<DinoRegistry.Entry> mine = sorted(p);
         if (mine.isEmpty()) {
-            p.sendMessage(Component.text("No tenés dinos domesticados.", NamedTextColor.GRAY));
+            lang.chat(p, "mis-vacio");
             return;
         }
-        p.sendMessage(Component.text("── Tus dinos (" + mine.size() + ") ──", NamedTextColor.GOLD));
+        lang.chat(p, "mis-titulo", "cantidad", mine.size());
         for (DinoRegistry.Entry e : mine) {
-            Component line = Component.text("• ", NamedTextColor.DARK_GRAY).append(title(e).color(NamedTextColor.WHITE))
-                    .append(Component.text(" — " + where(p, e) + " · " + orderLabel(e.order()), NamedTextColor.GRAY));
-            if (!isHere(p, e)) {
-                line = line.append(Component.text(" [Llamar]", NamedTextColor.GREEN).decorate(TextDecoration.BOLD)
-                        .hoverEvent(HoverEvent.showText(Component.text("Traerlo a tu lado")))
-                        .clickEvent(ClickEvent.runCommand("/dino llamar " + shortId(e.id()))));
-            }
-            p.sendMessage(line);
+            Component call = isHere(p, e) ? Component.empty() : lang.chatMsg("mis-boton")
+                    .hoverEvent(HoverEvent.showText(lang.chatMsg("mis-boton-hover")))
+                    .clickEvent(ClickEvent.runCommand("/dino llamar " + shortId(e.id())));
+            lang.chat(p, "mis-linea", "dino", title(e), "donde", where(p, e), "orden", orderLabel(e.order()), "llamar", call);
         }
         long wait = cooldownLeft(p);
-        p.sendMessage(Component.text(wait > 0 ? "Podés volver a llamar en " + time(wait) + "."
-                : "Podés llamar hasta " + settings.recallMax + " dinos a la vez (cada " + time(settings.recallCooldownMs)
-                + ").", NamedTextColor.DARK_GRAY));
+        if (wait > 0) lang.chat(p, "mis-pie-espera", "tiempo", Fmt.time(wait));
+        else lang.chat(p, "mis-pie-listo", "max", settings.recallMax, "tiempo", Fmt.time(settings.recallCooldownMs));
     }
 
     /** /dino llamar <id> [id]: ids cortos que muestra /dino mis. */
@@ -130,54 +130,84 @@ public final class RecallManager implements Listener {
             }
         }
         if (ids.isEmpty()) {
-            p.sendMessage(Component.text("No encontré ese dino. Mirá la lista con /dino mis.", NamedTextColor.RED));
+            Lang.get().chat(p, "llamar-no-encontrado");
             return;
         }
         recall(p, ids);
     }
 
     // ------------------------------------------------------------ silbato de regreso
-    public void openMenu(Player p) {
+    /** @param fromWhistle se abrio desde el menu del silbato: el boton del 49 dice Volver en vez de Cerrar. */
+    public void openMenu(Player p, boolean fromWhistle) {
         List<DinoRegistry.Entry> far = sorted(p).stream().filter(e -> !isHere(p, e)).toList();
         if (far.isEmpty()) {
-            p.sendActionBar(Component.text("Todos tus dinos están con vos.", NamedTextColor.GRAY));
+            Lang.get().action(p, "llamar-todos-aca");
             return;
         }
-        Holder h = new Holder();
-        for (int i = 0; i < Math.min(45, far.size()); i++) h.ids.add(far.get(i).id());
-        Inventory inv = Bukkit.createInventory(h, 54, Component.text("Llamar de regreso"));
+        Menu menu = Lang.get().menu("llamar");
+        Holder h = new Holder(fromWhistle);
+        for (DinoRegistry.Entry e : far) h.ids.add(e.id());
+        Inventory inv = Bukkit.createInventory(h, menu.size(), menu.title());
         h.inventory = inv;
         draw(p, h);
         p.openInventory(inv);
     }
 
     private void draw(Player p, Holder h) {
+        Menu menu = Lang.get().menu("llamar");
         Inventory inv = h.inventory;
         inv.clear();
-        for (int i = 0; i < h.ids.size(); i++) {
-            DinoRegistry.Entry e = registry.get(h.ids.get(i));
+        menu.fill(inv, Set.of("dino", "info", "llamar", "anterior", "siguiente", "volver", "cerrar"), this::tag);
+        List<Integer> slots = menu.slots("dino");
+        int per = Math.max(1, slots.size());
+        int pages = (h.ids.size() + per - 1) / per;
+        h.page = Math.max(0, Math.min(pages - 1, h.page));
+        for (int i = 0; i < per; i++) {
+            int idx = h.page * per + i;
+            if (idx >= h.ids.size()) break;
+            DinoRegistry.Entry e = registry.get(h.ids.get(idx));
             if (e == null) continue;
             boolean on = h.chosen.contains(e.id());
-            List<Component> lore = new ArrayList<>();
-            lore.add(line(where(p, e)));
-            lore.add(line(orderLabel(e.order())));
-            lore.add(line(Bukkit.getEntity(e.id()) != null ? "Cargado: llega al toque."
-                    : "Lejos: se carga su chunk un momento."));
-            lore.add(line(on ? "Click: sacar de la llamada" : "Click: elegir"));
-            ItemStack icon = icon(Material.PAPER, title(e).color(on ? NamedTextColor.GREEN : NamedTextColor.WHITE), lore, on);
-            ItemMeta meta = icon.getItemMeta();
-            meta.setItemModel(NamespacedKey.fromString("dinoearth:icon/" + e.species() + "/" + e.variant()));
-            icon.setItemMeta(meta);
-            inv.setItem(i, icon);
+            Species s = Species.byId(e.species());
+            ItemStack icon = menu.item("dino", Material.PAPER, "dinoearth:icon/" + e.species() + "/" + e.variant(),
+                    "dino", title(e), "especie", s != null ? s.name : e.species(),
+                    "color", s != null && s.rig != null ? s.colorName(e.variant()) : e.variant(),
+                    "sexo", Fmt.sex(e.male()), "donde", where(p, e), "orden", orderLabel(e.order()),
+                    "carga", Lang.get().plain(Bukkit.getEntity(e.id()) != null ? "llamar.cargado" : "llamar.lejos"),
+                    "click", menu.text(on ? "sacar" : "elegir"));
+            if (on) glow(icon);
+            tag(icon);
+            inv.setItem(slots.get(i), icon);
         }
         long wait = cooldownLeft(p);
-        inv.setItem(INFO, icon(Material.CLOCK, Component.text(wait > 0 ? "Esperá " + time(wait) : "Listo para llamar",
-                wait > 0 ? NamedTextColor.RED : NamedTextColor.GREEN), List.of(line("Hasta " + settings.recallMax
-                + " dinos por llamada, una vez cada " + time(settings.recallCooldownMs) + ".")), false));
-        inv.setItem(CONFIRM, icon(Material.GOAT_HORN, Component.text("Llamar (" + h.chosen.size() + "/" + settings.recallMax
-                + ")", NamedTextColor.GOLD), List.of(line("Trae a los elegidos a tu lado."),
-                line("Después te siguen.")), !h.chosen.isEmpty()));
-        inv.setItem(CLOSE, icon(Material.BARRIER, Component.text("Cerrar", NamedTextColor.RED), List.of(), false));
+        String time = Fmt.time(settings.recallCooldownMs);
+        put(inv, menu, "info", menu.item("info", "estado", wait > 0 ? menu.text("espera", "tiempo", Fmt.time(wait))
+                : menu.text("listo"), "max", settings.recallMax, "tiempo", time));
+        ItemStack call = menu.item("llamar", "elegidos", h.chosen.size(), "max", settings.recallMax);
+        if (!h.chosen.isEmpty()) glow(call);
+        put(inv, menu, "llamar", call);
+        if (h.page > 0) put(inv, menu, "anterior", menu.item("anterior"));
+        if (h.page < pages - 1) put(inv, menu, "siguiente", menu.item("siguiente"));
+        String back = h.fromWhistle ? "volver" : "cerrar";
+        put(inv, menu, back, menu.item(back));
+    }
+
+    private void put(Inventory inv, Menu menu, String id, ItemStack item) {
+        tag(item);
+        int slot = menu.slot(id);
+        if (slot >= 0 && slot < inv.getSize()) inv.setItem(slot, item);
+    }
+
+    private void tag(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(keys.menuIcon, PersistentDataType.BYTE, (byte) 1);
+        item.setItemMeta(meta);
+    }
+
+    private static void glow(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        meta.setEnchantmentGlintOverride(true);
+        item.setItemMeta(meta);
     }
 
     @EventHandler
@@ -186,23 +216,42 @@ public final class RecallManager implements Listener {
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player p) || event.getClickedInventory() != event.getInventory()) return;
         int slot = event.getSlot();
-        if (slot == CLOSE) {
+        Menu menu = Lang.get().menu("llamar");
+        if (slot == menu.slot("volver") || slot == menu.slot("cerrar")) {
             p.closeInventory();
-        } else if (slot == CONFIRM) {
+            if (h.fromWhistle && whistleBack != null) whistleBack.accept(p);
+        } else if (slot == menu.slot("llamar")) {
             if (h.chosen.isEmpty()) return;
             p.closeInventory();
             recall(p, new ArrayList<>(h.chosen));
-        } else if (slot < h.ids.size()) {
-            UUID id = h.ids.get(slot);
+        } else if (slot == menu.slot("anterior")) {
+            h.page--;
+            draw(p, h);
+        } else if (slot == menu.slot("siguiente")) {
+            h.page++;
+            draw(p, h);
+        } else {
+            List<Integer> slots = menu.slots("dino");
+            int i = slots.indexOf(slot);
+            int idx = h.page * Math.max(1, slots.size()) + i;
+            if (i < 0 || idx >= h.ids.size()) return;
+            UUID id = h.ids.get(idx);
             if (!h.chosen.remove(id)) {
                 if (h.chosen.size() >= settings.recallMax) {
-                    p.sendActionBar(Component.text("Máximo " + settings.recallMax + " dinos por llamada.", NamedTextColor.RED));
+                    Lang.get().action(p, "llamar-maximo", "max", settings.recallMax);
                     return;
                 }
                 h.chosen.add(id);
             }
             draw(p, h);
         }
+    }
+
+    private java.util.function.Consumer<Player> whistleBack;
+
+    /** Que hace "Volver" (abrir de nuevo el menu del silbato). */
+    public void setWhistleBack(java.util.function.Consumer<Player> back) {
+        this.whistleBack = back;
     }
 
     @EventHandler
@@ -214,7 +263,7 @@ public final class RecallManager implements Listener {
     public void recall(Player p, List<UUID> ids) {
         long wait = cooldownLeft(p);
         if (wait > 0) {
-            p.sendMessage(Component.text("El silbato todavía no se recuperó: esperá " + time(wait) + ".", NamedTextColor.RED));
+            Lang.get().chat(p, "llamar-espera", "tiempo", Fmt.time(wait));
             return;
         }
         List<DinoRegistry.Entry> list = new ArrayList<>();
@@ -223,7 +272,7 @@ public final class RecallManager implements Listener {
             if (e != null && e.owner().equals(p.getUniqueId()) && !isHere(p, e) && list.size() < settings.recallMax) list.add(e);
         }
         if (list.isEmpty()) {
-            p.sendMessage(Component.text("No hay nadie para llamar.", NamedTextColor.GRAY));
+            Lang.get().chat(p, "llamar-nadie");
             return;
         }
         lastCall.put(p.getUniqueId(), System.currentTimeMillis());
@@ -240,8 +289,7 @@ public final class RecallManager implements Listener {
         }
         World world = Bukkit.getWorld(e.world());
         if (world == null) {
-            p.sendMessage(Component.text("El mundo de ", NamedTextColor.RED).append(title(e))
-                    .append(Component.text(" no está cargado.", NamedTextColor.RED)));
+            Lang.get().chat(p, "llamar-mundo", "dino", title(e));
             return;
         }
         int cx = e.chunkX(), cz = e.chunkZ();
@@ -260,8 +308,7 @@ public final class RecallManager implements Listener {
                         cancel();
                         release(world, cx, cz);
                         if (p.isOnline()) {
-                            p.sendMessage(Component.text("No encontré a ", NamedTextColor.RED).append(title(e))
-                                    .append(Component.text(" donde estaba la última vez.", NamedTextColor.RED)));
+                            Lang.get().chat(p, "llamar-no-esta", "dino", title(e));
                         }
                     }
                 }
@@ -285,7 +332,7 @@ public final class RecallManager implements Listener {
             Entity now = Bukkit.getEntity(id);
             Dino moved = now instanceof Wolf w ? (dinos.get(w) != null ? dinos.get(w) : dinos.attach(w)) : null;
             if (!ok || moved == null) {
-                if (p.isOnline()) p.sendMessage(Component.text("No se pudo traer a ", NamedTextColor.RED).append(title(e)));
+                if (p.isOnline()) Lang.get().chat(p, "llamar-fallo", "dino", title(e));
                 return;
             }
             moved.setOrder(Dino.Order.FOLLOW, p);
@@ -293,8 +340,7 @@ public final class RecallManager implements Listener {
             Location at = moved.wolf().getLocation();
             at.getWorld().spawnParticle(Particle.CLOUD, at.clone().add(0, 0.6, 0), 16, 0.5, 0.4, 0.5, 0.03);
             at.getWorld().playSound(at, "minecraft:entity.enderman.teleport", SoundCategory.NEUTRAL, 0.6f, 1.3f);
-            p.sendMessage(OrderMenu.label(moved).colorIfAbsent(NamedTextColor.GREEN)
-                    .append(Component.text(" volvió con vos.", NamedTextColor.GREEN)));
+            Lang.get().chat(p, "llamar-volvio", "dino", OrderMenu.label(moved));
         });
     }
 
@@ -378,9 +424,8 @@ public final class RecallManager implements Listener {
         if (last != null && now - last < settings.alertCooldownMs) return;
         lastAlert.put(w.getUniqueId(), now);
         Location at = w.getLocation();
-        owner.sendMessage(Component.text("⚠ Están atacando a ", NamedTextColor.RED).append(OrderMenu.label(d))
-                .append(Component.text(" en " + at.getBlockX() + " " + at.getBlockY() + " " + at.getBlockZ()
-                        + " — " + who(attacker) + ".", NamedTextColor.RED)));
+        Lang.get().chat(owner, "aviso-ataque", "dino", OrderMenu.label(d), "x", at.getBlockX(), "y", at.getBlockY(),
+                "z", at.getBlockZ(), "atacante", who(attacker));
         owner.playSound(owner.getLocation(), "minecraft:block.note_block.bell", SoundCategory.PLAYERS, 0.7f, 0.6f);
     }
 
@@ -398,11 +443,13 @@ public final class RecallManager implements Listener {
         String name = d != null && d.name() != null
                 ? net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(d.name())
                 + " (" + s.name + ")" : s.name;
-        String text = "Tu " + name + " murió en " + at.getWorld().getName() + " " + at.getBlockX() + " " + at.getBlockY()
-                + " " + at.getBlockZ() + " — " + cause(w.getLastDamageCause()) + ".";
+        // se guarda ya armado (con colores) para mandarlo tal cual si el dueño no esta conectado
+        String text = Lang.apply(Lang.get().raw("messages.yml", "chat.aviso-muerte"), "dino", name,
+                "mundo", at.getWorld().getName(), "x", at.getBlockX(), "y", at.getBlockY(), "z", at.getBlockZ(),
+                "causa", cause(w.getLastDamageCause()));
         Player owner = Bukkit.getPlayer(ownerId);
         if (owner != null) {
-            owner.sendMessage(Component.text("✝ " + text, NamedTextColor.DARK_RED));
+            owner.sendMessage(Lang.parse(text));
         } else {
             registry.addNotice(ownerId, text);
         }
@@ -415,8 +462,8 @@ public final class RecallManager implements Listener {
             if (!p.isOnline()) return;
             List<String> list = registry.takeNotices(p.getUniqueId());
             if (list.isEmpty()) return;
-            p.sendMessage(Component.text("Mientras no estabas:", NamedTextColor.GOLD));
-            for (String t : list) p.sendMessage(Component.text("✝ " + t, NamedTextColor.DARK_RED));
+            Lang.get().chat(p, "avisos-titulo");
+            for (String t : list) p.sendMessage(Lang.parse(t));
         }, 60L);
     }
 
@@ -439,27 +486,26 @@ public final class RecallManager implements Listener {
 
     private static String where(Player p, DinoRegistry.Entry e) {
         World w = Bukkit.getWorld(e.world());
-        String coords = (int) Math.floor(e.x()) + " " + (int) Math.floor(e.y()) + " " + (int) Math.floor(e.z());
         double d = distance(p, e);
-        return (w != null ? w.getName() + " " : "") + coords
-                + (d == Double.MAX_VALUE ? " (otro mundo)" : " (" + Math.round(d) + " bloques)");
+        return Lang.get().plain(d == Double.MAX_VALUE ? "lugar.otro-mundo" : "lugar.con-distancia",
+                "mundo", w != null ? w.getName() : "?", "x", (int) Math.floor(e.x()), "y", (int) Math.floor(e.y()),
+                "z", (int) Math.floor(e.z()), "bloques", Math.round(d));
     }
 
     private static Component title(DinoRegistry.Entry e) {
         Species s = Species.byId(e.species());
         String species = s != null ? s.name : e.species();
-        String color = s != null && s.rig != null ? s.rig.variant(e.variant()).name() : e.variant();
+        String color = s != null && s.rig != null ? s.colorName(e.variant()) : e.variant();
         String sex = e.male() ? "♂" : "♀";
-        return e.name() != null ? Component.text(e.name() + " (" + species + " " + color + " " + sex + ")")
-                : Component.text(species + " " + color + " " + sex);
+        Lang lang = Lang.get();
+        return Component.text(e.name() != null
+                ? lang.plain("dino-con-nombre", "nombre", e.name(), "especie", species, "color", color, "sexo", sex)
+                : lang.plain("dino-sin-nombre", "especie", species, "color", color, "sexo", sex));
     }
 
     private static String orderLabel(String order) {
-        return switch (order) {
-            case "STAY" -> "sentado";
-            case "PATROL" -> "patrullando";
-            default -> "siguiéndote";
-        };
+        Lang lang = Lang.get();
+        return lang.has("textos.yml", "ordenes." + order) ? lang.plain("ordenes." + order) : lang.plain("ordenes.FOLLOW");
     }
 
     private static String who(Entity e) {
@@ -471,24 +517,14 @@ public final class RecallManager implements Listener {
     }
 
     private static String cause(EntityDamageEvent last) {
-        if (last == null) return "causa desconocida";
+        Lang lang = Lang.get();
+        if (last == null) return lang.plain("causas.desconocida");
         if (last instanceof EntityDamageByEntityEvent by) {
             Entity k = by.getDamager() instanceof Projectile pr && pr.getShooter() instanceof Entity s ? s : by.getDamager();
-            return "lo mató " + who(k);
+            return lang.plain("causas.mato", "quien", who(k));
         }
-        return switch (last.getCause()) {
-            case FALL -> "una caída";
-            case LAVA -> "la lava";
-            case FIRE, FIRE_TICK -> "el fuego";
-            case DROWNING -> "se ahogó";
-            case VOID -> "cayó al vacío";
-            case SUFFOCATION -> "se asfixió";
-            case STARVATION -> "el hambre";
-            case BLOCK_EXPLOSION, ENTITY_EXPLOSION -> "una explosión";
-            case LIGHTNING -> "un rayo";
-            case FREEZE -> "el frío";
-            default -> last.getCause().name().toLowerCase().replace('_', ' ');
-        };
+        String key = "causas." + last.getCause().name();
+        return lang.has("textos.yml", key) ? lang.plain(key) : last.getCause().name().toLowerCase().replace('_', ' ');
     }
 
     private long cooldownLeft(Player p) {
@@ -496,28 +532,10 @@ public final class RecallManager implements Listener {
         return last == null ? 0 : Math.max(0, settings.recallCooldownMs - (System.currentTimeMillis() - last));
     }
 
-    private static String time(long ms) {
-        long s = (ms + 999) / 1000;
-        return s >= 60 ? (s / 60) + " min" + (s % 60 > 0 ? " " + s % 60 + " s" : "") : s + " s";
-    }
 
     public static String shortId(UUID id) {
         return id.toString().substring(0, 8);
     }
 
-    private static Component line(String text) {
-        return Component.text(text, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false);
-    }
 
-    private ItemStack icon(Material material, Component name, List<Component> lore, boolean glow) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.itemName(name.decoration(TextDecoration.ITALIC, false));
-        meta.lore(lore);
-        meta.setEnchantmentGlintOverride(glow);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-        meta.getPersistentDataContainer().set(keys.menuIcon, PersistentDataType.BYTE, (byte) 1);
-        item.setItemMeta(meta);
-        return item;
-    }
 }

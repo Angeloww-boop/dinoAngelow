@@ -1,0 +1,299 @@
+# Nombre y descripcion de los items de DinoEarth. Los genera generator/items.py; el dueño los puede cambiar.
+# Formato: display_name y lore como en los menus (&8| &f para cada linea, &f para separar).
+
+cuero_raptor:
+  display_name: '&#ff00d9Cuero de velociraptor'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Velociraptor&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+garra_raptor:
+  display_name: '&#ff00d9Garra de velociraptor'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Velociraptor&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_raptor:
+  display_name: '&#ff00d9Montura de Velociraptor'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Velociraptor&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_triceratops:
+  display_name: '&#ff00d9Cuero de triceratops'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Triceratops&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+cuerno_triceratops:
+  display_name: '&#ff00d9Cuerno de triceratops'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Triceratops&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_triceratops:
+  display_name: '&#ff00d9Montura de Triceratops'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Triceratops&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+glandula_dilophosaurus:
+  display_name: '&#ff00d9Glándula venenosa'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Dilophosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+cresta_dilophosaurus:
+  display_name: '&#ff00d9Cresta de dilophosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Dilophosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+diente_compsognathus:
+  display_name: '&#ff00d9Diente de compsognathus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Compsognathus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+cuero_trex:
+  display_name: '&#ff00d9Cuero de T-Rex'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Tyrannosaurus rex&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+diente_trex:
+  display_name: '&#ff00d9Diente de T-Rex'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Tyrannosaurus rex&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_trex:
+  display_name: '&#ff00d9Montura de Tyrannosaurus rex'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Tyrannosaurus rex&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+membrana_pteranodon:
+  display_name: '&#ff00d9Membrana de pteranodon'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Pteranodon&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+cresta_pteranodon:
+  display_name: '&#ff00d9Cresta de pteranodon'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Pteranodon&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_pteranodon:
+  display_name: '&#ff00d9Montura de Pteranodon'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Pteranodon&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_parasaurolophus:
+  display_name: '&#ff00d9Cuero de parasaurolophus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Parasaurolophus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+cresta_parasaurolophus:
+  display_name: '&#ff00d9Cresta de parasaurolophus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Parasaurolophus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_parasaurolophus:
+  display_name: '&#ff00d9Montura de Parasaurolophus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Parasaurolophus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_gallimimus:
+  display_name: '&#ff00d9Cuero de gallimimus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Gallimimus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+pluma_gallimimus:
+  display_name: '&#ff00d9Pluma de gallimimus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Gallimimus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_gallimimus:
+  display_name: '&#ff00d9Montura de Gallimimus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Gallimimus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_stegosaurus:
+  display_name: '&#ff00d9Cuero de stegosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Stegosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+placa_stegosaurus:
+  display_name: '&#ff00d9Placa de stegosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Stegosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_stegosaurus:
+  display_name: '&#ff00d9Montura de Stegosaurus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Stegosaurus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_ankylosaurus:
+  display_name: '&#ff00d9Cuero de ankylosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Ankylosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+mazo_ankylosaurus:
+  display_name: '&#ff00d9Mazo de ankylosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Ankylosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_ankylosaurus:
+  display_name: '&#ff00d9Montura de Ankylosaurus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Ankylosaurus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_giganotosaurus:
+  display_name: '&#ff00d9Cuero de giganotosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Giganotosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+diente_giganotosaurus:
+  display_name: '&#ff00d9Diente de giganotosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Giganotosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_giganotosaurus:
+  display_name: '&#ff00d9Montura de Giganotosaurus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Giganotosaurus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_carnotaurus:
+  display_name: '&#ff00d9Cuero de carnotaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Carnotaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+cuerno_carnotaurus:
+  display_name: '&#ff00d9Cuerno de carnotaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Carnotaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_carnotaurus:
+  display_name: '&#ff00d9Montura de Carnotaurus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Carnotaurus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+membrana_dimorphodon:
+  display_name: '&#ff00d9Membrana de dimorphodon'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Dimorphodon&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+silbato:
+  display_name: '&#ff00d9Silbato de dinos'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho a tu dino &8» &#ff00d9darle órdenes&f.'
+    - '&8| &fAgachado y click derecho al aire &8» &#ff00d9órdenes a todos'
+    - '&8| &f&#ff00d9tus dinos&f a 16 bloques.'
+    - '&f'
+jaula:
+  display_name: '&#ff00d9Jaula para dinos'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho a tu dino &8» &#ff00d9lo guarda adentro&f.'
+    - '&8| &fClick derecho al piso con la jaula llena &8» &#ff00d9lo suelta&f.'
+    - '&8| &fQuien lo suelta queda como dueño.'
+    - '&f'
+
+# ---------------------------------------------------------------- items del plugin
+huevo:
+  display_name: '&#ff00d9Huevo de %especie%'
+  lore:
+    - '&f'
+    - '&8| &fPonelo en el suelo y esperá a que eclosione.'
+    - '&8| &fLa cría sale de un color al azar y es tuya.'
+    - '&f'
+comedero:
+  display_name: '&#ff00d9Comedero de %dieta%'
+  lore:
+    - '&f'
+    - '&8| &fPonelo en el suelo y llenalo con &#ff00d9%comida%&f.'
+    - '&8| &fLos dinos domesticados con hambre vienen a comer solos.'
+    - '&8| &fAgachado carga la pila entera. No se puede vaciar.'
+    - '&f'
+dinopedia:
+  display_name: '&#ff00d9Dinopedia'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho &8» &#ff00d9abrir&f.'
+    - '&8| &fClick derecho a un dinosaurio &8» &#ff00d9su ficha&f.'
+    - '&8| &fEn la mano anotás dinos desde más lejos, ves'
+    - '&8| &fhuellas de especies que no conocés y la lupa'
+    - '&8| &fte marca hacia dónde ir.'
+    - '&f'
+jaula-llena:
+  display_name: '&#ff00d9Jaula con %dino%'
+  lore:
+    - '&f'
+    - '&8| &fEspecie &8» &#ff00d9%especie% %color%'
+    - '&8| &fSexo &8» &#ff00d9%sexo%'
+    - '&8| &fEdad &8» &#ff00d9%edad%'
+    - '&8| &fVida &8» &#ff00d9%vida%%'
+    - '%montura%'
+    - '&f'
+    - '&8| &fClick derecho al piso para soltarlo.'
+    - '&8| &fQuien lo suelta queda como dueño.'
+    - '&f'
+jaula-con-montura: '&8| &fTiene &#ff00d9montura&f.'
+

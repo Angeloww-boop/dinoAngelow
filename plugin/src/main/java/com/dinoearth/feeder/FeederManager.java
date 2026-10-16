@@ -1,14 +1,13 @@
 package com.dinoearth.feeder;
 
+import com.dinoearth.text.Fmt;
+import com.dinoearth.text.Lang;
 import com.dinoearth.Keys;
 import com.dinoearth.Settings;
 import com.dinoearth.model.DinoModel;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.species.Species;
 import com.dinoearth.species.Species.Diet;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -116,20 +115,13 @@ public final class FeederManager {
         ItemStack item = new ItemStack(Material.PAPER, amount);
         ItemMeta meta = item.getItemMeta();
         meta.setItemModel(modelKey(diet, 3));
-        meta.itemName(Component.text("Comedero de " + diet.label, NamedTextColor.GOLD));
-        meta.lore(List.of(
-                line("Ponelo en el suelo y llenalo con " + foodText(diet) + "."),
-                line("Los dinos domesticados con hambre vienen a comer solos."),
-                line("Agachado carga la pila entera. No se puede vaciar.")));
+        Lang.get().itemTexts(meta, "comedero", "dieta", Fmt.diet(diet), "comida", Fmt.food(diet));
         meta.setMaxStackSize(16);
         meta.getPersistentDataContainer().set(keys.feederItem, PersistentDataType.STRING, diet.name());
         item.setItemMeta(meta);
         return item;
     }
 
-    private static Component line(String text) {
-        return Component.text(text, NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false);
-    }
 
     public static String foodText(Diet diet) {
         return switch (diet) {
@@ -220,19 +212,20 @@ public final class FeederManager {
             int room = (capacity - f.points) / each;
             int n = Math.min(room, player.isSneaking() ? hand.getAmount() : 1);
             if (n <= 0) {
-                player.sendActionBar(Component.text("El comedero está lleno.", NamedTextColor.YELLOW));
+                Lang.get().action(player, "comedero-lleno");
                 return;
             }
             f.points += n * each;
+            var missions = com.dinoearth.mission.MissionManager.get();
+            if (missions != null) missions.onFeed(player, n * each);
             f.changed();
             if (player.getGameMode() != GameMode.CREATIVE) hand.subtract(n);
             box.getWorld().playSound(box.getLocation(), "minecraft:block.composter.fill", SoundCategory.BLOCKS, 1f, 0.9f);
         } else if (each > 0) {
-            player.sendActionBar(Component.text("Este comedero es de " + f.diet.label + ".", NamedTextColor.RED));
+            Lang.get().action(player, "comedero-otra-dieta", "dieta", Fmt.diet(f.diet));
             return;
         }
-        player.sendActionBar(Component.text("Comedero de " + f.diet.label + ": " + f.points + " / " + capacity,
-                NamedTextColor.GOLD));
+        Lang.get().action(player, "comedero-estado", "dieta", Fmt.diet(f.diet), "puntos", f.points, "capacidad", capacity);
     }
 
     /** Lo rompe el dueño, un admin o alguien que puede construir ahi. Con comida adentro hay que estar agachado. */
@@ -241,13 +234,12 @@ public final class FeederManager {
         String owner = box.getPersistentDataContainer().get(keys.feederOwner, PersistentDataType.STRING);
         boolean mine = player.getUniqueId().toString().equals(owner);
         if (!mine && !player.hasPermission(ADMIN) && !Protection.canBuild(player, box.getLocation().getBlock())) {
-            player.sendActionBar(Component.text("Este comedero no es tuyo.", NamedTextColor.RED));
+            Lang.get().action(player, "comedero-ajeno");
             return;
         }
         int points = f != null ? f.points : 0;
         if (points > 0 && !player.isSneaking()) {
-            player.sendActionBar(Component.text("Tiene comida: agachate para romperlo (se pierde lo que tiene).",
-                    NamedTextColor.YELLOW));
+            Lang.get().action(player, "comedero-con-comida");
             return;
         }
         feeders.remove(box.getUniqueId());

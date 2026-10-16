@@ -1,0 +1,291 @@
+# Dinopedia. Es la excepcion al formato de menu: el fondo va dibujado (libreta de paleontologo) en el titulo, por
+# eso no hay menu_title ni relleno. Los textos que se escriben SOBRE la pagina estan en "textos" (sin colores: se
+# escriben con tinta). El nombre y el lore de cada item siguen el formato normal.
+size: 54
+items:
+  # ------------------------------------------------------------ indice
+  'rango':
+    slot: 0
+    display_name: '&#ff00d9Rango &8» &f%rango%'
+    lore:
+      - '&f'
+      - '&8| &fEspecies descubiertas &8» &#ff00d9%especies%&8/&#ff00d9%especies_total%'
+      - '&8| &fSellos de investigación &8» &#ff00d9%sellos%&8/&#ff00d9%sellos_total%'
+      - '%falta%'
+      - '&f'
+      - '%rangos%'
+      - '&f'
+  'investigacion':
+    model: 'dinoearth:gui/blank'
+    slots:
+      - 1-8
+    display_name: '&#ff00d9Investigación'
+    lore:
+      - '&f'
+      - '&8| &fEspecies descubiertas &8» &#ff00d9%especies%&8/&#ff00d9%especies_total%'
+      - '&8| &fSellos de investigación &8» &#ff00d9%sellos%&8/&#ff00d9%sellos_total%'
+      - '&f'
+  'especie':
+    display_name: '&#ff00d9%especie%'
+    lore:
+      - '&f'
+      - '%descripcion%'
+      - '&f'
+      - '&8| &fColores vistos &8» &#ff00d9%colores%&8/&#ff00d9%colores_total%'
+      - '&8| &fSellos &8» &#ff00d9%sellos%&8/&#ff00d9%sellos_total%'
+      - '%completa%'
+      - '&f'
+      - '&#41FF00✔ Click para abrir'
+  'especie-desconocida':
+    display_name: '&8???'
+    lore:
+      - '&f'
+      - '&8| &fTodavía no lo viste.'
+      - '&8| &fMirá uno de cerca para anotarlo.'
+      - '&f'
+  'rastreando':
+    model: 'dinoearth:gui/track'
+    slot: 46
+    display_name: '&#ff00d9Rastreando &8» &f%especie%'
+    lore:
+      - '&f'
+      - '&8| &fCon la Dinopedia en la mano te marca'
+      - '&8| &fhacia dónde está el más cercano.'
+      - '&f'
+      - '&#EE193B✘ Click para dejar de rastrear'
+  'ayuda':
+    model: 'dinoearth:gui/help'
+    slot: 47
+    display_name: '&#ff00d9Cómo se usa'
+    lore:
+      - '&f'
+      - '&8| &fLas especies se anotan solas al verlas de cerca,'
+      - '&8| &fcon la Dinopedia en la mano desde más lejos.'
+      - '&8| &fClick derecho a un dino con el libro &8» &#ff00d9su ficha&f.'
+      - '&f'
+      - '&8| &#ff00d9Huellas&f: con el libro en la mano te avisa si'
+      - '&8| &fhay una especie que no conocés cerca y hacia dónde.'
+      - '&8| &#ff00d9Lupa&f: en la página de una especie, rastreala.'
+      - '&f'
+      - '&8| &#ff00d9Sellos&f: cada especie tiene tareas, como verla,'
+      - '&8| &fsus colores, domesticarla o montarla. Cada sello'
+      - '&8| &fda experiencia y te sube de rango.'
+      - '&f'
+      - '&8| &#ff00d9Misiones&f: tres por día, solo para vos.'
+      - '&f'
+  'misiones':
+    model: 'dinoearth:gui/missions'
+    slot: 51
+    display_name: '&#ff00d9Misiones del día'
+    lore:
+      - '&f'
+      - '&8| &fCompletadas &8» &#ff00d9%hechas%&8/&#ff00d9%total%'
+      - '&8| &fCambian en &#ff00d9%tiempo%&f.'
+      - '&f'
+      - '&#41FF00✔ Click para abrir'
+  'anterior':
+    model: 'dinoearth:gui/prev'
+    slot: 45
+    display_name: '&#ff00d9Página anterior'
+    lore:
+      - '&f'
+      - '&#41FF00✔ Click para ver'
+  'siguiente':
+    model: 'dinoearth:gui/next'
+    slot: 53
+    display_name: '&#ff00d9Página siguiente'
+    lore:
+      - '&f'
+      - '&#41FF00✔ Click para ver'
+  'cerrar':
+    material: barrier
+    display_name: '&#EE193BCerrar'
+    slot: 49
+
+  # ------------------------------------------------------------ pagina de una especie
+  'foto':
+    model: 'dinoearth:gui/blank'
+    slots:
+      - 0-3
+      - 9-12
+      - 18-21
+      - 27-30
+    display_name: '&#ff00d9%especie% &8- &f%color%'
+    lore:
+      - '&f'
+      - '%descripcion%'
+      - '&f'
+      - '&8| &fTamaño de un adulto &8» &#ff00d9%tamano%'
+      - '%domesticados%'
+      - '&f'
+  'ficha':
+    model: 'dinoearth:gui/blank'
+    slots:
+      - 5-8
+      - 14-17
+      - 23-26
+      - 32-35
+    display_name: '&#ff00d9Ficha técnica'
+    lore:
+      - '&f'
+      - '&8| &fVida &#ff00d9%vida% &8• &fdaño &#ff00d9%dano% &8• &fvelocidad &#ff00d9%velocidad%'
+      - '&f'
+      - '&8| &#ff00d9Carácter&f:'
+      - '%caracter%'
+      - '&8| &#ff00d9Dieta&f:'
+      - '&8| &fCome %comida%.'
+      - '&8| &#ff00d9Domesticar&f:'
+      - '&8| &f%domesticar%'
+      - '&8| &#ff00d9Montura&f:'
+      - '&8| &f%montura%'
+      - '&8| &#ff00d9Crías&f:'
+      - '&8| &f%crias%'
+      - '%habilidad%'
+      - '&f'
+  'color':
+    display_name: '&#ff00d9%color%'
+    lore:
+      - '&f'
+      - '&8| &fVisto%raro%.'
+      - '&f'
+      - '%click%'
+  'color-sin-ver':
+    display_name: '&8???'
+    lore:
+      - '&f'
+      - '&8| &fColor sin ver%raro%.'
+      - '&f'
+  'sello':
+    display_name: '&#ff00d9Sello &8» &f%sello%'
+    lore:
+      - '&f'
+      - '&8| &f%tarea%'
+      - '&f'
+      - '%estado%'
+  'lupa':
+    slot: 44
+    display_name: '&#ff00d9%titulo%'
+    lore:
+      - '&f'
+      - '&8| &fCon la Dinopedia en la mano te marca hacia'
+      - '&8| &fdónde está el &#ff00d9%especie%&f más cercano,'
+      - '&8| &fhasta &#ff00d9%bloques%&f bloques, primero los colores'
+      - '&8| &fque todavía no viste.'
+      - '&f'
+      - '%click%'
+  'especie-anterior':
+    model: 'dinoearth:gui/prev'
+    slot: 45
+    display_name: '&#ff00d9%especie%'
+    lore:
+      - '&f'
+      - '&#41FF00✔ Click para abrir'
+  'especie-siguiente':
+    model: 'dinoearth:gui/next'
+    slot: 53
+    display_name: '&#ff00d9%especie%'
+    lore:
+      - '&f'
+      - '&#41FF00✔ Click para abrir'
+  'volver':
+    material: barrier
+    display_name: '&#EE193BVolver'
+    slot: 49
+
+  # ------------------------------------------------------------ ficha de un dino
+  'ficha-foto':
+    model: 'dinoearth:gui/blank'
+    slots:
+      - 0-3
+      - 9-12
+      - 18-21
+      - 27-30
+    display_name: '&#ff00d9%dino%'
+    lore:
+      - '&f'
+      - '%descripcion%'
+      - '&f'
+  'ficha-datos':
+    model: 'dinoearth:gui/blank'
+    slots:
+      - 5-8
+      - 14-17
+      - 23-26
+      - 32-35
+      - 41-44
+    display_name: '&#ff00d9%dino%'
+    lore:
+      - '&f'
+      - '&8| &fVida &8» &#ff00d9%vida%&8/&#ff00d9%vida_max%'
+      - '%hambre%'
+      - '%patrulla%'
+      - '&8| &fSexo &8» &#ff00d9%sexo%'
+      - '&8| &fEdad &8» &#ff00d9%edad%'
+      - '&f'
+  'ver-especie':
+    model: 'dinoearth:dinopedia'
+    slot: 53
+    display_name: '&#ff00d9Página de %especie%'
+    lore:
+      - '&f'
+      - '&#41FF00✔ Click para abrir'
+
+  # ------------------------------------------------------------ misiones
+  'mision':
+    display_name: '&#ff00d9%mision%'
+    lore:
+      - '&f'
+      - '&8| &fProgreso &8» &#ff00d9%progreso%&8/&#ff00d9%total%'
+      - '&8| &fPremio &8» &#ff00d9%xp%&f de experiencia'
+      - '&f'
+      - '%estado%'
+  'mision-vacia':
+    model: 'dinoearth:gui/blank'
+    display_name: '&8Sin misión'
+    lore:
+      - '&f'
+      - '&8| &fNo hay ninguna misión para vos en este lugar.'
+      - '&f'
+  'cambiar':
+    model: 'dinoearth:gui/reroll'
+    display_name: '&#ff00d9Cambiar misión'
+    lore:
+      - '&f'
+      - '&8| &fTe da otra misión en su lugar.'
+      - '&8| &fUna vez por día.'
+      - '&f'
+      - '&#EE193B✘ Click para cambiarla'
+
+textos:
+  # lineas que se agregan al lore solo cuando corresponde
+  falta: '&8| &fFaltan &#ff00d9%cantidad%&f sellos para &#ff00d9%rango%&f.'
+  rango-tiene: '&8| &#41FF00✔ &f%rango% &8(&#ff00d9%porcentaje%%&8)'
+  rango-falta: '&8| &8• %rango% (%porcentaje%%)'
+  completa: '&8| &#ff00d9Página completa&f.'
+  descripcion: '&8| &f%linea%'
+  domesticados: '&8| &fDomesticados por vos &8» &#ff00d9%cantidad%'
+  caracter: '&8| &f%linea%'
+  habilidad: '&8| &#ff00d9Habilidad&f:'
+  habilidad-linea: '&8| &f%linea%'
+  raro: ' &8- &fraro'
+  ver-color: '&#41FF00✔ Click para verlo en la foto'
+  en-foto: '&8| &fEstá en la foto.'
+  sello-hecho: '&8| &#41FF00Conseguido&f.'
+  sello-pendiente: '&8| &fPendiente.'
+  lupa-on: 'Rastreando'
+  lupa-off: 'Rastrear'
+  lupa-activar: '&#41FF00✔ Click para rastrear'
+  lupa-desactivar: '&#EE193B✘ Click para dejar de rastrear'
+  hambre: '&8| &fHambre &8» &#ff00d9%hambre%%'
+  patrulla: '&8| &fPatrulla el &#ff00d9%chunk%'
+  mision-hecha: '&8| &#41FF00Completada&f.'
+  mision-en-curso: '&8| &fEn curso.'
+  # escritos sobre las paginas dibujadas (sin colores)
+  pagina-dinopedia: 'Dinopedia'
+  pagina-colores: 'Colores: %vistos%/%total%'
+  pagina-ficha: 'Ficha'
+  pagina-salvaje: 'Salvaje'
+  pagina-dueno: 'de %player%'
+  pagina-misiones: 'Misiones'
+  pagina-cambian: 'Nuevas en %tiempo%'
+  pagina-completada: 'Completada'

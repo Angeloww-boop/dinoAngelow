@@ -1,5 +1,6 @@
 package com.dinoearth.dino;
 
+import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.GoalKey;
 import com.destroystokyo.paper.entity.ai.MobGoals;
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
@@ -11,6 +12,18 @@ import com.dinoearth.model.DinoRig;
 import com.dinoearth.species.Species;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.bukkit.Color;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.AnimalTamer;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.TextDisplay;
+import org.bukkit.util.Transformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Input;
@@ -129,6 +142,19 @@ public final class Dino {
     private float deathYaw;
     private int fallSide = 1;
     private float fallLift;
+    // ordenes del silbato
+    public enum Order { FOLLOW, STAY, PATROL }
+
+    public enum Combat { PASSIVE, DEFENSIVE, AGGRESSIVE }
+
+    private Order order = Order.FOLLOW;
+    private Combat combat = Combat.DEFENSIVE;
+    private UUID patrolWorld;
+    private int patrolCx, patrolCz;
+    @SuppressWarnings("rawtypes")
+    private Goal followGoal;          // el "seguir al dueño" del lobo, sacado mientras patrulla
+    private Component nameComp;       // nombre puesto con una etiqueta
+    private TextDisplay plate;        // cartel con el nombre y el dueño
     private int poseEvery = 2;   // ticks entre poses (0 = nadie lo ve, no se manda nada)
     private int lastPose;
     private final Map<UUID, Integer> rammed = new HashMap<>();
@@ -155,6 +181,7 @@ public final class Dino {
         if (rider() == null) wolf.setAware(true);
         if (species.flies()) wolf.setGravity(true);   // por si se guardo volando
         adjustGoals();
+        loadOrders(pdc);
         form = isBabyForm() ? rig.baby() : rig.adult();
         updateStats();
         buildModel();
@@ -236,6 +263,7 @@ public final class Dino {
         drawnYaw = wolf.getBodyYaw();
         model.applyPose(wolf.getLocation(), drawnYaw, visualScale(), 0);
         lastPose = age;
+        refreshPlate();
     }
 
     private boolean isBabyForm() {
@@ -495,6 +523,248 @@ public final class Dino {
         play("roar", 0.5f, 1.15f);
     }
 
+    // ------------------------------------------------------------ ordenes (silbato)
+    public Order order() {
+        return order;
+    }
+
+    public Combat combat() {
+        return combat;
+    }
+
+    /** "chunk x, z" si esta patrullando. */
+    public String patrolLabel() {
+        return order == Order.PATROL ? "chunk " + patrolCx + ", " + patrolCz : null;
+    }
+
+    private void loadOrders(PersistentDataContainer pdc) {
+        try {
+            order = Order.valueOf(pdc.getOrDefault(keys.order, PersistentDataType.STRING, "FOLLOW"));
+            combat = Combat.valueOf(pdc.getOrDefault(keys.combat, PersistentDataType.STRING, "DEFENSIVE"));
+        } catch (IllegalArgumentException e) {
+            order = Order.FOLLOW;
+            combat = Combat.DEFENSIVE;
+        }
+        String world = pdc.get(keys.patrolWorld, PersistentDataType.STRING);
+        if (world != null) {
+            patrolWorld = UUID.fromString(world);
+            patrolCx = pdc.getOrDefault(keys.patrolX, PersistentDataType.INTEGER, 0);
+            patrolCz = pdc.getOrDefault(keys.patrolZ, PersistentDataType.INTEGER, 0);
+        }
+        if (order == Order.PATROL && patrolWorld == null) order = Order.FOLLOW;
+        if (order == Order.PATROL && wolf.isTamed()) removeFollowGoal();
+        String name = pdc.get(keys.name, PersistentDataType.STRING);
+        if (name != null) {
+            try {
+                nameComp = GsonComponentSerializer.gson().deserialize(name);
+            } catch (RuntimeException ignored) {
+                nameComp = null;
+            }
+        }
+    }
+
+    private void saveOrders() {
+        if (!wolf.isValid()) return;
+        PersistentDataContainer pdc = wolf.getPersistentDataContainer();
+        pdc.set(keys.order, PersistentDataType.STRING, order.name());
+        pdc.set(keys.combat, PersistentDataType.STRING, combat.name());
+        if (patrolWorld != null) {
+            pdc.set(keys.patrolWorld, PersistentDataType.STRING, patrolWorld.toString());
+            pdc.set(keys.patrolX, PersistentDataType.INTEGER, patrolCx);
+            pdc.set(keys.patrolZ, PersistentDataType.INTEGER, patrolCz);
+        }
+    }
+
+    /** Orden del silbato. Patrullar usa el chunk donde esta parado el que da la orden. */
+    public void setOrder(Order o, Player issuer) {
+        if (!wolf.isTamed()) return;
+        if (perch != null) unperch();
+        order = o;
+        switch (o) {
+            case FOLLOW -> {
+                restoreFollowGoal();
+                if (!starvingSit) wolf.setSitting(false);
+            }
+            case STAY -> {
+                restoreFollowGoal();
+                wolf.getPathfinder().stopPathfinding();
+                wolf.setSitting(true);
+            }
+            case PATROL -> {
+                Location at = issuer.getLocation();
+                patrolWorld = at.getWorld().getUID();
+                patrolCx = at.getBlockX() >> 4;
+                patrolCz = at.getBlockZ() >> 4;
+                removeFollowGoal();
+                if (!starvingSit) wolf.setSitting(false);
+                patrol(true);
+            }
+        }
+        saveOrders();
+    }
+
+    public void setCombat(Combat c) {
+        combat = c;
+        if (c == Combat.PASSIVE) {
+            wolf.setTarget(null);
+            wolf.setAngry(false);
+        }
+        saveOrders();
+    }
+
+    private void tickOrders(Player rider, Location loc) {
+        if (!wolf.isTamed() || rider != null || perch != null || flying) return;
+        // si el dueño lo sento o lo paro con click derecho, la orden pasa a ser eso
+        if (age % 10 == 0 && !starvingSit) {
+            boolean sitting = wolf.isSitting();
+            if (sitting && order != Order.STAY) {
+                order = Order.STAY;
+                restoreFollowGoal();
+                saveOrders();
+            } else if (!sitting && order == Order.STAY) {
+                order = Order.FOLLOW;
+                saveOrders();
+            }
+        }
+        LivingEntity target = wolf.getTarget();
+        if (target != null && (!target.isValid() || target.isDead())) target = null;
+        if (combat == Combat.PASSIVE && target != null) {
+            wolf.setTarget(null);
+            wolf.setAngry(false);
+            target = null;
+        }
+        if (combat == Combat.AGGRESSIVE && target == null && age % 20 == 0 && !wolf.isSitting() && !isStarving()) {
+            boolean here = order == Order.PATROL && patrolWorld != null && patrolWorld.equals(loc.getWorld().getUID());
+            Location center = here ? new Location(loc.getWorld(), (patrolCx << 4) + 8, loc.getY(), (patrolCz << 4) + 8) : loc;
+            Monster best = null;
+            double bestD = Double.MAX_VALUE;
+            for (Monster m : center.getNearbyEntitiesByType(Monster.class, 12)) {
+                if (m instanceof Creeper || m.isDead() || !wolf.hasLineOfSight(m)) continue;
+                double d = m.getLocation().distanceSquared(loc);
+                if (d < bestD) {
+                    best = m;
+                    bestD = d;
+                }
+            }
+            if (best != null) wolf.setTarget(best);
+        }
+        if (order == Order.PATROL && age % 20 == 0 && target == null && feeder == null && eating < 0 && !wolf.isSitting()) {
+            patrol(false);
+        }
+    }
+
+    /** Camina a un punto al azar del chunk de patrulla (o vuelve si se fue). */
+    private void patrol(boolean now) {
+        World w = wolf.getWorld();
+        if (patrolWorld == null || !w.getUID().equals(patrolWorld) || !w.isChunkLoaded(patrolCx, patrolCz)) return;
+        Location at = wolf.getLocation();
+        int minX = patrolCx << 4, minZ = patrolCz << 4;
+        boolean inside = at.getX() >= minX && at.getX() < minX + 16 && at.getZ() >= minZ && at.getZ() < minZ + 16;
+        var path = wolf.getPathfinder();
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        if (inside && !now && (path.hasPath() || r.nextInt(3) != 0)) return;
+        for (int tries = 0; tries < 6; tries++) {
+            Location spot = standable(w, minX + 2 + r.nextInt(12), minZ + 2 + r.nextInt(12), at.getBlockY());
+            if (spot != null) {
+                path.moveTo(spot, inside ? 0.8 : 1.1);
+                return;
+            }
+        }
+    }
+
+    /** Un lugar donde se pueda parar (piso solido y dos bloques libres) cerca de la altura dada. */
+    private static Location standable(World w, int x, int z, int nearY) {
+        for (int dy = 0; dy <= 8; dy++) {
+            for (int y : dy == 0 ? new int[]{nearY} : new int[]{nearY + dy, nearY - dy}) {
+                if (y <= w.getMinHeight() || y >= w.getMaxHeight() - 2) continue;
+                Block b = w.getBlockAt(x, y, z);
+                if (b.isPassable() && !b.isLiquid() && b.getRelative(BlockFace.UP).isPassable()
+                        && b.getRelative(BlockFace.DOWN).getType().isSolid()) {
+                    return b.getLocation().add(0.5, 0, 0.5);
+                }
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void removeFollowGoal() {
+        if (followGoal != null) return;
+        MobGoals goals = Bukkit.getMobGoals();
+        try {
+            Goal g = ((MobGoals) goals).getGoal((Mob) wolf, (GoalKey) VanillaGoal.FOLLOW_OWNER);
+            if (g == null) return;
+            followGoal = g;
+            ((MobGoals) goals).removeGoal((Mob) wolf, (GoalKey) VanillaGoal.FOLLOW_OWNER);
+        } catch (RuntimeException ignored) {
+            // sin la API de goals no se puede patrullar: se queda siguiendo al dueño
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void restoreFollowGoal() {
+        if (followGoal == null) return;
+        try {
+            ((MobGoals) Bukkit.getMobGoals()).addGoal((Mob) wolf, 6, followGoal);   // 6 = prioridad del lobo
+        } catch (RuntimeException ignored) {
+            // vuelve a seguir al dueño la proxima vez que se cargue el chunk
+        }
+        followGoal = null;
+    }
+
+    // ------------------------------------------------------------ nombre y dueño
+    public Component name() {
+        return nameComp;
+    }
+
+    public void setName(Component name) {
+        nameComp = name;
+        if (wolf.isValid()) {
+            wolf.getPersistentDataContainer().set(keys.name, PersistentDataType.STRING,
+                    GsonComponentSerializer.gson().serialize(name));
+            wolf.customName(name);   // asi sale en los mensajes de muerte
+        }
+        refreshPlate();
+    }
+
+    public String ownerName() {
+        AnimalTamer o = wolf.getOwner();
+        return o != null && o.getName() != null ? o.getName() : null;
+    }
+
+    /** Cartel arriba del modelo con el nombre y el dueño (solo si tiene nombre). */
+    public void refreshPlate() {
+        if (nameComp == null || dying >= 0 || !wolf.isValid()) {
+            removePlate();
+            return;
+        }
+        Component text = nameComp.colorIfAbsent(NamedTextColor.WHITE);
+        String owner = wolf.isTamed() ? ownerName() : null;
+        if (owner != null) text = text.appendNewline().append(Component.text("de " + owner, NamedTextColor.GRAY));
+        if (plate == null || !plate.isValid()) {
+            plate = wolf.getWorld().spawn(wolf.getLocation(), TextDisplay.class, t -> {
+                t.setPersistent(false);
+                t.setBillboard(Display.Billboard.CENTER);
+                t.setShadowed(true);
+                t.setBackgroundColor(Color.fromARGB(70, 0, 0, 0));
+                t.setViewRange(0.5f);
+                keys.tagPart(t);
+            });
+            wolf.addPassenger(plate);
+        }
+        plate.text(text);
+        // los pasajeros del lobo van a ~0.96 de su altura: el cartel sube hasta arriba del modelo
+        float top = form.height() * visualScale() / 16f + 0.35f;
+        float mount = (float) (wolf.getHeight() * 0.963);
+        plate.setTransformation(new Transformation(new Vector3f(0, top - mount, 0), new Quaternionf(),
+                new Vector3f(1, 1, 1), new Quaternionf()));
+    }
+
+    private void removePlate() {
+        if (plate != null) plate.remove();
+        plate = null;
+    }
+
     // ------------------------------------------------------------ eventos
     public void onAttack() {
         attack = 0;
@@ -660,6 +930,7 @@ public final class Dino {
     public void onDeath() {
         if (flying) wolf.setGravity(true);
         dying = 0;
+        removePlate();
         // sigue montado en el lobo muerto (se mueve igual que el) y conserva hacia donde miraba
         deathYaw = drawnYaw;
         fallSide = ThreadLocalRandom.current().nextBoolean() ? 1 : -1;
@@ -682,6 +953,7 @@ public final class Dino {
         }
         save();
         model.remove();
+        removePlate();
     }
 
     // ------------------------------------------------------------ tick
@@ -692,7 +964,10 @@ public final class Dino {
         if (!model.isValid()) buildModel();   // alguien borro las displays (p. ej. /kill)
 
         age++;
-        if (age % 20 == 0) model.remount();
+        if (age % 20 == 0) {
+            model.remount();
+            if (plate != null && plate.isValid() && plate.getVehicle() != wolf) wolf.addPassenger(plate);
+        }
 
         if (growth < 1f && !isStarving()) {   // muerto de hambre no crece
             boolean wasBaby = isBabyForm();
@@ -702,6 +977,7 @@ public final class Dino {
             if (age % 200 == 0) {
                 save();
                 updateViewRange();
+                refreshPlate();
             }
         }
 
@@ -798,6 +1074,7 @@ public final class Dino {
         LivingEntity target = wolf.getTarget();
         if (target != null && (!target.isValid() || target.isDead())) target = null;
 
+        tickOrders(rider, loc);
         if (species.temper == Species.Temper.PREY && !wolf.isTamed() && rider == null && !flying) tickPrey(loc);
         boolean hunts = species.temper == Species.Temper.HOSTILE || species.territorial && !wolf.isTamed();
         if (hunts && age % 10 == 0 && rider == null && !flying) hunt(loc);

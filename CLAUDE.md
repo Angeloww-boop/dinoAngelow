@@ -59,6 +59,7 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 | `generator/species_*.py` | Modelo, colores y montura de cada especie (13: raptor, triceratops, dilophosaurus, compsognathus, trex, pteranodon, parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus, dimorphodon) |
 | `generator/geometry.py` | Cube/Bone/Rig, huevo y materiales de montura (`SADDLE_COLORS`, cada especie los pisa con `saddle_colors`) |
 | `generator/feeder.py`, `generator/icons.py` | Modelo del comedero; iconos de la Dinopedia (los llama build.py) |
+| `generator/items.py` | Items propios: drops por especie, monturas como item, silbato, jaula. Dibuja sus iconos y escribe `plugin/src/main/resources/items.json` (el plugin lee todo de ahí) |
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
 | `generator/preview.py` | Render propio a `preview.png` (`python generator/preview.py <especie>`) — usarlo para revisar modelos |
 | `generator/sounds.py`, `sounds_species.py`, `synth.py` | Sonidos sintetizados a `.ogg` |
@@ -95,5 +96,9 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   colas, hombro.
 - v0.5–v0.7 se escribieron en la nube (sin acceso a repo.papermc.io). El 2026-10-15 se compilaron en la PC contra el
   paper-api 1.21.11 real **sin errores**: el jar de la raiz es ese build (0.7.1: /dino pack info muestra por que no esta listo el pack; 0.7.2: el config.yml viejo se actualiza solo y queda config-anterior.yml; 0.7.3: /dino tame [jugador] domestica el dino que mirás, incluso los que solo nacen de huevo; 0.7.4: texturas ajustadas; 0.7.5: sin z-fighting, pack sha1 8c5971bd…; 0.7.6: muerte sin temblor, sigue montado y cae apoyado de costado; 0.7.7: arreglo real del temblor de piezas quietas/sentadas, ver setTransformationMatrix).
+- v0.8.0 **sin probar en el juego**: drops propios por especie, montura = item por especie (la de vanilla no sirve; los
+  crafteos los arma el dueño con Shopkeepers), silbato (seguir/quedarse/patrullar el chunk del jugador + pasivo/defensivo/
+  agresivo; patrullar saca el goal FOLLOW_OWNER y lo vuelve a poner con MobGoals: verificar que vuelva a seguir),
+  nombre con etiqueta + cartel TextDisplay, `/dino dar` con aceptar/rechazar, jaula que guarda/suelta el dino.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

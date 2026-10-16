@@ -2,7 +2,7 @@ package com.dinoearth;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Display;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
@@ -34,6 +34,18 @@ public final class Keys {
     public final NamespacedKey feederItem;
     public final NamespacedKey dexBook;
     public final NamespacedKey dexIcon;
+    // items propios (drops, monturas, silbato, jaula) y lo que guarda una jaula llena
+    public final NamespacedKey item;
+    public final NamespacedKey cage;
+    public final NamespacedKey health;
+    // dino domesticado: nombre, orden, modo de combate y chunk de patrulla
+    public final NamespacedKey name;
+    public final NamespacedKey order;
+    public final NamespacedKey combat;
+    public final NamespacedKey patrolWorld;
+    public final NamespacedKey patrolX;
+    public final NamespacedKey patrolZ;
+    public final NamespacedKey menuIcon;
 
     private final Plugin plugin;
     private final Map<String, NamespacedKey> dynamic = new HashMap<>();
@@ -63,6 +75,16 @@ public final class Keys {
         feederItem = new NamespacedKey(plugin, "feeder_item");
         dexBook = new NamespacedKey(plugin, "dinopedia");
         dexIcon = new NamespacedKey(plugin, "dinopedia_icon");
+        item = new NamespacedKey(plugin, "item");
+        cage = new NamespacedKey(plugin, "cage");
+        health = new NamespacedKey(plugin, "health");
+        name = new NamespacedKey(plugin, "name");
+        order = new NamespacedKey(plugin, "order");
+        combat = new NamespacedKey(plugin, "combat");
+        patrolWorld = new NamespacedKey(plugin, "patrol_world");
+        patrolX = new NamespacedKey(plugin, "patrol_x");
+        patrolZ = new NamespacedKey(plugin, "patrol_z");
+        menuIcon = new NamespacedKey(plugin, "menu_icon");
         this.plugin = plugin;
     }
 
@@ -76,13 +98,13 @@ public final class Keys {
         return dynamic.computeIfAbsent("dex_tamed_" + species, k -> new NamespacedKey(plugin, k));
     }
 
-    public void tagPart(ItemDisplay display) {
+    public void tagPart(Display display) {
         display.getPersistentDataContainer().set(part, PersistentDataType.STRING, session);
     }
 
     /** Display de un modelo nuestro que quedo de un arranque anterior. */
     public boolean isStalePart(Entity e) {
-        if (!(e instanceof ItemDisplay)) return false;
+        if (!(e instanceof Display)) return false;
         String s = e.getPersistentDataContainer().get(part, PersistentDataType.STRING);
         return s != null && !s.equals(session);
     }

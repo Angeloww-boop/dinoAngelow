@@ -35,7 +35,12 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 | Domesticar | Click derecho con su comida (ver tabla) |
 | Sentar / parar | Click derecho (agachado si tiene montura) |
 | Curar | Con su comida (carnívoros: carne; herbívoros y presas: plantas; pteranodon y dimorphodon: pescado) |
-| Montura | Click derecho con una montura (adulto, solo el dueño). Click derecho para subir. WASD, Ctrl corre, espacio salta, Shift baja. Tijeras: sacar la montura |
+| Montura | Cada especie tiene **su propia montura** (item `montura_<especie>`; la de vanilla no sirve). Click derecho con ella al dino adulto (solo el dueño), click derecho para subir. WASD, Ctrl corre, espacio salta, Shift baja. Tijeras: te devuelve la montura |
+| Silbato | **Click derecho a tu dino**: menú de órdenes. **Agachado + click derecho al aire**: órdenes a todos tus dinos a 16 bloques. Órdenes: **seguirme**, **quedarse**, **patrullar el chunk donde estás parado** (camina por ese chunk y no se va). Modos: **pasivo** (no ataca a nadie), **defensivo** (lo normal) y **agresivo** (además ataca monstruos cerca, menos creepers) |
+| Nombre | Etiqueta con nombre (renombrada en un yunque) + click derecho a tu dino. Arriba del modelo aparece el nombre y "de <dueño>" |
+| Regalar | `/dino dar <jugador>` mirando a tu dino. El otro recibe [Aceptar] / [Rechazar] y tiene 60 s |
+| Jaula | Click derecho a tu dino con una jaula vacía: lo guarda adentro (color, sexo, edad, montura, hambre, vida, nombre y modo). Click derecho al piso con la jaula llena: lo suelta y **quien lo suelta queda como dueño** (sirve para venderlo) |
+| Drops | Cada especie suelta lo suyo (cuero, garras, dientes, cuernos, placas, membranas, plumas, glándula...) para craftear sus monturas con Shopkeepers. Lista en `/dino item` |
 | Presas | El parasaurolophus y el gallimimus salvajes huyen si te acercás. **Agachado** podés llegar hasta ellos y darles de comer |
 | Hombro (dimorphodon) | Domesticado: **agachado + click derecho con la mano vacía** y se sube a tu hombro. Agachado + click izquierdo (o lo mismo de nuevo) y se baja. Si hay monstruos a 12 bloques, chilla y te avisa |
 | Volar (pteranodon) | En el suelo, **espacio despega**. En el aire: **W vuela hacia donde mirás** (mirar abajo = picada, arriba = trepar), Ctrl más rápido, **espacio aletea para subir**, sin W planea bajando. Aterriza solo al tocar el suelo. Si te bajás (Shift) en el aire caés con caída lenta |
@@ -54,6 +59,7 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 /dino egg <especie> [cantidad]
 /dino grow [%]                      (crías a 10 bloques)
 /dino tame [jugador]                (domestica el dino que mirás; sirve para T-Rex y Giganotosaurus)
+/dino item <id> [cantidad] [jugador] (monturas, drops, silbato, jaula: para armar los trades de Shopkeepers)
 /dino remove [radio] [especie]
 /dino count
 /dino comedero <carne|plantas|pescado> [cantidad]
@@ -61,6 +67,16 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 /dino hambre [%]                    (pone el hambre de los domesticados a 10 bloques, para probar)
 /dino pack [reload|info]
 ```
+
+Todos los jugadores: `/dino dar <jugador>`, `/dino aceptar`, `/dino rechazar`, `/dino pack`.
+
+Items (`/dino item <id>`): `silbato`, `jaula`, `montura_<especie>` (raptor, triceratops, trex, pteranodon,
+parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus) y los drops: `cuero_<especie>`,
+`garra_raptor`, `cuerno_triceratops`, `cuerno_carnotaurus`, `diente_trex`, `diente_giganotosaurus`,
+`diente_compsognathus`, `glandula_dilophosaurus`, `cresta_dilophosaurus`, `cresta_pteranodon`,
+`cresta_parasaurolophus`, `pluma_gallimimus`, `placa_stegosaurus`, `mazo_ankylosaurus`, `membrana_pteranodon`,
+`membrana_dimorphodon`. Los items propios no sirven en crafteos, yunques, hornos ni dispensers: los crafteos se arman
+con Shopkeepers.
 
 Especies: `raptor`, `triceratops` (`trike`), `dilophosaurus` (`dilo`), `compsognathus` (`compy`), `trex` (`rex`),
 `pteranodon` (`ptera`, `pterodactilo`), `parasaurolophus` (`para`), `gallimimus` (`galli`), `stegosaurus` (`stego`),

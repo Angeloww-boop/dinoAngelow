@@ -7,6 +7,8 @@ import com.dinoearth.dex.DexManager;
 import com.dinoearth.egg.EggManager;
 import com.dinoearth.feeder.FeederManager;
 import com.dinoearth.feeder.Protection;
+import com.dinoearth.item.CageManager;
+import com.dinoearth.item.DinoItems;
 import com.dinoearth.species.Species;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.text.Component;
@@ -62,11 +64,15 @@ public final class DinoListener implements Listener {
     private final FeederManager feeders;
     private final DexManager dex;
     private final Keys keys;
+    private final DinoItems items;
+    private final CageManager cages;
     /** Ultimo tick en que manejamos un click con la mano principal (para ignorar el de la mano secundaria). */
     private final Map<UUID, Integer> handled = new HashMap<>();
 
-    public DinoListener(Plugin plugin, DinoManager dinos, EggManager eggs, Keys keys) {
+    public DinoListener(Plugin plugin, DinoManager dinos, EggManager eggs, Keys keys, DinoItems items, CageManager cages) {
         this.plugin = plugin;
+        this.items = items;
+        this.cages = cages;
         this.dinos = dinos;
         this.eggs = eggs;
         this.feeders = dinos.feeders();
@@ -154,8 +160,9 @@ public final class DinoListener implements Listener {
         if (species == null) return;
         Dino d = dinos.get(wolf);
         event.getDrops().clear();
-        if (d != null && d.isSaddled()) event.getDrops().add(new ItemStack(Material.SADDLE));
+        if (d != null && d.isSaddled()) event.getDrops().add(items.saddleFor(species));
         float size = d != null ? Math.max(0.3f, d.growth()) : 1f;
+        event.getDrops().addAll(items.rollDrops(species, size));
         for (Species.Drop drop : species.drops) {
             int n = ThreadLocalRandom.current().nextInt(drop.min(), drop.max() + 1);
             n = Math.round(n * size);
@@ -247,6 +254,34 @@ public final class DinoListener implements Listener {
             event.setCancelled(true);
             return;
         }
+        if (type == Material.NAME_TAG) {
+            event.setCancelled(true);
+            handled.put(player.getUniqueId(), now);
+            if (!owner) {
+                player.sendActionBar(Component.text("Solo el dueño le puede poner nombre.", NamedTextColor.RED));
+                return;
+            }
+            var meta = hand.getItemMeta();
+            if (meta == null || !meta.hasDisplayName() || meta.displayName() == null) {
+                player.sendActionBar(Component.text("Primero escribile un nombre a la etiqueta en un yunque.", NamedTextColor.RED));
+                return;
+            }
+            d.setName(meta.displayName());
+            if (!creative) hand.subtract();
+            wolf.getWorld().playSound(wolf.getLocation(), "minecraft:entity.villager.yes", SoundCategory.NEUTRAL, 0.6f, 1.3f);
+            player.sendActionBar(Component.text("Ahora se llama ", NamedTextColor.GREEN).append(d.name()));
+            return;
+        }
+        if (items.is(hand, DinoItems.Kind.CAGE)) {
+            event.setCancelled(true);
+            handled.put(player.getUniqueId(), now);
+            if (!owner) {
+                player.sendActionBar(Component.text("Solo podés enjaular a tus propios dinos.", NamedTextColor.RED));
+                return;
+            }
+            cages.capture(player, d, hand);
+            return;
+        }
         if (food && d.wantsFood()) {
             // con hambre: comer primero (cualquiera le puede dar de comer)
             event.setCancelled(true);
@@ -270,9 +305,17 @@ public final class DinoListener implements Listener {
             return;
         }
 
-        if (type == Material.SADDLE && species.rideable) {
+        DinoItems.Def held = items.defOf(hand);
+        boolean saddleItem = held != null && held.kind() == DinoItems.Kind.SADDLE;
+        if ((saddleItem || type == Material.SADDLE) && species.rideable) {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
+            if (!saddleItem || !species.id.equals(held.species())) {
+                player.sendActionBar(Component.text("Necesita una ", NamedTextColor.RED)
+                        .append(Component.text(items.def(items.saddleId(species)).name(), NamedTextColor.GOLD))
+                        .append(Component.text(".", NamedTextColor.RED)));
+                return;
+            }
             if (!d.isAdult()) {
                 player.sendActionBar(Component.text("Todavía es muy chico para montarlo.", NamedTextColor.RED));
             } else if (!d.isSaddled()) {
@@ -286,7 +329,7 @@ public final class DinoListener implements Listener {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
             d.setSaddled(false);
-            wolf.getWorld().dropItemNaturally(wolf.getLocation().add(0, 1, 0), new ItemStack(Material.SADDLE));
+            wolf.getWorld().dropItemNaturally(wolf.getLocation().add(0, 1, 0), items.saddleFor(species));
             wolf.getWorld().playSound(wolf.getLocation(), "minecraft:entity.sheep.shear", SoundCategory.NEUTRAL, 1f, 1f);
             return;
         }

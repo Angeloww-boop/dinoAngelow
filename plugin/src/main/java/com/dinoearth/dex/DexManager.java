@@ -236,7 +236,9 @@ public final class DexManager {
         var max = d.wolf().getAttribute(Attribute.MAX_HEALTH);
         String sex = d.isMale() ? "macho" : "hembra";
         String age = d.isAdult() ? "adulto" : "cría (" + Math.round(d.growth() * 100) + "% crecido)";
-        p.sendMessage(Component.text("── " + s.name + " ──", NamedTextColor.GOLD));
+        Component title = d.name() != null ? Component.text("── ").append(d.name()).append(Component.text(" (" + s.name + ") ──"))
+                : Component.text("── " + s.name + " ──");
+        p.sendMessage(title.color(NamedTextColor.GOLD));
         p.sendMessage(Component.text(s.rig.variant(d.variant()).name() + " · " + sex + " · " + age, NamedTextColor.WHITE));
         p.sendMessage(Component.text("Vida: " + Math.round(d.wolf().getHealth()) + " / "
                 + (max != null ? Math.round(max.getValue()) : "?"), NamedTextColor.RED));
@@ -250,6 +252,17 @@ public final class DexManager {
             var owner = d.wolf().getOwner();
             p.sendMessage(Component.text("Dueño: " + (owner != null && owner.getName() != null ? owner.getName() : "?"),
                     NamedTextColor.GRAY));
+            String order = switch (d.order()) {
+                case FOLLOW -> "sigue al dueño";
+                case STAY -> "se queda quieto";
+                case PATROL -> "patrulla el " + d.patrolLabel();
+            };
+            String combat = switch (d.combat()) {
+                case PASSIVE -> "pasivo";
+                case DEFENSIVE -> "defensivo";
+                case AGGRESSIVE -> "agresivo";
+            };
+            p.sendMessage(Component.text("Orden: " + order + " · modo " + combat, NamedTextColor.GRAY));
         } else {
             p.sendMessage(Component.text("Salvaje", NamedTextColor.GRAY));
         }

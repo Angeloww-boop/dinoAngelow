@@ -1,0 +1,645 @@
+{
+  "items": [
+    {
+      "id": "cuero_raptor",
+      "kind": "drop",
+      "species": "raptor",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_raptor",
+      "name": "Cuero de velociraptor",
+      "lore": [
+        "Lo suelta el Velociraptor.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "garra_raptor",
+      "kind": "drop",
+      "species": "raptor",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/garra_raptor",
+      "name": "Garra de velociraptor",
+      "lore": [
+        "Lo suelta el Velociraptor.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_raptor",
+      "kind": "saddle",
+      "species": "raptor",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_raptor",
+      "name": "Montura de Velociraptor",
+      "lore": [
+        "Click derecho sobre tu Velociraptor adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "cuero_triceratops",
+      "kind": "drop",
+      "species": "triceratops",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_triceratops",
+      "name": "Cuero de triceratops",
+      "lore": [
+        "Lo suelta el Triceratops.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "cuerno_triceratops",
+      "kind": "drop",
+      "species": "triceratops",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuerno_triceratops",
+      "name": "Cuerno de triceratops",
+      "lore": [
+        "Lo suelta el Triceratops.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_triceratops",
+      "kind": "saddle",
+      "species": "triceratops",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_triceratops",
+      "name": "Montura de Triceratops",
+      "lore": [
+        "Click derecho sobre tu Triceratops adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "glandula_dilophosaurus",
+      "kind": "drop",
+      "species": "dilophosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/glandula_dilophosaurus",
+      "name": "Glándula venenosa",
+      "lore": [
+        "Lo suelta el Dilophosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "cresta_dilophosaurus",
+      "kind": "drop",
+      "species": "dilophosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cresta_dilophosaurus",
+      "name": "Cresta de dilophosaurus",
+      "lore": [
+        "Lo suelta el Dilophosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "diente_compsognathus",
+      "kind": "drop",
+      "species": "compsognathus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/diente_compsognathus",
+      "name": "Diente de compsognathus",
+      "lore": [
+        "Lo suelta el Compsognathus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "cuero_trex",
+      "kind": "drop",
+      "species": "trex",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_trex",
+      "name": "Cuero de T-Rex",
+      "lore": [
+        "Lo suelta el Tyrannosaurus rex.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "diente_trex",
+      "kind": "drop",
+      "species": "trex",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/diente_trex",
+      "name": "Diente de T-Rex",
+      "lore": [
+        "Lo suelta el Tyrannosaurus rex.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_trex",
+      "kind": "saddle",
+      "species": "trex",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_trex",
+      "name": "Montura de Tyrannosaurus rex",
+      "lore": [
+        "Click derecho sobre tu Tyrannosaurus rex adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "membrana_pteranodon",
+      "kind": "drop",
+      "species": "pteranodon",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/membrana_pteranodon",
+      "name": "Membrana de pteranodon",
+      "lore": [
+        "Lo suelta el Pteranodon.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "cresta_pteranodon",
+      "kind": "drop",
+      "species": "pteranodon",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cresta_pteranodon",
+      "name": "Cresta de pteranodon",
+      "lore": [
+        "Lo suelta el Pteranodon.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_pteranodon",
+      "kind": "saddle",
+      "species": "pteranodon",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_pteranodon",
+      "name": "Montura de Pteranodon",
+      "lore": [
+        "Click derecho sobre tu Pteranodon adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "cuero_parasaurolophus",
+      "kind": "drop",
+      "species": "parasaurolophus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_parasaurolophus",
+      "name": "Cuero de parasaurolophus",
+      "lore": [
+        "Lo suelta el Parasaurolophus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "cresta_parasaurolophus",
+      "kind": "drop",
+      "species": "parasaurolophus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cresta_parasaurolophus",
+      "name": "Cresta de parasaurolophus",
+      "lore": [
+        "Lo suelta el Parasaurolophus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_parasaurolophus",
+      "kind": "saddle",
+      "species": "parasaurolophus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_parasaurolophus",
+      "name": "Montura de Parasaurolophus",
+      "lore": [
+        "Click derecho sobre tu Parasaurolophus adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "cuero_gallimimus",
+      "kind": "drop",
+      "species": "gallimimus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_gallimimus",
+      "name": "Cuero de gallimimus",
+      "lore": [
+        "Lo suelta el Gallimimus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "pluma_gallimimus",
+      "kind": "drop",
+      "species": "gallimimus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/pluma_gallimimus",
+      "name": "Pluma de gallimimus",
+      "lore": [
+        "Lo suelta el Gallimimus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_gallimimus",
+      "kind": "saddle",
+      "species": "gallimimus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_gallimimus",
+      "name": "Montura de Gallimimus",
+      "lore": [
+        "Click derecho sobre tu Gallimimus adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "cuero_stegosaurus",
+      "kind": "drop",
+      "species": "stegosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_stegosaurus",
+      "name": "Cuero de stegosaurus",
+      "lore": [
+        "Lo suelta el Stegosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "placa_stegosaurus",
+      "kind": "drop",
+      "species": "stegosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/placa_stegosaurus",
+      "name": "Placa de stegosaurus",
+      "lore": [
+        "Lo suelta el Stegosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_stegosaurus",
+      "kind": "saddle",
+      "species": "stegosaurus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_stegosaurus",
+      "name": "Montura de Stegosaurus",
+      "lore": [
+        "Click derecho sobre tu Stegosaurus adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "cuero_ankylosaurus",
+      "kind": "drop",
+      "species": "ankylosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_ankylosaurus",
+      "name": "Cuero de ankylosaurus",
+      "lore": [
+        "Lo suelta el Ankylosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "mazo_ankylosaurus",
+      "kind": "drop",
+      "species": "ankylosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/mazo_ankylosaurus",
+      "name": "Mazo de ankylosaurus",
+      "lore": [
+        "Lo suelta el Ankylosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_ankylosaurus",
+      "kind": "saddle",
+      "species": "ankylosaurus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_ankylosaurus",
+      "name": "Montura de Ankylosaurus",
+      "lore": [
+        "Click derecho sobre tu Ankylosaurus adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "cuero_giganotosaurus",
+      "kind": "drop",
+      "species": "giganotosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_giganotosaurus",
+      "name": "Cuero de giganotosaurus",
+      "lore": [
+        "Lo suelta el Giganotosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "diente_giganotosaurus",
+      "kind": "drop",
+      "species": "giganotosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/diente_giganotosaurus",
+      "name": "Diente de giganotosaurus",
+      "lore": [
+        "Lo suelta el Giganotosaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_giganotosaurus",
+      "kind": "saddle",
+      "species": "giganotosaurus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_giganotosaurus",
+      "name": "Montura de Giganotosaurus",
+      "lore": [
+        "Click derecho sobre tu Giganotosaurus adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "cuero_carnotaurus",
+      "kind": "drop",
+      "species": "carnotaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_carnotaurus",
+      "name": "Cuero de carnotaurus",
+      "lore": [
+        "Lo suelta el Carnotaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "cuerno_carnotaurus",
+      "kind": "drop",
+      "species": "carnotaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuerno_carnotaurus",
+      "name": "Cuerno de carnotaurus",
+      "lore": [
+        "Lo suelta el Carnotaurus.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "montura_carnotaurus",
+      "kind": "saddle",
+      "species": "carnotaurus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_carnotaurus",
+      "name": "Montura de Carnotaurus",
+      "lore": [
+        "Click derecho sobre tu Carnotaurus adulto.",
+        "Con tijeras se la sacás y te la devuelve."
+      ]
+    },
+    {
+      "id": "membrana_dimorphodon",
+      "kind": "drop",
+      "species": "dimorphodon",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/membrana_dimorphodon",
+      "name": "Membrana de dimorphodon",
+      "lore": [
+        "Lo suelta el Dimorphodon.",
+        "Se usa para craftear monturas."
+      ]
+    },
+    {
+      "id": "silbato",
+      "kind": "whistle",
+      "material": "STICK",
+      "max_stack": 1,
+      "model": "dinoearth:items/silbato",
+      "name": "Silbato de dinos",
+      "lore": [
+        "Click derecho a tu dino: darle órdenes.",
+        "Agachado y click derecho al aire: órdenes a todos",
+        "tus dinos a 16 bloques."
+      ]
+    },
+    {
+      "id": "jaula",
+      "kind": "cage",
+      "material": "PAPER",
+      "max_stack": 16,
+      "model": "dinoearth:items/jaula",
+      "model_full": "dinoearth:items/jaula_llena",
+      "name": "Jaula para dinos",
+      "lore": [
+        "Click derecho a tu dino: lo guarda adentro.",
+        "Click derecho al piso con la jaula llena: lo suelta.",
+        "Quien lo suelta queda como dueño."
+      ]
+    }
+  ],
+  "drops": {
+    "raptor": [
+      {
+        "item": "cuero_raptor",
+        "min": 1,
+        "max": 3,
+        "chance": 1.0
+      },
+      {
+        "item": "garra_raptor",
+        "min": 1,
+        "max": 2,
+        "chance": 0.5
+      }
+    ],
+    "triceratops": [
+      {
+        "item": "cuero_triceratops",
+        "min": 2,
+        "max": 4,
+        "chance": 1.0
+      },
+      {
+        "item": "cuerno_triceratops",
+        "min": 1,
+        "max": 1,
+        "chance": 0.5
+      }
+    ],
+    "dilophosaurus": [
+      {
+        "item": "glandula_dilophosaurus",
+        "min": 1,
+        "max": 1,
+        "chance": 0.7
+      },
+      {
+        "item": "cresta_dilophosaurus",
+        "min": 1,
+        "max": 1,
+        "chance": 0.4
+      }
+    ],
+    "compsognathus": [
+      {
+        "item": "diente_compsognathus",
+        "min": 1,
+        "max": 1,
+        "chance": 0.5
+      }
+    ],
+    "trex": [
+      {
+        "item": "cuero_trex",
+        "min": 3,
+        "max": 5,
+        "chance": 1.0
+      },
+      {
+        "item": "diente_trex",
+        "min": 1,
+        "max": 3,
+        "chance": 0.8
+      }
+    ],
+    "pteranodon": [
+      {
+        "item": "membrana_pteranodon",
+        "min": 1,
+        "max": 2,
+        "chance": 1.0
+      },
+      {
+        "item": "cresta_pteranodon",
+        "min": 1,
+        "max": 1,
+        "chance": 0.4
+      }
+    ],
+    "parasaurolophus": [
+      {
+        "item": "cuero_parasaurolophus",
+        "min": 1,
+        "max": 3,
+        "chance": 1.0
+      },
+      {
+        "item": "cresta_parasaurolophus",
+        "min": 1,
+        "max": 1,
+        "chance": 0.4
+      }
+    ],
+    "gallimimus": [
+      {
+        "item": "cuero_gallimimus",
+        "min": 1,
+        "max": 2,
+        "chance": 1.0
+      },
+      {
+        "item": "pluma_gallimimus",
+        "min": 1,
+        "max": 3,
+        "chance": 0.7
+      }
+    ],
+    "stegosaurus": [
+      {
+        "item": "cuero_stegosaurus",
+        "min": 2,
+        "max": 4,
+        "chance": 1.0
+      },
+      {
+        "item": "placa_stegosaurus",
+        "min": 1,
+        "max": 2,
+        "chance": 0.6
+      }
+    ],
+    "ankylosaurus": [
+      {
+        "item": "cuero_ankylosaurus",
+        "min": 2,
+        "max": 4,
+        "chance": 1.0
+      },
+      {
+        "item": "mazo_ankylosaurus",
+        "min": 1,
+        "max": 1,
+        "chance": 0.3
+      }
+    ],
+    "giganotosaurus": [
+      {
+        "item": "cuero_giganotosaurus",
+        "min": 3,
+        "max": 5,
+        "chance": 1.0
+      },
+      {
+        "item": "diente_giganotosaurus",
+        "min": 1,
+        "max": 3,
+        "chance": 0.8
+      }
+    ],
+    "carnotaurus": [
+      {
+        "item": "cuero_carnotaurus",
+        "min": 1,
+        "max": 3,
+        "chance": 1.0
+      },
+      {
+        "item": "cuerno_carnotaurus",
+        "min": 1,
+        "max": 2,
+        "chance": 0.5
+      }
+    ],
+    "dimorphodon": [
+      {
+        "item": "membrana_dimorphodon",
+        "min": 1,
+        "max": 1,
+        "chance": 0.8
+      }
+    ]
+  }
+}

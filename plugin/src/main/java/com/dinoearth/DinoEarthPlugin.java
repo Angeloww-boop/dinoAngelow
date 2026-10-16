@@ -6,23 +6,35 @@ import com.dinoearth.dino.DinoManager;
 import com.dinoearth.dex.DexManager;
 import com.dinoearth.feeder.FeederManager;
 import com.dinoearth.egg.EggManager;
+import com.dinoearth.item.CageManager;
+import com.dinoearth.item.DinoItems;
+import com.dinoearth.item.ItemListener;
+import com.dinoearth.order.OrderMenu;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.pack.PackManager;
 import com.dinoearth.species.Species;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class DinoEarthPlugin extends JavaPlugin {
@@ -34,6 +46,18 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private PackManager pack;
     private FeederManager feeders;
     private DexManager dex;
+    private DinoItems items;
+    private CageManager cages;
+
+    /** Comandos que puede usar cualquier jugador; el resto es de admin. */
+    private static final Set<String> PLAYER_COMMANDS = Set.of("pack", "dar", "regalar", "aceptar", "rechazar");
+    private static final int OFFER_TICKS = 60 * 20;
+
+    /** Un dino ofrecido a otro jugador con /dino dar, esperando que lo acepte. */
+    private record Offer(UUID wolf, UUID from, int expires) {
+    }
+
+    private final Map<UUID, Offer> offers = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -58,7 +82,17 @@ public final class DinoEarthPlugin extends JavaPlugin {
         dex = new DexManager(keys);
         dinos = new DinoManager(keys, settings, feeders, dex);
         eggs = new EggManager(keys, dinos, settings.hatchTicks);
-        getServer().getPluginManager().registerEvents(new DinoListener(this, dinos, eggs, keys), this);
+        try (InputStream in = getResource("items.json")) {
+            items = new DinoItems(keys, in);
+        } catch (Exception e) {
+            getLogger().severe("No se pudo cargar items.json: " + e);
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        cages = new CageManager(items, dinos, keys);
+        getServer().getPluginManager().registerEvents(new OrderMenu(dinos, items, keys), this);
+        getServer().getPluginManager().registerEvents(new ItemListener(items, cages, dinos), this);
+        getServer().getPluginManager().registerEvents(new DinoListener(this, dinos, eggs, keys, items, cages), this);
         getServer().getScheduler().runTaskTimer(this, () -> {
             dinos.tick();
             eggs.tick();
@@ -88,11 +122,27 @@ public final class DinoEarthPlugin extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         String sub = args.length > 0 ? args[0].toLowerCase() : "";
-        if (sub.equals("pack")) return packCommand(sender, args);
+        switch (sub) {
+            case "pack" -> {
+                return packCommand(sender, args);
+            }
+            case "dar", "regalar" -> {
+                return give(sender, args);
+            }
+            case "aceptar" -> {
+                return accept(sender);
+            }
+            case "rechazar" -> {
+                return reject(sender);
+            }
+            default -> {
+            }
+        }
         if (!sender.hasPermission(ADMIN)) {
-            return msg(sender, "Podés usar /dino pack para volver a cargar el pack de dinosaurios.", NamedTextColor.GRAY);
+            return msg(sender, "Podés usar /dino dar <jugador> (regalar el dino que mirás) o /dino pack.", NamedTextColor.GRAY);
         }
         switch (sub) {
+            case "item", "items" -> giveItem(sender, args);
             case "spawn" -> spawn(sender, args);
             case "egg", "huevo" -> {
                 if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
@@ -171,6 +221,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 msg(sender, "/dino comedero <carne|plantas|pescado> [cantidad]  ·  /dino dinopedia [jugador]  ·  /dino hambre [%]",
                         NamedTextColor.GRAY);
                 msg(sender, "/dino tame [jugador]  (domestica el dino que estás mirando)", NamedTextColor.GRAY);
+                msg(sender, "/dino item <id> [cantidad] [jugador]  ·  /dino dar <jugador>  ·  /dino aceptar | rechazar",
+                        NamedTextColor.GRAY);
                 msg(sender, "/dino pack [reload|info]  ·  Especies: " + String.join(", ", ids()), NamedTextColor.GRAY);
             }
         }
@@ -226,6 +278,90 @@ public final class DinoEarthPlugin extends JavaPlugin {
             }
         }
         return best;
+    }
+
+    // ------------------------------------------------------------ items propios
+    private void giveItem(CommandSender sender, String[] args) {
+        if (args.length < 2 || items.def(args[1].toLowerCase()) == null) {
+            msg(sender, "Items: " + String.join(", ", items.ids()), NamedTextColor.RED);
+            return;
+        }
+        String id = args[1].toLowerCase();
+        int amount = Math.max(1, Math.min(64, args.length > 2 ? (int) parse(args[2], 1) : 1));
+        Player target = args.length > 3 ? getServer().getPlayerExact(args[3]) : sender instanceof Player p ? p : null;
+        if (target == null) {
+            msg(sender, "/dino item <id> [cantidad] [jugador]", NamedTextColor.RED);
+            return;
+        }
+        int max = items.def(id).maxStack();
+        for (int left = amount; left > 0; left -= max) {
+            for (var rest : target.getInventory().addItem(items.create(id, Math.min(max, left))).values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), rest);
+            }
+        }
+        msg(sender, "Diste " + amount + " × " + items.def(id).name() + " a " + target.getName() + ".", NamedTextColor.GREEN);
+    }
+
+    // ------------------------------------------------------------ regalar dinos
+    /** /dino dar <jugador>: ofrece el dino que estas mirando; el otro tiene 60 segundos para aceptarlo. */
+    private boolean give(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+        if (args.length < 2) return msg(sender, "/dino dar <jugador>  (mirando al dino que querés dar)", NamedTextColor.RED);
+        Player target = getServer().getPlayerExact(args[1]);
+        if (target == null) return msg(sender, "No encontré a " + args[1] + " conectado.", NamedTextColor.RED);
+        if (target == player) return msg(sender, "Ya es tuyo.", NamedTextColor.YELLOW);
+        Dino d = lookedAt(player);
+        if (d == null) return msg(sender, "Mirá a tu dino y volvé a usar /dino dar.", NamedTextColor.RED);
+        if (!d.wolf().isTamed() || !player.getUniqueId().equals(d.wolf().getOwnerUniqueId())) {
+            return msg(sender, "Ese dino no es tuyo.", NamedTextColor.RED);
+        }
+        if (d.rider() != null) return msg(sender, "Bajate del dino primero.", NamedTextColor.RED);
+        offers.put(target.getUniqueId(), new Offer(d.wolf().getUniqueId(), player.getUniqueId(),
+                getServer().getCurrentTick() + OFFER_TICKS));
+        Component dino = OrderMenu.label(d).append(Component.text(" (" + d.species().name + " "
+                + d.species().rig.variant(d.variant()).name() + ", " + (d.isMale() ? "macho" : "hembra") + ")"));
+        msg(sender, "Le ofreciste tu dino a " + target.getName() + ". Tiene 60 segundos para aceptarlo.", NamedTextColor.GREEN);
+        target.sendMessage(Component.text(player.getName() + " te quiere dar su ", NamedTextColor.GOLD)
+                .append(dino.colorIfAbsent(NamedTextColor.WHITE)).append(Component.text(". ", NamedTextColor.GOLD))
+                .append(Component.text("[Aceptar]", NamedTextColor.GREEN).decorate(TextDecoration.BOLD)
+                        .clickEvent(ClickEvent.runCommand("/dino aceptar")))
+                .append(Component.text(" "))
+                .append(Component.text("[Rechazar]", NamedTextColor.RED).decorate(TextDecoration.BOLD)
+                        .clickEvent(ClickEvent.runCommand("/dino rechazar"))));
+        return true;
+    }
+
+    private boolean accept(CommandSender sender) {
+        if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+        Offer offer = offers.remove(player.getUniqueId());
+        if (offer == null || offer.expires() < getServer().getCurrentTick()) {
+            return msg(sender, "No tenés ningún dino ofrecido (o ya pasó el minuto).", NamedTextColor.RED);
+        }
+        Entity e = Bukkit.getEntity(offer.wolf());
+        Dino d = e == null ? null : dinos.get(e);
+        if (d == null || d.isDying() || !offer.from().equals(d.wolf().getOwnerUniqueId())) {
+            return msg(sender, "Ese dino ya no está disponible.", NamedTextColor.RED);
+        }
+        if (d.rider() != null) d.wolf().removePassenger(d.rider());
+        d.wolf().setOwner(player);
+        d.wolf().setTarget(null);
+        d.setOrder(Dino.Order.STAY, player);
+        d.refreshPlate();
+        dex.addTamed(player, d.species(), d.variant());
+        msg(sender, "¡Ahora el dino es tuyo! Quedó sentado: click derecho para que te siga.", NamedTextColor.GREEN);
+        Player from = getServer().getPlayer(offer.from());
+        if (from != null) msg(from, player.getName() + " aceptó tu dino.", NamedTextColor.GREEN);
+        return true;
+    }
+
+    private boolean reject(CommandSender sender) {
+        if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
+        Offer offer = offers.remove(player.getUniqueId());
+        if (offer == null) return msg(sender, "No tenés ningún dino ofrecido.", NamedTextColor.GRAY);
+        msg(sender, "Rechazaste el dino.", NamedTextColor.YELLOW);
+        Player from = getServer().getPlayer(offer.from());
+        if (from != null) msg(from, player.getName() + " rechazó tu dino.", NamedTextColor.YELLOW);
+        return true;
     }
 
     private boolean packCommand(CommandSender sender, String[] args) {
@@ -334,12 +470,20 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
-            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "remove", "count", "comedero", "dinopedia", "hambre", "pack")
-                    : List.of("pack"), args[0]);
+            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "item", "dar", "aceptar", "rechazar", "remove", "count",
+                    "comedero", "dinopedia", "hambre", "pack") : List.of("dar", "aceptar", "rechazar", "pack"), args[0]);
         }
         String sub = args[0].toLowerCase();
+        if (args.length == 2 && (sub.equals("dar") || sub.equals("regalar"))) {
+            return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[1]);
+        }
         if (args.length == 2 && sub.equals("pack") && admin) return filter(List.of("reload", "info"), args[1]);
         if (!admin) return List.of();
+        if (sub.equals("item") || sub.equals("items")) {
+            if (args.length == 2) return filter(items.ids(), args[1]);
+            if (args.length == 3) return filter(List.of("1", "16", "64"), args[2]);
+            if (args.length == 4) return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[3]);
+        }
         if (args.length == 2 && sub.equals("spawn")) return filter(ids(), args[1]);
         if (args.length == 2 && (sub.equals("egg") || sub.equals("huevo"))) return filter(eggSpecies(), args[1]);
         if (args.length == 3 && sub.equals("remove")) return filter(ids(), args[2]);

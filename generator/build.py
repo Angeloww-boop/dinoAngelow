@@ -570,6 +570,8 @@ def build():
     all_sets.update(build_feeders(files))
     import icons  # aca y no arriba: icons usa el render de preview.py, que importa este modulo
     icons.build_icons(ALL_SPECIES, all_sets, files)
+    import items  # drops, monturas, silbato y jaula (tambien escribe items.json para el plugin)
+    items.build_items(ALL_SPECIES, all_sets, files)
 
     files["pack.mcmeta"] = json.dumps({
         # 46 = 1.21.4 (primera version con items/ y item_model), 69 = 1.21.9, 75 = 1.21.11.

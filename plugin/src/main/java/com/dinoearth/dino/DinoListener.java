@@ -220,6 +220,11 @@ public final class DinoListener implements Listener {
         if (!(event.getRightClicked() instanceof Wolf wolf)) return;
         Dino d = dinos.get(wolf);
         if (d == null) return;
+        if (d.isRental()) {
+            // dino de una pista de carreras: no se toca (ni jaula, ni nombre, ni montura, ni comida)
+            event.setCancelled(true);
+            return;
+        }
         Species species = d.species();
 
         // con la Dinopedia en la mano: ficha del dino

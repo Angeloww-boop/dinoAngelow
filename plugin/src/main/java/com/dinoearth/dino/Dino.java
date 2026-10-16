@@ -99,6 +99,12 @@ public final class Dino {
     private float charge;     // 0..1 cabeza baja embistiendo (triceratops)
     private float rideYaw;
     private int jumpCooldown;
+    // carrera pareja: dino de la pista (no es de nadie), quieto hasta la largada y con estamina para correr
+    private boolean racing;
+    private boolean frozen;
+    private float stamina = 1f;
+    private boolean exhausted;
+    private double staminaDrain, staminaRegen;
     private int roarCooldown;
 
     // vuelo (pteranodon)
@@ -398,6 +404,36 @@ public final class Dino {
         return flying;
     }
 
+    // ------------------------------------------------------------ carreras
+    /** Dino que presta una pista de carreras: no cuenta como de nadie, no se guarda y no se puede tocar. */
+    public boolean isRental() {
+        return wolf.getPersistentDataContainer().has(keys.rental);
+    }
+
+    /**
+     * Modo carrera: sin habilidades (rugido, embestida) y con estamina. Correr (Ctrl) gasta la barra en drainSeconds;
+     * vacia, no deja correr hasta recuperar el 30 %. Se recupera en regenSeconds.
+     */
+    public void startRacing(double drainSeconds, double regenSeconds) {
+        racing = true;
+        stamina = 1f;
+        exhausted = false;
+        staminaDrain = 1.0 / Math.max(1, drainSeconds * 20);
+        staminaRegen = 1.0 / Math.max(1, regenSeconds * 20);
+    }
+
+    public void setFrozen(boolean value) {
+        frozen = value;
+    }
+
+    public float stamina() {
+        return stamina;
+    }
+
+    public boolean isExhausted() {
+        return exhausted;
+    }
+
     public boolean canRide() {
         return species.rideable && rig.hasSaddle() && isAdult() && saddled && wolf.isTamed() && !isStarving();
     }
@@ -405,7 +441,7 @@ public final class Dino {
     // ------------------------------------------------------------ hambre
     /** Si esta especie (domesticada) tiene hambre con esta configuracion. */
     public boolean tracksHunger() {
-        return settings.hunger && species.getsHungry() && wolf.isTamed();
+        return settings.hunger && species.getsHungry() && wolf.isTamed() && !isRental();
     }
 
     public float hunger() {
@@ -1392,7 +1428,7 @@ public final class Dino {
                 ? rider.getCurrentInput().isSprint() && rider.getCurrentInput().isForward() && speed > 0.35f
                 : target != null && speed > 0.3f;
         charge += ((charging ? 1f : 0f) - charge) * 0.2f;
-        if (rider != null && charging && age % 2 == 0) ram(rider);
+        if (rider != null && charging && age % 2 == 0 && !racing) ram(rider);
         if (age % 100 == 0) rammed.values().removeIf(t -> age - t > 40);
     }
 
@@ -1433,9 +1469,26 @@ public final class Dino {
             return;
         }
 
+        if (frozen) {
+            // largada: quieto hasta que larguen (puede mirar para los costados)
+            Vector still = wolf.getVelocity();
+            wolf.setVelocity(still.setX(0).setZ(0));
+            return;
+        }
         double f = (in.isForward() ? 1 : 0) - (in.isBackward() ? 1 : 0);
         double s = (in.isLeft() ? 1 : 0) - (in.isRight() ? 1 : 0);
-        double max = (f > 0 && in.isSprint() ? species.rideSprint : species.rideWalk) * g().speed;
+        boolean sprint = f > 0 && in.isSprint();
+        if (racing) {
+            if (sprint && !exhausted) {
+                stamina = (float) Math.max(0, stamina - staminaDrain);
+                if (stamina <= 0) exhausted = true;
+            } else {
+                stamina = (float) Math.min(1, stamina + staminaRegen);
+                if (exhausted && stamina >= 0.3f) exhausted = false;
+            }
+            if (exhausted) sprint = false;
+        }
+        double max = (sprint ? species.rideSprint : species.rideWalk) * g().speed;
         if (f < 0) max *= 0.45;
         double rad = Math.toRadians(rideYaw);
         double vx = -Math.sin(rad) * f + Math.cos(rad) * s * 0.6;
@@ -1453,8 +1506,8 @@ public final class Dino {
         v.setZ(v.getZ() + (vz - v.getZ()) * k);
         if (jumpCooldown > 0) jumpCooldown--;
         if (species.roars) {
-            // el T-Rex no salta: la barra espaciadora es para rugir
-            if (in.isJump() && roarCooldown == 0 && roar < 0) {
+            // el T-Rex no salta: la barra espaciadora es para rugir (en carrera no)
+            if (in.isJump() && roarCooldown == 0 && roar < 0 && !racing) {
                 roar = 0;
                 play("roar", 1f, 1f);
                 scare(rider);

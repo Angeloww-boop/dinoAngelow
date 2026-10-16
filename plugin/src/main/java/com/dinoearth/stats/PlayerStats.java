@@ -29,7 +29,7 @@ public final class PlayerStats implements Listener {
 
     /** Categorias de los tops, en el orden en que se listan. */
     public static final List<String> CATEGORIES = List.of("dinos", "sellos", "especies", "crias", "domesticados",
-            "nidos", "cazados", "misiones", "genes");
+            "nidos", "cazados", "misiones", "carreras", "genes");
     private static final long CACHE_MS = 10_000;
 
     public record Row(UUID id, String name, double value) {

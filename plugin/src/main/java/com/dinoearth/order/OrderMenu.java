@@ -139,7 +139,7 @@ public final class OrderMenu implements Listener {
     }
 
     private boolean owned(Player p, Dino d) {
-        return !d.isDying() && d.wolf().isValid() && d.wolf().isTamed() && d.wolf().getWorld() == p.getWorld()
+        return !d.isDying() && !d.isRental() && d.wolf().isValid() && d.wolf().isTamed() && d.wolf().getWorld() == p.getWorld()
                 && p.getUniqueId().equals(d.wolf().getOwnerUniqueId());
     }
 

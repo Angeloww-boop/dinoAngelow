@@ -44,7 +44,7 @@ public final class MissionManager implements Listener {
 
     public static final int PER_DAY = 3;
 
-    public enum Type { AVISTAR, COLOR, DOMESTICAR, CRIAR, MONTAR, CAZAR, COMEDERO }
+    public enum Type { AVISTAR, COLOR, DOMESTICAR, CRIAR, MONTAR, CAZAR, COMEDERO, CARRERA }
 
     public static final class Mission {
         public final Type type;
@@ -328,6 +328,8 @@ public final class MissionManager implements Listener {
         if (breeds) options.add(new Option(new Mission(Type.CRIAR, null, null, 1), 1));
         if (rides) options.add(new Option(new Mission(Type.MONTAR, null, null, 100 * r.nextInt(3, 9)), 2));
         if (eats) options.add(new Option(new Mission(Type.COMEDERO, null, null, 20 * r.nextInt(3, 8)), 1));
+        var races = com.dinoearth.race.RaceManager.get();
+        if (races != null && races.hasTracks()) options.add(new Option(new Mission(Type.CARRERA, null, null, 1), 2));
 
         List<Mission> out = new ArrayList<>();
         Set<Type> used = new HashSet<>();
@@ -415,6 +417,11 @@ public final class MissionManager implements Listener {
             int whole = (int) m.ridden;
             if (whole > m.progress) advance(p, st, m, whole);
         }
+    }
+
+    /** Termino una carrera (cualquier puesto). */
+    public void onRace(Player p, int place) {
+        bump(p, Type.CARRERA, null, 1);
     }
 
     public void onFeed(Player p, int points) {

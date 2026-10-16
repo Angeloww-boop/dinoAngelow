@@ -157,6 +157,7 @@ sellos:
   JINETE: {nombre: 'Jinete', tarea: 'Montarlo.'}
   HOMBRO: {nombre: 'Compañero', tarea: 'Que vuele a tu lado.'}
   CAZADO: {nombre: 'Cazador', tarea: 'Derrotar uno.'}
+  CORREDOR: {nombre: 'Corredor', tarea: 'Terminar una carrera montándolo.'}
 rangos:
   - 'Aprendiz'
   - 'Explorador'
@@ -193,6 +194,7 @@ tops:
   nidos: 'huevos sacados de nidos'
   cazados: 'dinos derrotados'
   misiones: 'misiones completadas'
+  carreras: 'carreras ganadas'
   genes: 'mejor genética'
   genes-valor: '%valor%%'
 
@@ -205,6 +207,7 @@ misiones:
   MONTAR: 'Recorré %cantidad% bloques montado'
   CAZAR: 'Derrotá %cantidad% %especie%'
   COMEDERO: 'Cargá %cantidad% puntos en comederos'
+  CARRERA: 'Terminá una carrera'
   ninguna: 'Sin misión'
 
 especies:
@@ -357,3 +360,13 @@ especies:
       tiburon: 'Tiburón'
       noche: 'Noche'
       albino: 'Albino'
+
+# ---------------------------------------------------------------- carreras
+carrera:
+  lista: 'lista'
+  incompleta: 'le faltan largadas, puertas o especie'
+  sin-record: 'sin récord'
+  # barra de estamina (10 cuadraditos, con colores)
+  estamina-lleno: '&#41FF00■'
+  estamina-cansado: '&#EE193B■'
+  estamina-vacio: '&8■'

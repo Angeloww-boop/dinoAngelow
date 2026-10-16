@@ -177,5 +177,12 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   PlaceholderAPI + Vault + Towny/WG (nidos) + `/dino top`. Escrito en la nube: compila contra las stubs (scratchpad)
   sin errores, pero el jar real hay que armarlo en la PC (`mvn package`, baja tambien placeholderapi 2.11.6 de
   repo.extendedclip.com). Sonidos nuevos generados en Linux (los viejos se restauraron con git para no cambiar el hash).
+- v0.15.0 **sin probar en el juego**: carreras parejas (`race/RaceManager`): pistas en carreras.yml (largadas +
+  puertas en orden, la ultima es la meta; `Gate.crossed` = segmento tick a tick contra la caja, probado en `RaceCheck`),
+  dinos prestados (`keys.rental`, no persistentes, invulnerables, genetica neutra, fuera del registro; DinoListener y el
+  silbato no los dejan tocar), `Dino.setFrozen` en la largada, `Dino.startRacing` = estamina, inscripcion por NPC de
+  FancyNpcs (comando `dino carrera unirse <pista>`), programadas con anuncio, premios por puesto, records de siempre y
+  de la semana, mision CARRERA, sello CORREDOR (solo especies que presta alguna pista; 7.o slot sobre el lomo, 40),
+  top `carreras` y placeholders `record_<pista>`/`recordista_<pista>`.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Brachiosaurus con varios jinetes).

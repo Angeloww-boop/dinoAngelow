@@ -59,6 +59,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private CageManager cages;
     private DinoRegistry registry;
     private RecallManager recall;
+    private com.dinoearth.race.RaceManager races;
     private MissionManager missions;
     private PlayerStats stats;
     private NestManager nests;
@@ -122,6 +123,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
         missions = new MissionManager(this, dinos, registry, settings);
         dex.setMissions(missions);
         getServer().getPluginManager().registerEvents(missions, this);
+        races = new com.dinoearth.race.RaceManager(this, dinos, keys);
+        getServer().getPluginManager().registerEvents(races, this);
         recall = new RecallManager(this, dinos, registry, keys, settings);
         getServer().getPluginManager().registerEvents(recall, this);
         getServer().getScheduler().runTaskTimer(this, registry::save, 600L, 600L);
@@ -167,6 +170,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         if (stats != null) stats.save();
         if (feeders != null) feeders.shutdown();
         if (pack != null) pack.stop();
+        if (races != null) races.shutdown();
         if (recall != null) recall.shutdown();
         if (registry != null) registry.save();
         if (missions != null) missions.save();
@@ -211,6 +215,9 @@ public final class DinoEarthPlugin extends JavaPlugin {
             }
             case "top", "tops" -> {
                 return top(sender, args);
+            }
+            case "carrera", "carreras" -> {
+                return race(sender, args);
             }
             default -> {
             }
@@ -290,6 +297,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
             case "stats", "estadisticas" -> stats(sender);
             case "reload", "recargar" -> {
                 lang.reload();
+                reloadConfig();
+                races.loadConfig();
                 for (Species s : Species.ALL) s.applyTexts(lang);
                 chat(sender, "recargado");
             }
@@ -405,6 +414,68 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 .hoverEvent(HoverEvent.showText(lang.chatMsg("boton-rechazar-hover")));
         lang.chat(target, "dar-oferta", "aceptar", yes, "rechazar", no, "player", player.getName(),
                 "dino", OrderMenu.label(d), "detalle", detail);
+        return true;
+    }
+
+    /**
+     * /dino carrera ...: los jugadores se anotan (unirse, lo usa el NPC de FancyNpcs), salen y ven las pistas; los
+     * admins arman la pista parados en el lugar (crear, largada, puerta, deshacer, limpiar, vueltas, especie, ver, info)
+     * y manejan las carreras (iniciar, cancelar, borrar).
+     */
+    private boolean race(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player p)) return chat(sender, "solo-jugadores");
+        String action = args.length > 1 ? args[1].toLowerCase() : "";
+        String id = args.length > 2 ? args[2].toLowerCase() : null;
+        var t = races.track(id);
+        switch (action) {
+            case "unirse", "anotarme", "entrar" -> {
+                if (t == null) return chat(sender, "carrera-no-existe", "pista", id != null ? id : "?");
+                races.join(p, t);
+                return true;
+            }
+            case "salir" -> {
+                races.leave(p);
+                return true;
+            }
+            case "pistas", "lista" -> {
+                races.list(p);
+                return true;
+            }
+            default -> {
+            }
+        }
+        if (!sender.hasPermission(ADMIN)) {
+            lang.chatLines(sender, "carrera-ayuda");
+            return true;
+        }
+        if (action.equals("crear")) {
+            if (id == null) return chat(sender, "carrera-uso");
+            races.create(p, id);
+            return true;
+        }
+        if (action.isEmpty()) {
+            lang.chatLines(sender, "carrera-ayuda-admin");
+            return true;
+        }
+        if (t == null) return chat(sender, "carrera-no-existe", "pista", id != null ? id : "?");
+        switch (action) {
+            case "largada" -> races.addGrid(p, t);
+            case "puerta" -> races.addGate(p, t, args.length > 3 ? parse(args[3], 8) : 8, args.length > 4 ? parse(args[4], 4) : 4);
+            case "deshacer" -> races.undoGate(p, t);
+            case "limpiar" -> races.clear(p, t);
+            case "vueltas" -> races.setLaps(p, t, args.length > 3 ? (int) parse(args[3], 3) : 3);
+            case "especie" -> {
+                Species s = args.length > 3 ? Species.byId(args[3]) : null;
+                if (s == null) return chat(sender, "spawn-especies", "lista", String.join(", ", ids()));
+                races.setSpecies(p, t, s);
+            }
+            case "ver" -> races.show(p, t, 300);
+            case "info" -> races.info(p, t);
+            case "iniciar" -> races.forceStart(p, t);
+            case "cancelar" -> races.forceCancel(p, t);
+            case "borrar" -> races.delete(p, t);
+            default -> lang.chatLines(sender, "carrera-ayuda-admin");
+        }
         return true;
     }
 
@@ -605,9 +676,9 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
-            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "nido", "item", "mis", "llamar", "misiones", "top",
+            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "nido", "item", "mis", "llamar", "misiones", "top", "carrera",
                     "dar", "aceptar", "rechazar", "remove", "count", "stats", "comedero", "dinopedia", "hambre", "pack", "reload")
-                    : List.of("mis", "llamar", "misiones", "top", "dar", "aceptar", "rechazar", "pack"), args[0]);
+                    : List.of("mis", "llamar", "misiones", "top", "carrera", "dar", "aceptar", "rechazar", "pack"), args[0]);
         }
         String sub = args[0].toLowerCase();
         if (sub.equals("llamar") && args.length <= 3 && sender instanceof Player p) {
@@ -619,6 +690,23 @@ public final class DinoEarthPlugin extends JavaPlugin {
         }
         if (args.length == 2 && sub.equals("pack") && admin) return filter(List.of("reload", "info"), args[1]);
         if (args.length == 2 && (sub.equals("top") || sub.equals("tops"))) return filter(PlayerStats.CATEGORIES, args[1]);
+        if (sub.equals("carrera") || sub.equals("carreras")) {
+            if (args.length == 2) {
+                return filter(admin ? List.of("unirse", "salir", "pistas", "crear", "largada", "puerta", "deshacer", "limpiar",
+                        "vueltas", "especie", "ver", "info", "iniciar", "cancelar", "borrar")
+                        : List.of("unirse", "salir", "pistas"), args[1]);
+            }
+            if (args.length == 3 && !args[1].equalsIgnoreCase("salir") && !args[1].equalsIgnoreCase("pistas")
+                    && !args[1].equalsIgnoreCase("crear")) {
+                return filter(races.ids(), args[2]);
+            }
+            if (args.length == 4 && args[1].equalsIgnoreCase("especie")) {
+                return filter(Species.ALL.stream().filter(s -> s.rideable && !s.flies() && !s.aquatic()).map(s -> s.id).toList(), args[3]);
+            }
+            if (args.length == 4 && args[1].equalsIgnoreCase("puerta")) return filter(List.of("6", "8", "12"), args[3]);
+            if (args.length == 4 && args[1].equalsIgnoreCase("vueltas")) return filter(List.of("1", "2", "3", "5"), args[3]);
+            return List.of();
+        }
         if (!admin) return List.of();
         if (sub.equals("item") || sub.equals("items")) {
             if (args.length == 2) return filter(items.ids(), args[1]);

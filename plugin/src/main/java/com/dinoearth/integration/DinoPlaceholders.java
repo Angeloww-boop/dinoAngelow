@@ -66,6 +66,13 @@ public final class DinoPlaceholders extends PlaceholderExpansion {
         String p = params.toLowerCase(Locale.ROOT);
         if (p.startsWith("top_")) return top(p.substring(4));
         if (p.equals("cargados")) return String.valueOf(dinos.count());
+        // record_<pista> / recordista_<pista>: mejor tiempo de siempre de una pista de carreras
+        var races = com.dinoearth.race.RaceManager.get();
+        if (races != null && (p.startsWith("record_") || p.startsWith("recordista_"))) {
+            var t = races.track(p.substring(p.indexOf('_') + 1));
+            if (t == null || t.best() <= 0) return "-";
+            return p.startsWith("record_") ? com.dinoearth.race.RaceManager.time(t.best()) : t.bestName();
+        }
         if (player == null) return "";
         Player online = player.getPlayer();
         if (p.startsWith("puesto_")) return String.valueOf(stats.position(player.getUniqueId(), p.substring(7)));
@@ -90,7 +97,8 @@ public final class DinoPlaceholders extends PlaceholderExpansion {
             case "rango" -> online != null ? dex.rankOf(online) : "";
             case "misiones_hoy" -> online != null && missions != null ? String.valueOf(missions.doneToday(online)) : "0";
             case "mejor_genes" -> num(stats.value(player.getUniqueId(), "genes"));
-            case "crias", "domesticados", "nidos", "cazados", "misiones" -> num(stats.value(player.getUniqueId(), p));
+            case "crias", "domesticados", "nidos", "cazados", "misiones", "carreras" -> num(stats.value(player.getUniqueId(), p));
+            case "carreras_corridas" -> num(stats.value(player.getUniqueId(), "carreras-corridas"));
             case "montando" -> online != null && online.getVehicle() != null && dinos.get(online.getVehicle()) != null
                     ? dinos.get(online.getVehicle()).species().name : "";
             default -> null;

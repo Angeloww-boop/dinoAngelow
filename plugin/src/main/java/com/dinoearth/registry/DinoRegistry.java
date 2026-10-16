@@ -52,7 +52,7 @@ public final class DinoRegistry {
     public void update(Dino d) {
         Wolf w = d.wolf();
         UUID owner = w.getOwnerUniqueId();
-        if (!w.isTamed() || owner == null) {
+        if (!w.isTamed() || owner == null || d.isRental()) {
             if (entries.remove(w.getUniqueId()) != null) dirty = true;
             return;
         }

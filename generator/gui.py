@@ -487,6 +487,7 @@ STAMPS = {
     "jinete": ((130, 80, 50), "saddle"),
     "hombro": ((90, 120, 160), "feather"),
     "cazado": ((150, 50, 40), "swords"),
+    "corredor": ((40, 120, 140), "flag"),
 }
 
 
@@ -521,6 +522,7 @@ def symbol_pixels(symbol):
         "saddle": ["..xxxx..", ".xx..xx.", "xx....xx", "x......x", "x......x", "xx....xx", "x......x"],
         "feather": [".....xx.", "....xxx.", "...xxx..", "..xxx...", ".xxx....", ".x......", "x......."],
         "swords": ["x......x", ".x....x.", "..x..x..", "...xx...", "..x..x..", "xx....xx", "x......x"],
+        "flag": ["x.......", "xxxxxx..", "xx.x.x..", "xxxxxx..", "x.......", "x.......", "x......."],
     }[symbol]
     return [(4 + x, 4 + y) for y, row in enumerate(rows) for x, ch in enumerate(row) if ch == "x"]
 

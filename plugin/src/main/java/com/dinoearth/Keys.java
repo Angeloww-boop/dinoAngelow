@@ -46,6 +46,9 @@ public final class Keys {
     public final NamespacedKey patrolX;
     public final NamespacedKey patrolZ;
     public final NamespacedKey menuIcon;
+    // carreras: dino prestado por la pista, y adonde vuelve el jugador si se desconecta corriendo
+    public final NamespacedKey rental;
+    public final NamespacedKey raceReturn;
     // genetica (lobo, huevo, jaula) y color ya elegido de la cria que va a salir de un huevo
     public final NamespacedKey genes;
     public final NamespacedKey geneMother;
@@ -99,6 +102,8 @@ public final class Keys {
         patrolX = new NamespacedKey(plugin, "patrol_x");
         patrolZ = new NamespacedKey(plugin, "patrol_z");
         menuIcon = new NamespacedKey(plugin, "menu_icon");
+        rental = new NamespacedKey(plugin, "rental");
+        raceReturn = new NamespacedKey(plugin, "race_return");
         genes = new NamespacedKey(plugin, "genes");
         geneMother = new NamespacedKey(plugin, "gene_mother");
         geneFather = new NamespacedKey(plugin, "gene_father");

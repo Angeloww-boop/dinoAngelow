@@ -58,13 +58,13 @@ public final class DexManager {
     // ------------------------------------------------------------ casilleros que dependen del dibujo
     private static final int[][] INDEX_ROWS = {{10, 11, 12, 13, 14, 15, 16}, {28, 29, 30, 31, 32, 33, 34}};
     private static final int[] COLOR_SLOTS = {36, 37, 38, 39, 46, 47, 48};
-    private static final int[] STAMP_SLOTS = {41, 42, 43, 50, 51, 52};
+    private static final int[] STAMP_SLOTS = {41, 42, 43, 50, 51, 52, 40};   // el 7.o va sobre el lomo
     private static final int[] MISSION_ICON = {0, 18, 36};
     private static final int[] MISSION_REROLL = {8, 26, 44};
 
     // ------------------------------------------------------------ sellos y rangos
     public enum Stamp {
-        VISTO, COLORES, RARO, DOMESTICADO, CRIADO, JINETE, HOMBRO, CAZADO;
+        VISTO, COLORES, RARO, DOMESTICADO, CRIADO, JINETE, HOMBRO, CAZADO, CORREDOR;
 
         String label() {
             return Lang.get().plain("sellos." + name() + ".nombre");
@@ -98,6 +98,9 @@ public final class DexManager {
         }
         if (s.rideable) out.add(Stamp.JINETE);
         else if (s.perches) out.add(Stamp.HOMBRO);
+        // solo en las especies que presta alguna pista de carreras
+        var races = com.dinoearth.race.RaceManager.get();
+        if (races != null && races.usesSpecies(s)) out.add(Stamp.CORREDOR);
         return out;
     }
 
@@ -302,6 +305,12 @@ public final class DexManager {
 
     public void onHatch(Player p, Species s) {
         award(p, s, Stamp.CRIADO);
+    }
+
+    /** Termino una carrera montando un dino de esta especie (prestado por la pista). */
+    public void onRace(Player p, Species s) {
+        if (!discovered(p, s)) discover(p, s, s.rig.variants().keySet().iterator().next());
+        award(p, s, Stamp.CORREDOR);
     }
 
     public void onKill(Player p, Species s) {
@@ -691,6 +700,7 @@ public final class DexManager {
             case CRIAR -> "dinoearth:gui/stamp/criado";
             case MONTAR -> "dinoearth:gui/stamp/jinete";
             case COMEDERO -> "dinoearth:gui/stamp/domesticado";
+            case CARRERA -> "dinoearth:gui/stamp/corredor";
         };
     }
 

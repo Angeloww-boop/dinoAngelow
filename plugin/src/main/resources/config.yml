@@ -66,6 +66,51 @@ missions:
 # guardados en una jaula no cuentan (pero no se pueden soltar si ya tiene el maximo). Los huevos de un jugador que
 # llego al maximo esperan a que tenga lugar para nacer.
 # Para dar mas a algunos (VIP, rangos): permiso dinoearth.limit.<numero> (vale el mayor) o dinoearth.limit.unlimited
+# Carreras parejas: la pista presta a todos el mismo dino (misma especie y genetica neutra). Las pistas se arman con
+# /dino carrera (ver /dino carrera para la ayuda) y se guardan en carreras.yml. Los jugadores se anotan con un NPC
+# (FancyNpcs: accion de comando del jugador "dino carrera unirse <pista>") o con el comando.
+races:
+  min-players: 2
+  # cuando ya hay el minimo, se espera esto para que se sumen mas (si se llena, larga al toque)
+  lobby-seconds: 30
+  # si en este tiempo no se junta el minimo, la inscripcion se cancela
+  lobby-timeout-minutes: 3
+  countdown-seconds: 10
+  # despues de que llega el primero, los demas tienen este tiempo para terminar
+  finish-wait-seconds: 30
+  default-laps: 3
+  default-species: gallimimus
+  # correr (Ctrl) gasta la estamina en sprint-seconds; vacia no deja correr hasta recuperar el 30 %
+  stamina:
+    sprint-seconds: 6
+    regen-seconds: 10
+  # carreras programadas: a estas horas (zona de missions.timezone) o cada every-minutes minutos (0 = no)
+  # track = pista de las programadas ('' = van rotando todas las pistas listas)
+  schedule:
+    track: ''
+    times: []
+    every-minutes: 0
+    announce-minutes: 5
+  # premios por puesto ('1', '2', '3') y para el resto de los que terminan ('finish').
+  # money necesita Vault; commands: %player%, %pista%, %puesto%
+  rewards:
+    '1':
+      xp: 300
+      money: 0
+      commands: []
+    '2':
+      xp: 200
+      money: 0
+      commands: []
+    '3':
+      xp: 100
+      money: 0
+      commands: []
+    finish:
+      xp: 50
+      money: 0
+      commands: []
+
 limits:
   max-tamed-per-player: 20
 

@@ -132,6 +132,35 @@ Placeholders (`%dinoearth_<x>%`):
 
 Categorías: `dinos`, `sellos`, `especies`, `crias`, `domesticados`, `nidos`, `cazados`, `misiones`, `genes`.
 
+## Carreras de dinosaurios
+
+Carreras **parejas**: la pista le presta a todos **el mismo dino** (misma especie, genética neutra), así gana el que
+mejor maneja. La pista la armás vos donde quieras (decorala como te guste) y la marcás parado en el lugar:
+
+1. `/dino carrera crear <pista>`.
+2. En cada puesto de largada, mirando hacia adelante: `/dino carrera largada <pista>` (uno por corredor).
+3. Recorré la pista y en cada control, mirando hacia donde se corre: `/dino carrera puerta <pista> [ancho] [alto]`
+   (por defecto 8 de ancho y 4 de alto). **La última puerta es la meta.** Si la largada está detrás de la meta, es una
+   carrera de vueltas (`/dino carrera vueltas <pista> <n>`).
+4. `/dino carrera especie <pista> <especie>` (por defecto gallimimus; tiene que ser montable y de tierra) y
+   `/dino carrera ver <pista>` para ver largadas y puertas con partículas.
+5. **NPC de inscripción** con FancyNpcs: agregale la acción de comando del jugador `dino carrera unirse <pista>`.
+
+Cómo se corre: al juntarse el mínimo de corredores (2) se espera 30 s por si se suma alguien más (si se llena, larga al
+toque). Todos aparecen montados en la grilla, quietos durante la cuenta regresiva en bossbar. Hay que pasar **todas las
+puertas en orden** (no se puede cortar camino). La actionbar muestra puesto, vuelta, tiempo y la **estamina**: correr con
+Ctrl la gasta y, vacía, no deja correr hasta recuperar el 30 %. Si te bajás del dino volvés a la última puerta.
+Teletransportarse en plena carrera te deja afuera. Cuando llega el primero, el resto tiene 30 s.
+
+Al terminar: podio, **premios por puesto** (`races.rewards`: experiencia, plata con Vault y comandos), **récord de
+siempre y de la semana** por pista (`/dino carrera pistas`, PlaceholderAPI `%dinoearth_record_<pista>%` y
+`%dinoearth_recordista_<pista>%`), carreras ganadas en `/dino top carreras` (`%dinoearth_carreras%`), la misión diaria
+**"Terminá una carrera"** y el sello **Corredor** de la especie de la pista en la Dinopedia.
+
+**Carreras programadas** (`races.schedule`): a ciertas horas (`times: ['20:00', '22:00']`) o cada N minutos; unos
+minutos antes se anuncia en el chat con un botón **[Anotarme]** y otro aviso un minuto antes. Si no se juntan
+corredores, se cancela. `/dino carrera iniciar <pista>` larga aunque haya uno solo (para probar la pista).
+
 ## Textos y menús
 
 Nada de lo que ve el jugador está escrito en el código: todo sale de archivos en `plugins/DinoEarth/` (se crean solos

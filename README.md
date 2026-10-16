@@ -50,7 +50,9 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 | T-Rex | Los salvajes no se domestican: hay que conseguir un huevo (`/dino egg trex` o vendido con Shopkeepers), criarlo y esperar a que sea adulto |
 | Hambre | Los domesticados se van quedando con hambre (1–2 h de juego de lleno a vacío). Se les da su comida con click derecho. **Muertos de hambre se echan, se ven mal y no se dejan montar** (no se mueren); con hambre tampoco crían |
 | Comedero | Se pone en el suelo y se carga con click derecho con su comida (agachado = la pila entera). Los dinos domesticados con hambre a menos de 16 bloques **van solos a comer**. Hay de carne, de plantas y de pescado. No tiene inventario: la comida se convierte en puntos y no se puede sacar. Lo rompe el dueño (agachado si tiene comida) |
-| Dinopedia | Libro: click derecho abre las especies. Cada especie (y cada color) se anota sola al ver un dino de cerca. Con el libro, click derecho a un dino = su ficha (color, sexo, edad, vida, hambre, dueño) |
+| Dinopedia | Libreta de paleontólogo con menús dibujados. **Índice**: las especies (silueta las que no viste), tu rango y una barra de investigación. **Página de cada especie**: foto grande del color que elijas, barras de vida/daño/velocidad/tamaño, colores vistos, sellos y la lupa. **Ficha** (click derecho a un dino con el libro): su foto, sexo, edad, color, vida, hambre, dueño y órdenes. Cada especie y cada color se anotan solos al ver un dino de cerca |
+| Sellos y rangos | Cada especie tiene sellos: verla, todos sus colores comunes, el color raro, domesticarla (o derrotarla si no se domestica), criar una de huevo, montarla (o llevarla en el hombro). Cada sello da experiencia, completar una especie da más y podés poner comandos de premio en `config.yml` (`dinopedia`). Con los sellos subís de rango: Aprendiz, Explorador, Rastreador, Naturalista, Paleontólogo y Leyenda jurásica |
+| Llevar la Dinopedia | En la mano: anotás dinos desde **32 bloques** (sin ella, 16), te avisa con **huellas** cuando hay una especie que no conocés cerca (y hacia dónde) y, si activaste la **lupa** en la página de una especie, la barra de acción te marca con una flecha dónde está la más cercana y a cuántos metros (primero los colores que te faltan) |
 | Criar | Dar comida a un macho y una hembra adultos domesticados → la hembra pone un **huevo** |
 | Huevo | Click derecho en el suelo. Se mueve, se agrieta y a los 5 min nace una cría al azar, domesticada por quien lo puso. Click derecho = ver %, golpe = recogerlo |
 | Cría | Crece sola (40 min). Darle su comida la hace crecer un 5 % |
@@ -118,6 +120,8 @@ El zip es determinista: su hash solo cambia cuando cambia el contenido, así los
 | `generator/geometry.py` | Piezas comunes (cubos, huesos, huevo, materiales de las monturas) |
 | `generator/feeder.py` | Modelo del comedero (3 dietas × 4 niveles de comida) |
 | `generator/icons.py` | Íconos de la Dinopedia (cada color renderizado, silueta, libro) |
+| `generator/gui.py` | Menús dibujados de la Dinopedia: fondos, fotos grandes, fuentes y botones (`font_widths.json` = anchos de las letras de vanilla) |
+| `generator/gui_preview.py` | Dibuja los menús como en el juego para revisarlos sin entrar (ver CLAUDE.md) |
 | `generator/build.py` | Genera texturas, modelos JSON, el zip del pack y los rigs del plugin |
 | `generator/sounds.py`, `sounds_species.py`, `synth.py` | Síntesis de sonidos (necesita `generator/.venv`) |
 | `generator/preview.py` | Regenera todo y renderiza `preview.png` (`python generator/preview.py triceratops` = una sola especie, `monturas` = las monturas de cerca) |

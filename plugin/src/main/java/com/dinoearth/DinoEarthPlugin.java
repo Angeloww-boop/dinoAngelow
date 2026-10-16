@@ -4,6 +4,7 @@ import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoListener;
 import com.dinoearth.dino.DinoManager;
 import com.dinoearth.dex.DexManager;
+import com.dinoearth.gui.GuiFont;
 import com.dinoearth.feeder.FeederManager;
 import com.dinoearth.egg.EggManager;
 import com.dinoearth.item.CageManager;
@@ -80,8 +81,17 @@ public final class DinoEarthPlugin extends JavaPlugin {
         Keys keys = new Keys(this);
         Settings settings = new Settings(getConfig());
         feeders = new FeederManager(keys, settings);
-        dex = new DexManager(keys);
+        GuiFont gui;
+        try (InputStream in = getResource("gui.json")) {
+            gui = GuiFont.load(in);
+        } catch (Exception e) {
+            getLogger().severe("No se pudo cargar gui.json: " + e);
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        dex = new DexManager(keys, settings, gui);
         dinos = new DinoManager(keys, settings, feeders, dex);
+        dex.start(this, dinos);
         eggs = new EggManager(keys, dinos, settings.hatchTicks);
         try (InputStream in = getResource("items.json")) {
             items = new DinoItems(keys, in);

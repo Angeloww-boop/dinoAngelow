@@ -46,6 +46,21 @@ recall:
 alerts:
   attack-cooldown-seconds: 30
 
+# Dinopedia: cada especie tiene sellos de investigacion (verla, sus colores, el color raro, domesticarla,
+# criarla, montarla...). Cada sello da experiencia y completar una especie da mas. Los comandos se corren
+# desde la consola (%player% = jugador, %species% = id de la especie), por ejemplo para dar plata o un kit.
+dinopedia:
+  xp-per-stamp: 30
+  xp-species-complete: 150
+  species-complete-commands: []
+  all-complete-commands: []
+  # Distancia a la que se anota un dino al verlo (con la Dinopedia en la mano, mas lejos)
+  discover-range: 16
+  book-discover-range: 32
+  # Con la Dinopedia en la mano: huellas de especies que no conoces y rastreo con la lupa (en bloques)
+  tracks-range: 64
+  track-range: 160
+
 # Valores por especie. Velocidades de montura en bloques por tick
 # (un jugador caminando ~0.22, corriendo ~0.28).
 species:

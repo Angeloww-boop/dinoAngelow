@@ -1,0 +1,148 @@
+{
+ "providers": [
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/bg_index.png",
+   "ascent": 13,
+   "height": 222,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/bg_species.png",
+   "ascent": 13,
+   "height": 222,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/bg_card.png",
+   "ascent": 13,
+   "height": 222,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/raptor.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/triceratops.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/dilophosaurus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/compsognathus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/trex.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/pteranodon.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/parasaurolophus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/gallimimus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/stegosaurus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/ankylosaurus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/giganotosaurus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/carnotaurus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/dimorphodon.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  }
+ ]
+}

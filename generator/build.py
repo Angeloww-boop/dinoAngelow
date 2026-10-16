@@ -569,9 +569,11 @@ def build():
             all_sets[f"{sp['id']}/{key}"] = s
     all_sets.update(build_feeders(files))
     import icons  # aca y no arriba: icons usa el render de preview.py, que importa este modulo
-    icons.build_icons(ALL_SPECIES, all_sets, files)
+    raws = icons.build_icons(ALL_SPECIES, all_sets, files)
     import items  # drops, monturas, silbato y jaula (tambien escribe items.json para el plugin)
     items.build_items(ALL_SPECIES, all_sets, files)
+    import gui  # menus con diseño de la Dinopedia (fondos, fotos, fuentes; escribe gui.json para el plugin)
+    gui.build_gui(ALL_SPECIES, raws, files)
 
     files["pack.mcmeta"] = json.dumps({
         # 46 = 1.21.4 (primera version con items/ y item_model), 69 = 1.21.9, 75 = 1.21.11.
@@ -584,7 +586,7 @@ def build():
     # Windows no es el de Linux), asi que un PNG con los mismos pixeles se deja como estaba: si no, el
     # hash del pack cambiaria al regenerar en otra compu sin haber cambiado nada.
     stale = set()
-    for sub in ("models", "items", "textures"):
+    for sub in ("models", "items", "textures", "font"):
         for base, _, names in os.walk(os.path.join(PACK_DIR, "assets", NS, sub)):
             stale.update(os.path.normpath(os.path.join(base, n)) for n in names)
     for rel_path, data in files.items():

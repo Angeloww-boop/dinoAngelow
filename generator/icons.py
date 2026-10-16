@@ -15,14 +15,18 @@ SILHOUETTE = (46, 50, 58)
 
 
 def icon(sets, key, scale, pose, yaw, pitch):
+    return shrink(raw_render(sets, key, scale, pose, yaw, pitch))
+
+
+def raw_render(sets, key, scale, pose, yaw, pitch):
+    """Render grande con fondo transparente (None): sirve para el icono y para la foto de la Dinopedia."""
     rig = sets[key][0]
     cubes = [c for b in rig.bones for c in b.cubes]
     radius = max(max(abs(c.frm[i]), abs(c.to[i])) for c in cubes for i in (0, 2))
     height = max(c.to[1] for c in cubes)
     ppx = CANVAS * 0.8 / (max(2 * radius, height) * scale)
-    img = render(dino(sets, key, pose, root=mat_t(0, -height / 2, 0), k=scale), yaw, pitch, ppx=ppx, cy_frac=0.5,
-                 canvas=(CANVAS, CANVAS), bg=None)
-    return shrink(img)
+    return render(dino(sets, key, pose, root=mat_t(0, -height / 2, 0), k=scale), yaw, pitch, ppx=ppx, cy_frac=0.5,
+                  canvas=(CANVAS, CANVAS), bg=None)
 
 
 def shrink(img):
@@ -95,13 +99,18 @@ def put(files, path, pix):
 
 
 def build_icons(species, sets, files):
+    """Devuelve los renders crudos {(especie, color): imagen} para las fotos de la Dinopedia (gui.py)."""
+    raws = {}
     for sp in species:
         sid = sp["id"]
         pose, yaw, pitch = POSE.get(sid, ("reposo", 125, 15))
         first = None
         for vid in sp["variants"]:
-            pix = icon(sets, f"{sid}/{vid}/male", sp["scale"], pose, yaw, pitch)
+            raw = raw_render(sets, f"{sid}/{vid}/male", sp["scale"], pose, yaw, pitch)
+            raws[(sid, vid)] = raw
+            pix = shrink(raw)
             put(files, f"icon/{sid}/{vid}", pix)
             first = first or pix
         put(files, f"icon/{sid}/unknown", silhouette(first))
     put(files, "dinopedia", book())
+    return raws

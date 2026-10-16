@@ -1,0 +1,558 @@
+{
+ "hud": [
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  ""
+ ],
+ "hud_font": "dinoearth:hud",
+ "icons": {
+  "check": [
+   "",
+   8
+  ],
+  "fish": [
+   "",
+   9
+  ],
+  "heart": [
+   "",
+   8
+  ],
+  "leaf": [
+   "",
+   7
+  ],
+  "mbar0": [
+   "",
+   17
+  ],
+  "mbar1": [
+   "",
+   17
+  ],
+  "mbar2": [
+   "",
+   17
+  ],
+  "mbar3": [
+   "",
+   17
+  ],
+  "mbar4": [
+   "",
+   17
+  ],
+  "mbar5": [
+   "",
+   17
+  ],
+  "mbar6": [
+   "",
+   17
+  ],
+  "mbar7": [
+   "",
+   17
+  ],
+  "mbar8": [
+   "",
+   17
+  ],
+  "meat": [
+   "",
+   7
+  ],
+  "pip_off": [
+   "",
+   6
+  ],
+  "pip_on": [
+   "",
+   6
+  ],
+  "seg_off": [
+   "",
+   5
+  ],
+  "seg_on": [
+   "",
+   5
+  ],
+  "size": [
+   "",
+   8
+  ],
+  "skull": [
+   "",
+   6
+  ],
+  "speed": [
+   "",
+   8
+  ],
+  "star": [
+   "",
+   8
+  ],
+  "sword": [
+   "",
+   8
+  ],
+  "·": [
+   "·",
+   3
+  ],
+  "…": [
+   "…",
+   6
+  ],
+  "♀": [
+   "♀",
+   6
+  ],
+  "♂": [
+   "♂",
+   8
+  ]
+ },
+ "image_font": "dinoearth:gui_img",
+ "images": {
+  "bg/card": [
+   "",
+   177
+  ],
+  "bg/index": [
+   "",
+   177
+  ],
+  "bg/species": [
+   "",
+   177
+  ],
+  "render/ankylosaurus/albino": [
+   "",
+   63
+  ],
+  "render/ankylosaurus/arcilla": [
+   "",
+   63
+  ],
+  "render/ankylosaurus/musgo": [
+   "",
+   63
+  ],
+  "render/ankylosaurus/pardo": [
+   "",
+   63
+  ],
+  "render/ankylosaurus/piedra": [
+   "",
+   63
+  ],
+  "render/carnotaurus/albino": [
+   "",
+   63
+  ],
+  "render/carnotaurus/gris": [
+   "",
+   63
+  ],
+  "render/carnotaurus/pardo": [
+   "",
+   63
+  ],
+  "render/carnotaurus/rojo": [
+   "",
+   63
+  ],
+  "render/carnotaurus/verde": [
+   "",
+   63
+  ],
+  "render/compsognathus/albino": [
+   "",
+   63
+  ],
+  "render/compsognathus/gris": [
+   "",
+   63
+  ],
+  "render/compsognathus/pardo": [
+   "",
+   63
+  ],
+  "render/compsognathus/verde": [
+   "",
+   63
+  ],
+  "render/dilophosaurus/albino": [
+   "",
+   63
+  ],
+  "render/dilophosaurus/amarillo": [
+   "",
+   63
+  ],
+  "render/dilophosaurus/pardo": [
+   "",
+   63
+  ],
+  "render/dilophosaurus/verde": [
+   "",
+   63
+  ],
+  "render/dimorphodon/albino": [
+   "",
+   63
+  ],
+  "render/dimorphodon/cielo": [
+   "",
+   63
+  ],
+  "render/dimorphodon/loro": [
+   "",
+   63
+  ],
+  "render/dimorphodon/pardo": [
+   "",
+   63
+  ],
+  "render/dimorphodon/tucan": [
+   "",
+   63
+  ],
+  "render/gallimimus/albino": [
+   "",
+   63
+  ],
+  "render/gallimimus/arena": [
+   "",
+   63
+  ],
+  "render/gallimimus/gris": [
+   "",
+   63
+  ],
+  "render/gallimimus/naranja": [
+   "",
+   63
+  ],
+  "render/gallimimus/verde": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/albino": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/arena": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/gris": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/rojizo": [
+   "",
+   63
+  ],
+  "render/giganotosaurus/verde": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/albino": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/azul": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/pardo": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/rojizo": [
+   "",
+   63
+  ],
+  "render/parasaurolophus/verde": [
+   "",
+   63
+  ],
+  "render/pteranodon/albino": [
+   "",
+   63
+  ],
+  "render/pteranodon/celeste": [
+   "",
+   63
+  ],
+  "render/pteranodon/gaviota": [
+   "",
+   63
+  ],
+  "render/pteranodon/pardo": [
+   "",
+   63
+  ],
+  "render/pteranodon/pizarra": [
+   "",
+   63
+  ],
+  "render/raptor/albino": [
+   "",
+   63
+  ],
+  "render/raptor/arena": [
+   "",
+   63
+  ],
+  "render/raptor/gris": [
+   "",
+   63
+  ],
+  "render/raptor/oscuro": [
+   "",
+   63
+  ],
+  "render/raptor/rojizo": [
+   "",
+   63
+  ],
+  "render/raptor/verde": [
+   "",
+   63
+  ],
+  "render/stegosaurus/albino": [
+   "",
+   63
+  ],
+  "render/stegosaurus/gris": [
+   "",
+   63
+  ],
+  "render/stegosaurus/oliva": [
+   "",
+   63
+  ],
+  "render/stegosaurus/pardo": [
+   "",
+   63
+  ],
+  "render/stegosaurus/rojizo": [
+   "",
+   63
+  ],
+  "render/trex/albino": [
+   "",
+   63
+  ],
+  "render/trex/oscuro": [
+   "",
+   63
+  ],
+  "render/trex/pardo": [
+   "",
+   63
+  ],
+  "render/trex/rojizo": [
+   "",
+   63
+  ],
+  "render/trex/verde": [
+   "",
+   63
+  ],
+  "render/triceratops/albino": [
+   "",
+   63
+  ],
+  "render/triceratops/oliva": [
+   "",
+   63
+  ],
+  "render/triceratops/pardo": [
+   "",
+   63
+  ],
+  "render/triceratops/pizarra": [
+   "",
+   63
+  ],
+  "render/triceratops/rojizo": [
+   "",
+   63
+  ]
+ },
+ "layout": {
+  "render": 64,
+  "render_x": 16,
+  "render_y": 20
+ },
+ "rows": {
+  "20": "dinoearth:gui_t20",
+  "31": "dinoearth:gui_t31",
+  "42": "dinoearth:gui_t42",
+  "53": "dinoearth:gui_t53",
+  "56": "dinoearth:gui_t56",
+  "6": "dinoearth:gui_t6",
+  "64": "dinoearth:gui_t64",
+  "75": "dinoearth:gui_t75",
+  "86": "dinoearth:gui_t86",
+  "92": "dinoearth:gui_t92",
+  "97": "dinoearth:gui_t97"
+ },
+ "space": {
+  "-1": "",
+  "-128": "",
+  "-16": "",
+  "-2": "",
+  "-256": "",
+  "-32": "",
+  "-4": "",
+  "-512": "",
+  "-64": "",
+  "-8": "",
+  "1": "",
+  "128": "",
+  "16": "",
+  "2": "",
+  "256": "",
+  "32": "",
+  "4": "",
+  "512": "",
+  "64": "",
+  "8": ""
+ },
+ "space_font": "dinoearth:gui_space",
+ "widths": {
+  " ": 4,
+  "!": 2,
+  "\"": 4,
+  "#": 6,
+  "$": 6,
+  "%": 6,
+  "&": 6,
+  "'": 2,
+  "(": 4,
+  ")": 4,
+  "*": 4,
+  "+": 6,
+  ",": 2,
+  "-": 6,
+  ".": 2,
+  "/": 6,
+  "0": 6,
+  "1": 6,
+  "2": 6,
+  "3": 6,
+  "4": 6,
+  "5": 6,
+  "6": 6,
+  "7": 6,
+  "8": 6,
+  "9": 6,
+  ":": 2,
+  ";": 2,
+  "<": 5,
+  "=": 6,
+  ">": 5,
+  "?": 6,
+  "@": 7,
+  "A": 6,
+  "B": 6,
+  "C": 6,
+  "D": 6,
+  "E": 6,
+  "F": 6,
+  "G": 6,
+  "H": 6,
+  "I": 4,
+  "J": 6,
+  "K": 6,
+  "L": 6,
+  "M": 6,
+  "N": 6,
+  "O": 6,
+  "P": 6,
+  "Q": 6,
+  "R": 6,
+  "S": 6,
+  "T": 6,
+  "U": 6,
+  "V": 6,
+  "W": 6,
+  "X": 6,
+  "Y": 6,
+  "Z": 6,
+  "[": 4,
+  "\\": 6,
+  "]": 4,
+  "^": 6,
+  "_": 6,
+  "`": 3,
+  "a": 6,
+  "b": 6,
+  "c": 6,
+  "d": 6,
+  "e": 6,
+  "f": 5,
+  "g": 6,
+  "h": 6,
+  "i": 2,
+  "j": 6,
+  "k": 5,
+  "l": 3,
+  "m": 6,
+  "n": 6,
+  "o": 6,
+  "p": 6,
+  "q": 6,
+  "r": 6,
+  "s": 6,
+  "t": 4,
+  "u": 6,
+  "v": 6,
+  "w": 6,
+  "x": 6,
+  "y": 6,
+  "z": 6,
+  "{": 4,
+  "|": 2,
+  "}": 4,
+  "~": 7,
+  "ª": 5,
+  "«": 7,
+  "°": 5,
+  "±": 6,
+  "·": 3,
+  "º": 5,
+  "»": 7,
+  "Á": 6,
+  "É": 6,
+  "Í": 4,
+  "Ñ": 6,
+  "Ó": 6,
+  "Ú": 6,
+  "Ü": 6,
+  "á": 6,
+  "é": 6,
+  "í": 3,
+  "ñ": 6,
+  "ó": 6,
+  "ú": 6,
+  "ü": 6,
+  "…": 6,
+  "♀": 6,
+  "♂": 8
+ },
+ "x0": 8
+}

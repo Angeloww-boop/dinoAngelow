@@ -1,5 +1,5 @@
 name: DinoEarth
-version: '0.9.0'
+version: 0.10.0
 main: com.dinoearth.DinoEarthPlugin
 api-version: '1.21'
 description: Dinosaurios para Minecraft Earth

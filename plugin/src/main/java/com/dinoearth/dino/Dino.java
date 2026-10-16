@@ -1469,7 +1469,8 @@ public final class Dino {
     /** Anota la especie (y el color) en la Dinopedia de los jugadores que lo ven de cerca. */
     private void discover(Location loc) {
         for (Player p : model.viewers()) {
-            if (p.getWorld() == loc.getWorld() && p.getLocation().distanceSquared(loc) < 16 * 16 && p.hasLineOfSight(wolf)) {
+            double r = manager.dex().discoverRange(p);
+            if (p.getWorld() == loc.getWorld() && p.getLocation().distanceSquared(loc) < r * r && p.hasLineOfSight(wolf)) {
                 manager.dex().discover(p, species, variant);
             }
         }

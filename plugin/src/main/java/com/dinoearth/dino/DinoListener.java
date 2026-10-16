@@ -169,6 +169,8 @@ public final class DinoListener implements Listener {
             if (n > 0) event.getDrops().add(new ItemStack(drop.item(), n));
         }
         event.setDroppedExp((int) Math.round(species.health / 5 * size));
+        Player killer = wolf.getKiller();
+        if (killer != null && !killer.getUniqueId().equals(wolf.getOwnerUniqueId())) dex.onKill(killer, species);
         dinos.onDeath(wolf);
     }
 
@@ -376,6 +378,7 @@ public final class DinoListener implements Listener {
                 Dino other = dinos.perchedOn(player);
                 if (other != null) other.unperch();
                 d.perch(player);
+                dex.onPerch(player, species);
             }
             return;
         }
@@ -383,6 +386,7 @@ public final class DinoListener implements Listener {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
             d.mount(player);
+            dex.onRide(player, species);
         }
         // si no, comportamiento de lobo: sentarse/pararse, curarse con carne, entrar en celo
     }

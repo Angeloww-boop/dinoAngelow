@@ -93,6 +93,11 @@ public final class Keys {
         return dynamic.computeIfAbsent("dex_" + species, k -> new NamespacedKey(plugin, k));
     }
 
+    /** Dinopedia en el jugador: sellos de investigacion conseguidos de una especie ("VISTO,COLORES,..."). */
+    public NamespacedKey dexStamps(String species) {
+        return dynamic.computeIfAbsent("dex_stamps_" + species, k -> new NamespacedKey(plugin, k));
+    }
+
     /** Dinopedia en el jugador: cuantos de una especie domestico. */
     public NamespacedKey dexTamed(String species) {
         return dynamic.computeIfAbsent("dex_tamed_" + species, k -> new NamespacedKey(plugin, k));

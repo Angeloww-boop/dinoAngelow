@@ -48,6 +48,18 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
   convierte en puntos en el PDC: sin dupes). Poner/romper consulta Towny/WG con un BlockPlaceEvent de prueba
   (`Protection`). Dinopedia (`dex/DexManager`): libro → menu de solo lectura (todo click cancelado, se reconoce por
   `InventoryHolder`); lo descubierto va en el PDC del jugador. Iconos: `generator/icons.py` con el render de preview.
+- Menus dibujados (0.10): el dibujo va en el **titulo** del menu de cofre de 6 filas (176 x 222, el titulo arranca en
+  (8, 6)). `generator/gui.py` hace fuentes: `gui_img` (fondos y fotos 64x64 de cada color como letras), `gui_space`
+  (espacios +-2^n para mover el lapiz) y `gui_t<y>` (renglon: copia de ascii.png/accented.png de vanilla corrida a la
+  altura y, mas iconitos y barritas). Verificado en el bytecode de 1.21.9: borde de arriba de la letra = y + 7 - ascent,
+  avance = (int)(0.5 + ancho real * escala) + 1, y el menu dibuja el titulo ANTES que los items (quedan arriba).
+  ascent nunca mayor que height (por eso las celdas de 8 px). `gui.json` le dice al plugin la letra y el avance de cada
+  cosa; `gui/GuiFont` arma el titulo; `dex/DexLayout` dibuja las 3 pantallas sin tocar Bukkit. Para revisar sin el juego:
+  `GuiPreview` (plugin/src/test) arma titulos de ejemplo y `generator/gui_preview.py` los dibuja con las fuentes del pack
+  (necesita el jar del cliente en .minecraft y Pillow en .venv). Si Mojang cambia la fuente: `generator/font_widths.py`.
+- Sellos de la Dinopedia (`DexManager.Stamp`): por especie segun lo que tenga (raro, domesticable, huevo, montura,
+  hombro); en el PDC del jugador (`dex_stamps_<especie>`). XP y comandos en `dinopedia.*` del config. Con el libro en la
+  mano: descubrir a 32 bloques, huellas de especies no vistas, lupa = flecha en la barra de accion (fuente `hud`).
 - Rendimiento: pose solo si alguien la ve (`getTrackedBy`), menos seguido de lejos; view range por tamaño.
 - Resource pack: el plugin lo manda solo (`PackManager`, modo `url` o `host`). El zip es determinista y
   una copia va dentro del jar (`plugin/src/main/resources/pack/`).
@@ -59,6 +71,7 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 | `generator/species_*.py` | Modelo, colores y montura de cada especie (13: raptor, triceratops, dilophosaurus, compsognathus, trex, pteranodon, parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus, dimorphodon) |
 | `generator/geometry.py` | Cube/Bone/Rig, huevo y materiales de montura (`SADDLE_COLORS`, cada especie los pisa con `saddle_colors`) |
 | `generator/feeder.py`, `generator/icons.py` | Modelo del comedero; iconos de la Dinopedia (los llama build.py) |
+| `generator/gui.py`, `gui_preview.py`, `font_widths.py` | Menus dibujados de la Dinopedia (ver arriba) |
 | `generator/items.py` | Items propios: drops por especie, monturas como item, silbato, jaula. Dibuja sus iconos y escribe `plugin/src/main/resources/items.json` (el plugin lee todo de ahí) |
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
 | `generator/preview.py` | Render propio a `preview.png` (`python generator/preview.py <especie>`) — usarlo para revisar modelos |
@@ -106,5 +119,8 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   getChunkAtAsync + ticket del plugin solo de ese chunk hasta encontrarlo; `Dino.prepareTeleport` saca el modelo
   porque un lobo con pasajeros no se teletransporta), avisos de ataque (lejos, cada 30 s) y de muerte (guardados si
   el dueño no esta conectado).
+- v0.10.0 **sin probar en el juego**: Dinopedia con menus dibujados (indice, pagina de especie con foto grande, ficha
+  de cada dino), sellos de investigacion con XP/rangos/comandos, huellas y lupa de rastreo con el libro en la mano.
+  Las pantallas se revisaron con gui_preview.py (mismo titulo que arma el plugin, dibujado con las fuentes del pack).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

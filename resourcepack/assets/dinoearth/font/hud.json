@@ -1,0 +1,17 @@
+{
+ "providers": [
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/hud.png",
+   "ascent": 7,
+   "height": 8,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "reference",
+   "id": "minecraft:default"
+  }
+ ]
+}

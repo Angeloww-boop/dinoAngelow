@@ -108,8 +108,8 @@ public final class DinoListener implements Listener {
         // si no, el dino se guardaria "adentro" del jugador al desconectarse
         Player p = event.getPlayer();
         if (p.getVehicle() != null && dinos.isDino(p.getVehicle())) p.leaveVehicle();
-        Dino perched = dinos.perchedOn(p);
-        if (perched != null) perched.unperch();
+        Dino escort = dinos.escortOf(p);
+        if (escort != null) escort.stopEscort();
     }
 
     // ------------------------------------------------------------ combate
@@ -373,18 +373,20 @@ public final class DinoListener implements Listener {
                 return;
             }
         }
-        if (species.perches && player.isSneaking() && type == Material.AIR && d.isAdult()) {
-            // agachado y con la mano vacia: se sube (o se baja) del hombro
+        if (species.perches && player.isSneaking() && type == Material.AIR && d.isAdult()
+                && player.getUniqueId().equals(wolf.getOwnerUniqueId())) {
+            // agachado y con la mano vacia: vuela a tu lado (o baja y camina)
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
-            if (d.isPerchedOn(player)) {
-                d.unperch();
-            } else {
-                Dino other = dinos.perchedOn(player);
-                if (other != null) other.unperch();
-                d.perch(player);
-                dex.onPerch(player, species);
+            if (!d.isEscorting(player)) {
+                Dino other = dinos.escortOf(player);
+                if (other != null) other.toggleEscort(player);
+                if (d.order() != Dino.Order.FOLLOW) d.setOrder(Dino.Order.FOLLOW, player);
+                dex.onEscort(player, species);
             }
+            d.toggleEscort(player);
+            player.sendActionBar(Component.text(d.isEscorting(player) ? species.name + " vuela a tu lado."
+                    : species.name + " baja y camina con vos.", NamedTextColor.GREEN));
             return;
         }
         if (d.canRide() && !player.isSneaking() && !food && d.rider() == null) {
@@ -470,13 +472,13 @@ public final class DinoListener implements Listener {
     }
 
     // ------------------------------------------------------------ comederos y dinopedia
-    /** Agachado + click izquierdo: el que va en el hombro se baja. */
+    /** Agachado + click izquierdo: el que vuela a tu lado baja y camina. */
     @EventHandler
     public void onPunchAir(PlayerInteractEvent event) {
         Action a = event.getAction();
         if ((a != Action.LEFT_CLICK_AIR && a != Action.LEFT_CLICK_BLOCK) || !event.getPlayer().isSneaking()) return;
-        Dino perched = dinos.perchedOn(event.getPlayer());
-        if (perched != null) perched.unperch();
+        Dino escort = dinos.escortOf(event.getPlayer());
+        if (escort != null) escort.toggleEscort(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGH)

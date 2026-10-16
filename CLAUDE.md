@@ -33,11 +33,12 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - Temperamento por especie (`Species.Temper`): CARNIVORE, HERBIVORE, HOSTILE, PACK, PREY (huye en manada con el
   pathfinder; agachado te acercas); se le sacan goals de lobo con la API MobGoals de Paper. Extras por especie:
   `TailAttack` (SPIKES/CLUB: coletazo al que pega por atras, `Dino.onStruck`), `armored` (proyectiles x0.35),
-  `perches` (dimorphodon en el hombro: NO es pasajero del jugador porque eso traba los teleports; se lo sigue con
-  velocidad, sin gravedad ni colision).
+  `perches` (dimorphodon compañero volador, 0.12: NO es pasajero del jugador porque eso traba los teleports;
+  `Dino.tickEscort` vuela con velocidad propia hacia un punto al costado del jugador + su velocidad medida x 5 ticks,
+  asi no queda atras; muy lejos o trabado = teleport al lado. Despega solo siguiendo si el dueño se aleja 10 bloques).
 - Montura: `Player#getCurrentInput()` + `wolf.setAware(false)` + velocidad manual. Cada especie tiene su modelo de
-  montura (hueso `saddle` hijo de `body`, materiales saddle/strap/metal/plate/spike/cloth/wood/rope); se equipa con la
-  montura de vanilla (los crafteos los hace el dueño con Shopkeepers).
+  montura (hueso `saddle` hijo de `body`, materiales saddle/strap/metal/plate/spike/cloth/wood/rope); se equipa con el
+  item montura de SU especie (items.json; la de vanilla no sirve; los crafteos los hace el dueño con Shopkeepers).
 - Vuelo (`Body.FLYER`, pteranodon): `setGravity(false)` + velocidad propia (`flyVel`, para que el roce del aire no la
   frene). Alas modeladas abiertas; en el suelo se pliegan (brazo = pata delantera, membranas `mem_*` escala 0.12).
   La inclinacion en vuelo va en `model.extra()`. Al guardar/cargar se vuelve a poner la gravedad.
@@ -130,5 +131,7 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.11.0 **sin probar en el juego**: dinos quietos mandan pose mas espaciada, huesos sin cambios no se mandan,
   `/dino stats`, limite de domesticados por jugador (`limits.max-tamed-per-player` + permisos dinoearth.limit.N).
   El pack no cambio (sha1 a471063d…).
+- v0.12.0 **sin probar en el juego**: el dimorphodon ya no va en el hombro, vuela al lado del dueño (simulado en
+  Python con la misma cuenta: queda ~1,5 bloques al costado a cualquier velocidad, nunca mas de 3 atras).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

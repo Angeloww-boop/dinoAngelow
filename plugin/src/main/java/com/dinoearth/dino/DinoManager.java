@@ -217,10 +217,10 @@ public final class DinoManager {
         dying.removeIf(d -> !d.tick());
     }
 
-    /** El dino que va en el hombro de este jugador, o null. */
-    public Dino perchedOn(org.bukkit.entity.Player player) {
+    /** El dino que vuela al lado de este jugador, o null. */
+    public Dino escortOf(org.bukkit.entity.Player player) {
         for (Dino d : active.values()) {
-            if (d.isPerchedOn(player)) return d;
+            if (d.isEscorting(player)) return d;
         }
         return null;
     }

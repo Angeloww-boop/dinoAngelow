@@ -129,7 +129,12 @@ public final class Dino {
     private int tailSwing = -1;
     private int tailCooldown;
     private float tailSide = 1;
-    private Player perch;            // jugador en cuyo hombro va (dimorphodon)
+    private Player escort;           // dueño al que acompaña volando (dimorphodon)
+    private Location escortLast;
+    private final Vector escortVel = new Vector();
+    private double escortAngle;
+    private int escortStuck;
+    private boolean walkOnly;        // el dueño lo puso a caminar: no despega solo para seguirlo
     private int alertCooldown;
     private int age;
     private int attack = -1;
@@ -476,7 +481,7 @@ public final class Dino {
             if (seekTicks > 400) feeder = null;   // no llega: se rinde (si no hay hambre extrema, vuelve a probar)
             return;
         }
-        if (age % 40 != 0 || hunger >= 0.6f || rider != null || flying || perch != null || wolf.isLeashed()) return;
+        if (age % 40 != 0 || hunger >= 0.6f || rider != null || flying || escort != null || wolf.isLeashed()) return;
         if (wolf.isSitting() && !starvingSit) return;   // el dueño lo dejo sentado: espera
         FeederManager.Feeder near = manager.feeders().nearest(wolf.getLocation(), species.diet(), 16);
         if (near == null) return;
@@ -579,7 +584,8 @@ public final class Dino {
     /** Orden del silbato. Patrullar usa el chunk donde esta parado el que da la orden. */
     public void setOrder(Order o, Player issuer) {
         if (!wolf.isTamed()) return;
-        if (perch != null) unperch();
+        if (o != Order.FOLLOW) stopEscort();
+        else walkOnly = false;
         order = o;
         switch (o) {
             case FOLLOW -> {
@@ -614,7 +620,7 @@ public final class Dino {
     }
 
     private void tickOrders(Player rider, Location loc) {
-        if (!wolf.isTamed() || rider != null || perch != null || flying) return;
+        if (!wolf.isTamed() || rider != null || escort != null || flying) return;
         // si el dueño lo sento o lo paro con click derecho, la orden pasa a ser eso
         if (age % 10 == 0 && !starvingSit) {
             boolean sitting = wolf.isSitting();
@@ -764,7 +770,7 @@ public final class Dino {
     /** Antes de teletransportarlo: un lobo con pasajeros no se puede mover, asi que se saca el modelo
      *  (se vuelve a armar solo en el proximo tick, ya en el destino). */
     public void prepareTeleport() {
-        if (perch != null) unperch();
+        stopEscort();
         if (flying) land();
         model.remove();
         removePlate();
@@ -806,8 +812,8 @@ public final class Dino {
      */
     public void onStruck(EntityDamageByEntityEvent event) {
         Entity src = event.getDamager();
-        if (perch != null && src == perch) {
-            event.setCancelled(true);   // el dueño no le pega sin querer al que lleva en el hombro
+        if (escort != null && src == escort) {
+            event.setCancelled(true);   // el dueño no le pega sin querer al que vuela a su lado
             return;
         }
         if (species.armored && src instanceof Projectile) event.setDamage(event.getDamage() * 0.35);
@@ -883,60 +889,126 @@ public final class Dino {
         wolf.getPathfinder().moveTo(loc.clone().add(away), 1.8);
     }
 
-    // ------------------------------------------------------------ hombro
-    public boolean isPerchedOn(Player p) {
-        return perch != null && perch.getUniqueId().equals(p.getUniqueId());
+    // ------------------------------------------------------------ compañero volador (dimorphodon)
+    public boolean isEscorting(Player p) {
+        return escort != null && escort.getUniqueId().equals(p.getUniqueId());
     }
 
-    /** Se sube al hombro derecho del jugador: no es pasajero (eso trabaria los teleports), lo seguimos a mano. */
-    public void perch(Player p) {
-        perch = p;
+    /**
+     * Vuela al lado del dueño. No es pasajero (eso trabaria los teleports): se mueve con su propia velocidad, apuntando
+     * a donde VA a estar el jugador (su velocidad medida aca, la del server no sirve para jugadores), asi no queda atras.
+     */
+    public void escort(Player p) {
+        escort = p;
+        escortLast = p.getLocation();
+        escortVel.zero();
+        escortStuck = 0;
+        walkOnly = false;
         wolf.setSitting(false);
         wolf.setTarget(null);
-        wolf.setAware(false);
-        wolf.setGravity(false);
         wolf.setCollidable(false);
-        if (flying) land();
+        if (!flying) {
+            takeOff();
+            flyVel.setY(0.3);
+        }
         play("ambient", 0.6f, 1.2f);
     }
 
-    public void unperch() {
-        Player p = perch;
-        if (p == null) return;
-        perch = null;
-        wolf.setGravity(true);
+    /** Deja de acompañar: baja planeando y aterriza solo. */
+    public void stopEscort() {
+        if (escort == null) return;
+        escort = null;
         wolf.setCollidable(true);
-        wolf.setFallDistance(0);
-        if (rider() == null) wolf.setAware(true);
-        double yaw = Math.toRadians(p.getYaw());
-        wolf.setVelocity(new Vector(-Math.sin(yaw) * 0.35, 0.25, Math.cos(yaw) * 0.35));
+        wildFlight = 0;
     }
 
-    private void tickPerch() {
-        Player p = perch;
-        if (!p.isOnline() || p.isDead() || p.getWorld() != wolf.getWorld()
-                || p.getLocation().distanceSquared(wolf.getLocation()) > 36 || isStarving()) {
-            unperch();
+    /** Agachado + click derecho con la mano vacia: vuela con vos o camina (sin despegar solo). */
+    public void toggleEscort(Player p) {
+        if (isEscorting(p)) {
+            stopEscort();
+            walkOnly = true;
+        } else {
+            escort(p);
+        }
+    }
+
+    private void tickEscort() {
+        Player p = escort;
+        if (!p.isOnline() || p.isDead() || isStarving() || wolf.isSitting() || order != Order.FOLLOW || hurt > 0
+                && wolf.getTarget() != null) {
+            stopEscort();
             return;
         }
-        float yaw = p.getBodyYaw();
-        double rad = Math.toRadians(yaw);
-        // hombro derecho: mirando a +Z (yaw 0) la derecha es -X
-        Location target = p.getLocation().add(-Math.cos(rad) * 0.42, p.getHeight() * 0.78, -Math.sin(rad) * 0.42);
-        wolf.setVelocity(target.toVector().subtract(wolf.getLocation().toVector()));
+        Location me = wolf.getLocation();
+        Location at = p.getLocation();
+        if (p.getWorld() != me.getWorld() || at.distanceSquared(me) > 40 * 40 || escortStuck > 60) {
+            // se quedo muy atras (teleport, elytra, portal, trabado): aparece al lado del dueño
+            Location spot = at.clone().add(0, Math.min(2.5, p.getHeight() + 0.6), 0);
+            prepareTeleport();
+            wolf.teleportAsync(spot).thenAccept(ok -> {
+                if (ok && wolf.isValid() && p.isOnline()) escort(p);
+            });
+            return;
+        }
+        // velocidad del jugador, suavizada (bloques por tick)
+        Vector step = at.toVector().subtract(escortLast.toVector());
+        escortLast = at;
+        if (step.lengthSquared() > 9) step.zero();          // teleport corto
+        escortVel.multiply(0.6).add(step.multiply(0.4));
+        double moving = Math.min(1, Math.hypot(escortVel.getX(), escortVel.getZ()) / 0.15);
+
+        // quieto: da vueltas despacio alrededor; caminando: atras a la derecha
+        double yaw = Math.toRadians(p.getYaw());
+        double fx = -Math.sin(yaw), fz = Math.cos(yaw);      // adelante
+        double rx = -Math.cos(yaw), rz = -Math.sin(yaw);     // derecha
+        escortAngle += 0.04 * (1 - moving);
+        double ox = Math.cos(escortAngle) * 2.2 * (1 - moving) + (rx * 1.5 - fx * 0.9) * moving;
+        double oz = Math.sin(escortAngle) * 2.2 * (1 - moving) + (rz * 1.5 - fz * 0.9) * moving;
+        double oy = p.getHeight() + 0.4 + Math.sin(age * 0.12) * 0.25;
+        // apunta a donde va a estar en 5 ticks
+        double tx = at.getX() + ox + escortVel.getX() * 5;
+        double ty = at.getY() + oy + escortVel.getY() * 5;
+        double tz = at.getZ() + oz + escortVel.getZ() * 5;
+        for (int i = 0; i < 3 && !me.getWorld().getBlockAt((int) Math.floor(tx), (int) Math.floor(ty),
+                (int) Math.floor(tz)).isPassable(); i++) {
+            ty += 1;     // el punto quedo adentro de un bloque: un poco mas arriba
+        }
+        Vector want = escortVel.clone().add(new Vector(tx - me.getX(), ty - me.getY(), tz - me.getZ()).multiply(0.25));
+        if (want.lengthSquared() > 1.8 * 1.8) want.normalize().multiply(1.8);
+        steer(want.getX(), want.getY(), want.getZ(), 0.5);
         wolf.setFallDistance(0);
-        rideYaw = yaw;
-        wolf.setRotation(yaw, 0);
-        wolf.setBodyYaw(yaw);
+        flapTarget(want.getY() > 0.05 || moving > 0.5 ? 1f : 0.45f);
+
+        Vector v = flyVel;
+        float heading = Math.hypot(v.getX(), v.getZ()) > 0.06 ? (float) Math.toDegrees(Math.atan2(-v.getX(), v.getZ()))
+                : p.getYaw();
+        rideYaw += clamp(wrap(heading - rideYaw), -14, 14);
+        wolf.setRotation(rideYaw, 0);
+        wolf.setBodyYaw(rideYaw);
+
+        double far = me.distanceSquared(new Location(me.getWorld(), tx, ty, tz));
+        if (far > 36 && Math.hypot(wolf.getVelocity().getX(), wolf.getVelocity().getZ()) < 0.05) escortStuck++;
+        else if (escortStuck > 0) escortStuck--;
+
         // avisa si hay monstruos cerca
         if (alertCooldown > 0) alertCooldown--;
         if (age % 40 == 0 && alertCooldown == 0
-                && !p.getLocation().getNearbyEntitiesByType(Monster.class, 12).isEmpty()) {
+                && !at.getNearbyEntitiesByType(Monster.class, 12).isEmpty()) {
             alertCooldown = 400;
             roar = 0;
             play("roar", 0.7f, 1.2f);
             p.sendActionBar(Component.text("¡Tu " + species.name + " chilla: hay monstruos cerca!", NamedTextColor.GOLD));
         }
+    }
+
+    /** Siguiendo al dueño y este se aleja: despega y lo acompaña volando (salvo que lo hayan puesto a caminar). */
+    private void maybeEscort(Player rider) {
+        if (!species.perches || escort != null || walkOnly || age % 20 != 0 || rider != null || order != Order.FOLLOW
+                || !wolf.isTamed() || wolf.isSitting() || isStarving() || isBabyForm() || wolf.getTarget() != null) {
+            return;
+        }
+        if (!(wolf.getOwner() instanceof Player owner) || !owner.isOnline() || owner.getWorld() != wolf.getWorld()) return;
+        if (owner.getLocation().distanceSquared(wolf.getLocation()) > 10 * 10) escort(owner);
     }
 
     public void onDeath() {
@@ -959,7 +1031,7 @@ public final class Dino {
 
     public void remove() {
         // que no quede flotando si se descarga el chunk en pleno vuelo (o yendo en un hombro)
-        if ((flying || perch != null) && wolf.isValid()) {
+        if ((flying || escort != null) && wolf.isValid()) {
             wolf.setGravity(true);
             wolf.setCollidable(true);
         }
@@ -1006,7 +1078,8 @@ public final class Dino {
         if (rider != null && rider() == null) rider = null;   // lo bajo el hambre
         if (tailSwing >= 0 && ++tailSwing > TAIL_TICKS) tailSwing = -1;
         if (tailCooldown > 0) tailCooldown--;
-        if (perch != null) tickPerch();
+        maybeEscort(rider);
+        if (escort != null) tickEscort();
         else if (rider != null) ride(rider);
         else if (flying) flyAlone();
         else {
@@ -1015,7 +1088,7 @@ public final class Dino {
         }
 
         Location loc = wolf.getLocation();
-        float bodyYaw = rider != null || flying || perch != null ? rideYaw : wolf.getBodyYaw();
+        float bodyYaw = rider != null || flying || escort != null ? rideYaw : wolf.getBodyYaw();
 
         // velocidad horizontal real -> ciclo de pasos
         Vector delta = loc.toVector().subtract(last.toVector()).setY(0);
@@ -1048,7 +1121,7 @@ public final class Dino {
         // la pose solo se calcula y se manda cuando alguien la puede ver, menos seguido de lejos y mucho menos
         // si esta quieto (parado o sentado sin hacer nada): ahi solo respira y mueve la cabeza
         boolean still = isStill(rider);
-        if (rider != null || perch != null) {
+        if (rider != null || escort != null) {
             poseEvery = 1;
         } else if (still != wasStill) {
             poseEvery = poseRate(loc, still);
@@ -1061,7 +1134,7 @@ public final class Dino {
         if (poseEvery > 0 && age - lastPose >= poseEvery) {
             lastPose = age;
             animate();
-            boolean free = rider == null && !flying && perch == null;   // mira para donde mira el lobo
+            boolean free = rider == null && !flying && escort == null;   // mira para donde mira el lobo
             float headYaw = free ? wrap(loc.getYaw() - bodyYaw) : 0;
             model.pose(head).ry += -clamp(headYaw, -50, 50) * 0.8f;
             model.pose(head).rx += clamp(free ? loc.getPitch() : 0, -35, 35) * 0.7f;
@@ -1089,7 +1162,7 @@ public final class Dino {
 
     /** Sin jinete, sin caminar y sin ninguna animacion en curso (ataque, rugido, comer, sentarse...). */
     private boolean isStill(Player rider) {
-        if (rider != null || perch != null || flying || isDying()) return false;
+        if (rider != null || escort != null || flying || isDying()) return false;
         if (speed > 0.04f || attack >= 0 || roar >= 0 || spit >= 0 || eating >= 0 || hurt > 0 || tailSwing >= 0) {
             return false;
         }

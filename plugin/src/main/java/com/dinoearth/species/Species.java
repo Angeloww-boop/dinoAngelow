@@ -119,7 +119,7 @@ public final class Species {
     public final TailAttack tail;
     /** Las flechas y otros proyectiles le hacen mucho menos daño. */
     public final boolean armored;
-    /** Domesticado se sube al hombro del dueño (agachado + click derecho con la mano vacia). */
+    /** Domesticado acompaña volando al dueño (Dino.tickEscort); agachado + click derecho con la mano vacia: vuela o camina. */
     public final boolean perches;
     /** Minutos que tarda en pasar de lleno a muerto de hambre (0 = no tiene hambre). */
     public double hungerMinutes;
@@ -302,7 +302,7 @@ public final class Species {
     public static final Species DIMORPHODON = new Builder("dimorphodon", "Dimorphodon", Body.FLYER, Temper.CARNIVORE)
             .aliases("dimo", "dimorfodonte").stats(10, 2, 0.32).hitbox(0.75).stride(5).group(2).view(0.8)
             .food(FISH).tame(0.33).perches().hunger(90, 16)
-            .about("0,7 bloques, 2 de ala a ala", "Pterosaurio chiquito y cabezón. Domesticado viaja en tu hombro y chilla si hay monstruos cerca.")
+            .about("0,7 bloques, 2 de ala a ala", "Pterosaurio chiquito y cabezón. Domesticado vuela a tu lado y chilla si hay monstruos cerca.")
             .drops().build();
 
     public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS, TREX, PTERANODON,

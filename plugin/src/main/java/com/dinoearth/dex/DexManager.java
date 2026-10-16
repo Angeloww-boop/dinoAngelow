@@ -68,7 +68,7 @@ public final class DexManager {
         DOMESTICADO("Domador", "Domesticar uno."),
         CRIADO("Criador", "Que nazca una cría tuya de un huevo."),
         JINETE("Jinete", "Montarlo."),
-        HOMBRO("Compañero", "Llevarlo en el hombro."),
+        HOMBRO("Compañero", "Que vuele a tu lado."),
         CAZADO("Cazador", "Derrotar uno.");
 
         public final String label;
@@ -271,7 +271,7 @@ public final class DexManager {
         award(p, s, Stamp.JINETE);
     }
 
-    public void onPerch(Player p, Species s) {
+    public void onEscort(Player p, Species s) {
         award(p, s, Stamp.HOMBRO);
     }
 
@@ -574,7 +574,7 @@ public final class DexManager {
         out.add(line(s.eggTameOnly ? "Solo naciendo de un huevo." : s.tameable()
                 ? "Dándole " + s.diet().label + " (" + Math.round(s.tameChance * 100) + "% por bocado)." : "No se domestica."));
         out.add(head("Montura"));
-        out.add(line(!s.rideable ? (s.perches ? "No se monta: va en tu hombro." : "No se puede montar.")
+        out.add(line(!s.rideable ? (s.perches ? "No se monta: vuela a tu lado." : "No se puede montar.")
                 : s.flies() ? "Sí: espacio despega, W vuela hacia donde mirás."
                 : s.roars ? "Sí: espacio ruge en vez de saltar."
                 : s.charges ? "Sí: corriendo arrolla lo que tenga adelante." : "Sí: rápido y salta alto."));
@@ -805,7 +805,7 @@ public final class DexManager {
     }
 
     private static String ability(Species s) {
-        if (s.perches) return "Agachado + click derecho: se sube a tu hombro y chilla si hay monstruos cerca.";
+        if (s.perches) return "Te sigue volando a tu lado (agachado + click derecho: vuela o camina) y chilla si hay monstruos cerca.";
         if (s.tail == Species.TailAttack.SPIKES) return "Coletazo con púas al que le pega por atrás.";
         if (s.tail == Species.TailAttack.CLUB) return "Maza en la cola que tira lejos; las flechas casi no le hacen daño.";
         if (s.temper == Species.Temper.PREY) return "Si uno se asusta, avisa y sale corriendo toda la manada.";

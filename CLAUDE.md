@@ -60,7 +60,12 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - Sellos de la Dinopedia (`DexManager.Stamp`): por especie segun lo que tenga (raro, domesticable, huevo, montura,
   hombro); en el PDC del jugador (`dex_stamps_<especie>`). XP y comandos en `dinopedia.*` del config. Con el libro en la
   mano: descubrir a 32 bloques, huellas de especies no vistas, lupa = flecha en la barra de accion (fuente `hud`).
-- Rendimiento: pose solo si alguien la ve (`getTrackedBy`), menos seguido de lejos; view range por tamaño.
+- Rendimiento: pose solo si alguien la ve (`getTrackedBy`), menos seguido de lejos (escalones 16/32/64 bloques: el
+  server tiene distancia de vista 8) y mucho menos si esta quieto (`Dino.isStill`: sin jinete, sin caminar, sin
+  animacion en curso; al arrancar a moverse manda pose al toque). `DinoModel` no manda un hueso que casi no cambio
+  desde lo ultimo mandado (`same`), y cuenta lo mandado/ahorrado para `/dino stats`; view range por tamaño.
+- Limite de domesticados (`DinoManager.tamedLimit/canOwnMore`, cuenta con `DinoRegistry`): comida, regalo aceptado,
+  jaula soltada y huevos (esperan listos). `/dino tame` de admin no tiene limite.
 - Resource pack: el plugin lo manda solo (`PackManager`, modo `url` o `host`). El zip es determinista y
   una copia va dentro del jar (`plugin/src/main/resources/pack/`).
 
@@ -122,5 +127,8 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.10.0 **sin probar en el juego**: Dinopedia con menus dibujados (indice, pagina de especie con foto grande, ficha
   de cada dino), sellos de investigacion con XP/rangos/comandos, huellas y lupa de rastreo con el libro en la mano.
   Las pantallas se revisaron con gui_preview.py (mismo titulo que arma el plugin, dibujado con las fuentes del pack).
+- v0.11.0 **sin probar en el juego**: dinos quietos mandan pose mas espaciada, huesos sin cambios no se mandan,
+  `/dino stats`, limite de domesticados por jugador (`limits.max-tamed-per-player` + permisos dinoearth.limit.N).
+  El pack no cambio (sha1 a471063d…).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.

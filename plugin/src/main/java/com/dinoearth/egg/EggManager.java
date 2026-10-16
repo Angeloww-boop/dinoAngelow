@@ -54,6 +54,8 @@ public final class EggManager {
         int progress;
         int wobble = -1;
         boolean cracked;
+        int waited;          // ticks esperando a que el dueño tenga lugar
+        boolean blocked;
 
         Egg(Interaction box, Species species) {
             this.box = box;
@@ -222,6 +224,20 @@ public final class EggManager {
             }
             if (egg.progress % 100 == 0) save(egg);
             if (egg.progress >= hatchTicks) {
+                String owner = egg.box.getPersistentDataContainer().get(keys.eggOwner, PersistentDataType.STRING);
+                if (owner != null && egg.waited % 20 == 0) egg.blocked = !dinos.canOwnMore(UUID.fromString(owner));
+                if (owner != null && egg.blocked) {
+                    // el dueño llego al maximo: el huevo espera listo hasta que tenga lugar (se revisa cada segundo)
+                    egg.progress = hatchTicks;
+                    if (egg.waited++ % 1200 == 0) {
+                        Player p = Bukkit.getPlayer(UUID.fromString(owner));
+                        if (p != null) {
+                            p.sendMessage(Component.text("Tu huevo de " + egg.species.name + " está listo para nacer, "
+                                    + "pero ya tenés el máximo de dinos. Nace cuando tengas lugar.", NamedTextColor.GOLD));
+                        }
+                    }
+                    continue;
+                }
                 hatched.add(egg);
                 it.remove();
             }

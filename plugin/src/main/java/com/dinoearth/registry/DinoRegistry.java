@@ -80,6 +80,10 @@ public final class DinoRegistry {
         return entries.get(id);
     }
 
+    public java.util.Collection<Entry> all() {
+        return java.util.Collections.unmodifiableCollection(entries.values());
+    }
+
     public List<Entry> ownedBy(UUID owner) {
         List<Entry> out = new ArrayList<>();
         for (Entry e : entries.values()) {

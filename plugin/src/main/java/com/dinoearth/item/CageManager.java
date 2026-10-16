@@ -121,6 +121,10 @@ public final class CageManager {
             player.sendActionBar(Component.text("La jaula tiene una especie que ya no existe.", NamedTextColor.RED));
             return;
         }
+        if (!dinos.canOwnMore(player.getUniqueId())) {
+            player.sendActionBar(dinos.limitMessage(player));
+            return;
+        }
         Location at = target.getLocation().add(0.5, 0, 0.5);
         at.setYaw(player.getYaw() + 180);
         Dino d = dinos.spawn(s, at, pdc.get(keys.variant, PersistentDataType.STRING),

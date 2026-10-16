@@ -238,6 +238,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
                         NamedTextColor.GREEN);
             }
             case "tame", "domesticar" -> tame(sender, args);
+            case "stats", "estadisticas" -> stats(sender);
             case "count" -> {
                 StringBuilder sb = new StringBuilder("Cargados: " + dinos.count());
                 for (Species s : Species.ALL) {
@@ -250,6 +251,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 msg(sender, "/dino spawn <tipo> [color|random] [macho|hembra|random] [adulto|bebe] [cantidad]", NamedTextColor.GRAY);
                 msg(sender, "/dino egg <especie> [cantidad]  ·  /dino grow [%]  ·  /dino remove [radio] [especie]  ·  /dino count",
                         NamedTextColor.GRAY);
+                msg(sender, "/dino stats  (cuánto consume DinoEarth: dinos, entidades, red, tick y dueños)", NamedTextColor.GRAY);
                 msg(sender, "/dino comedero <carne|plantas|pescado> [cantidad]  ·  /dino dinopedia [jugador]  ·  /dino hambre [%]",
                         NamedTextColor.GRAY);
                 msg(sender, "/dino tame [jugador]  (domestica el dino que estás mirando)", NamedTextColor.GRAY);
@@ -289,7 +291,13 @@ public final class DinoEarthPlugin extends JavaPlugin {
         d.setHunger(1f);
         d.onTamed();
         wolf.getWorld().spawnParticle(Particle.HEART, wolf.getLocation().add(0, wolf.getHeight() + 0.3, 0), 9, 0.6, 0.4, 0.6);
+        registry.update(d);
         dex.addTamed(owner, s, d.variant());
+        int limit = dinos.tamedLimit(owner), has = dinos.ownedCount(owner.getUniqueId());
+        if (limit > 0 && has > limit) {
+            msg(sender, owner.getName() + " ahora tiene " + has + " dinos, más que su límite (" + limit
+                    + "). Como lo diste vos, se lo deja igual.", NamedTextColor.GOLD);
+        }
         msg(sender, s.name + " " + s.rig.variant(d.variant()).name() + " domesticado para " + owner.getName()
                 + ". Quedó sentado: click derecho para que te siga.", NamedTextColor.GREEN);
         if (owner != player) msg(owner, player.getName() + " te regaló un " + s.name + ".", NamedTextColor.GREEN);
@@ -364,6 +372,43 @@ public final class DinoEarthPlugin extends JavaPlugin {
         return true;
     }
 
+    /** /dino stats: cuanto consume el plugin ahora mismo. */
+    private void stats(CommandSender sender) {
+        List<Dino> all = dinos.all();
+        long tamed = all.stream().filter(d -> d.wolf().isTamed()).count();
+        long seen = all.stream().filter(Dino::isSeen).count();
+        long quiet = all.stream().filter(d -> d.isSeen() && d.isQuiet()).count();
+        long parts = all.stream().mapToLong(Dino::modelParts).sum();
+        double[] r = dinos.poseRates();
+        double sent = r[0] + r[2];
+        int players = Math.max(1, getServer().getOnlinePlayers().size());
+        double kb = r[1] * 90 / 1024.0;      // ~90 bytes por hueso mandado a cada jugador
+        msg(sender, "── DinoEarth · consumo ──", NamedTextColor.GOLD);
+        msg(sender, "Dinos cargados: " + all.size() + " (salvajes " + (all.size() - tamed) + ", domesticados " + tamed
+                + ") · entidades: " + all.size() + " lobos + " + parts + " displays", NamedTextColor.AQUA);
+        msg(sender, "Los ve algún jugador: " + seen + " · quietos (pose espaciada): " + quiet, NamedTextColor.AQUA);
+        msg(sender, String.format("Huesos por segundo: %.0f mandados, %.0f ahorrados (%.0f%%) · a jugadores: %.0f/s",
+                r[0], r[2], sent > 0 ? r[2] * 100 / sent : 0, r[1]), NamedTextColor.AQUA);
+        msg(sender, String.format("Red estimada: %.1f KB/s en total, %.1f KB/s por jugador conectado", kb, kb / players),
+                NamedTextColor.AQUA);
+        msg(sender, String.format("Tick de DinoEarth: %.2f ms promedio, %.2f ms el peor (de 50 ms por tick)",
+                dinos.avgTickMs(), dinos.maxTickMs()), NamedTextColor.AQUA);
+        Map<UUID, Integer> owners = new HashMap<>();
+        for (var e : registry.all()) owners.merge(e.owner(), 1, Integer::sum);
+        int total = owners.values().stream().mapToInt(Integer::intValue).sum();
+        int limit = getConfig().getInt("limits.max-tamed-per-player", 20);
+        msg(sender, "Domesticados en total (cargados o no): " + total + " de " + owners.size() + " jugadores · límite: "
+                + (limit > 0 ? limit + " por jugador" : "sin límite"), NamedTextColor.AQUA);
+        String top = owners.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue()).limit(5)
+                .map(e -> {
+                    String name = getServer().getOfflinePlayer(e.getKey()).getName();
+                    return (name != null ? name : e.getKey().toString().substring(0, 8)) + " " + e.getValue();
+                }).reduce((a, b) -> a + " · " + b).orElse("nadie");
+        msg(sender, "Los que más tienen: " + top, NamedTextColor.GRAY);
+        msg(sender, "Distancia de vista del server: " + getServer().getViewDistance() + " chunks · simulación: "
+                + getServer().getSimulationDistance() + " chunks", NamedTextColor.GRAY);
+    }
+
     private boolean accept(CommandSender sender) {
         if (!(sender instanceof Player player)) return msg(sender, "Solo jugadores.", NamedTextColor.RED);
         Offer offer = offers.remove(player.getUniqueId());
@@ -374,6 +419,11 @@ public final class DinoEarthPlugin extends JavaPlugin {
         Dino d = e == null ? null : dinos.get(e);
         if (d == null || d.isDying() || !offer.from().equals(d.wolf().getOwnerUniqueId())) {
             return msg(sender, "Ese dino ya no está disponible.", NamedTextColor.RED);
+        }
+        if (!dinos.canOwnMore(player.getUniqueId())) {
+            offers.put(player.getUniqueId(), offer);
+            player.sendMessage(dinos.limitMessage(player));
+            return true;
         }
         if (d.rider() != null) d.wolf().removePassenger(d.rider());
         d.wolf().setOwner(player);
@@ -505,7 +555,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
             return filter(admin ? List.of("spawn", "egg", "grow", "tame", "item", "mis", "llamar", "dar", "aceptar", "rechazar",
-                    "remove", "count", "comedero", "dinopedia", "hambre", "pack")
+                    "remove", "count", "stats", "comedero", "dinopedia", "hambre", "pack")
                     : List.of("mis", "llamar", "dar", "aceptar", "rechazar", "pack"), args[0]);
         }
         String sub = args[0].toLowerCase();

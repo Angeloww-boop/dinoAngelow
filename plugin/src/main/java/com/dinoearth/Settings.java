@@ -15,6 +15,8 @@ public final class Settings {
     public final int recallMax;
     public final long recallCooldownMs;
     public final long alertCooldownMs;
+    /** Domesticados por jugador (0 = sin limite); los permisos dinoearth.limit.N lo suben. */
+    public final int maxTamed;
     // Dinopedia
     public final int dexXpStamp;
     public final int dexXpSpecies;
@@ -34,6 +36,7 @@ public final class Settings {
         recallMax = Math.max(1, c.getInt("recall.max-dinos", 2));
         recallCooldownMs = (long) (Math.max(0, c.getDouble("recall.cooldown-minutes", 5)) * 60_000);
         alertCooldownMs = (long) (Math.max(0, c.getDouble("alerts.attack-cooldown-seconds", 30)) * 1000);
+        maxTamed = Math.max(0, c.getInt("limits.max-tamed-per-player", 20));
         dexXpStamp = Math.max(0, c.getInt("dinopedia.xp-per-stamp", 30));
         dexXpSpecies = Math.max(0, c.getInt("dinopedia.xp-species-complete", 150));
         dexSpeciesCommands = c.getStringList("dinopedia.species-complete-commands");

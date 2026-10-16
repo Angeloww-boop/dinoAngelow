@@ -46,6 +46,13 @@ recall:
 alerts:
   attack-cooldown-seconds: 30
 
+# Maximo de dinos domesticados por jugador (0 = sin limite). Cuentan todos los suyos, cargados o no; los que estan
+# guardados en una jaula no cuentan (pero no se pueden soltar si ya tiene el maximo). Los huevos de un jugador que
+# llego al maximo esperan a que tenga lugar para nacer.
+# Para dar mas a algunos (VIP, rangos): permiso dinoearth.limit.<numero> (vale el mayor) o dinoearth.limit.unlimited
+limits:
+  max-tamed-per-player: 20
+
 # Dinopedia: cada especie tiene sellos de investigacion (verla, sus colores, el color raro, domesticarla,
 # criarla, montarla...). Cada sello da experiencia y completar una especie da mas. Los comandos se corren
 # desde la consola (%player% = jugador, %species% = id de la especie), por ejemplo para dar plata o un kit.

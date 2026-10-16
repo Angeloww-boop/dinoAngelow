@@ -1,12 +1,15 @@
 name: DinoEarth
-version: 0.10.0
+version: 0.11.0
 main: com.dinoearth.DinoEarthPlugin
 api-version: '1.21'
 description: Dinosaurios para Minecraft Earth
 commands:
   dino:
     description: Comandos de DinoEarth
-    usage: /dino <spawn|egg|grow|tame|item|mis|llamar|dar|aceptar|rechazar|remove|count|comedero|dinopedia|hambre|pack>
+    usage: /dino <spawn|egg|grow|tame|item|mis|llamar|dar|aceptar|rechazar|remove|count|stats|comedero|dinopedia|hambre|pack>
 permissions:
+  dinoearth.limit.unlimited:
+    description: Sin limite de dinos domesticados
+    default: false
   dinoearth.admin:
     default: op

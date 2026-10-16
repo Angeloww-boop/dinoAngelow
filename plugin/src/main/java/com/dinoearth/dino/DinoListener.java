@@ -235,6 +235,10 @@ public final class DinoListener implements Listener {
                 return;
             }
             if (!food || wolf.isAngry()) return;
+            if (!dinos.canOwnMore(player.getUniqueId())) {
+                player.sendActionBar(dinos.limitMessage(player));
+                return;
+            }
             if (!creative) hand.subtract();
             if (ThreadLocalRandom.current().nextDouble() < species.tameChance) {
                 wolf.setOwner(player);
@@ -244,6 +248,7 @@ public final class DinoListener implements Listener {
                 d.setHunger(1f);
                 wolf.getWorld().spawnParticle(Particle.HEART, fx, 7, 0.5, 0.4, 0.5);
                 d.onTamed();
+                if (dinos.registry() != null) dinos.registry().update(d);
                 dex.addTamed(player, species, d.variant());
             } else {
                 wolf.getWorld().spawnParticle(Particle.SMOKE, fx, 7, 0.4, 0.3, 0.4, 0.02);

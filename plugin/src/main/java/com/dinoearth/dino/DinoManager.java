@@ -129,7 +129,83 @@ public final class DinoManager {
         }
     }
 
+    // ------------------------------------------------------------ limite de domesticados
+    /** Maximo de domesticados de este jugador: el del config o el mayor dinoearth.limit.N; 0 = sin limite. */
+    public int tamedLimit(org.bukkit.entity.Player p) {
+        if (p.hasPermission("dinoearth.limit.unlimited")) return 0;
+        int limit = settings.maxTamed;
+        if (limit == 0) return 0;
+        for (var perm : p.getEffectivePermissions()) {
+            String name = perm.getPermission();
+            if (!perm.getValue() || !name.startsWith("dinoearth.limit.")) continue;
+            try {
+                limit = Math.max(limit, Integer.parseInt(name.substring("dinoearth.limit.".length())));
+            } catch (NumberFormatException ignored) {
+                // dinoearth.limit.unlimited u otro texto
+            }
+        }
+        return limit;
+    }
+
+    public int ownedCount(UUID owner) {
+        return registry == null ? 0 : registry.ownedBy(owner).size();
+    }
+
+    /** ¿Puede quedarse con un dino mas? Desconectado se usa el limite del config (no se pueden ver sus permisos). */
+    public boolean canOwnMore(UUID owner) {
+        org.bukkit.entity.Player p = Bukkit.getPlayer(owner);
+        int limit = p != null ? tamedLimit(p) : settings.maxTamed;
+        return limit == 0 || ownedCount(owner) < limit;
+    }
+
+    public net.kyori.adventure.text.Component limitMessage(org.bukkit.entity.Player p) {
+        return net.kyori.adventure.text.Component.text("Ya tenés " + ownedCount(p.getUniqueId()) + " dinos, el máximo ("
+                + tamedLimit(p) + "). Guardá alguno en una jaula o regalalo.",
+                net.kyori.adventure.text.format.NamedTextColor.RED);
+    }
+
+    // ------------------------------------------------------------ tick (y cuanto tarda, para /dino stats)
+    private long tickNanos, tickMaxNanos;
+    private int tickSamples;
+    private double lastTickMs, lastTickMaxMs;
+    private long boneMark, viewerMark, skippedMark;
+    private double boneRate, viewerRate, skippedRate;
+
+    /** Huesos mandados por segundo, huesos x jugadores que los reciben por segundo, y los que no hizo falta mandar. */
+    public double[] poseRates() {
+        return new double[]{boneRate, viewerRate, skippedRate};
+    }
+
+    public double avgTickMs() {
+        return lastTickMs;
+    }
+
+    public double maxTickMs() {
+        return lastTickMaxMs;
+    }
+
     public void tick() {
+        long start = System.nanoTime();
+        tickDinos();
+        long took = System.nanoTime() - start;
+        tickNanos += took;
+        tickMaxNanos = Math.max(tickMaxNanos, took);
+        if (++tickSamples >= 100) {
+            lastTickMs = tickNanos / 1e6 / tickSamples;
+            lastTickMaxMs = tickMaxNanos / 1e6;
+            double seconds = tickSamples / 20.0;
+            boneRate = (com.dinoearth.model.DinoModel.boneUpdates - boneMark) / seconds;
+            viewerRate = (com.dinoearth.model.DinoModel.viewerUpdates - viewerMark) / seconds;
+            skippedRate = (com.dinoearth.model.DinoModel.skippedUpdates - skippedMark) / seconds;
+            boneMark = com.dinoearth.model.DinoModel.boneUpdates;
+            viewerMark = com.dinoearth.model.DinoModel.viewerUpdates;
+            skippedMark = com.dinoearth.model.DinoModel.skippedUpdates;
+            tickNanos = tickMaxNanos = 0;
+            tickSamples = 0;
+        }
+    }
+
+    private void tickDinos() {
         Iterator<Dino> it = active.values().iterator();
         while (it.hasNext()) {
             Dino d = it.next();

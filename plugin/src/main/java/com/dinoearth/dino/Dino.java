@@ -157,6 +157,7 @@ public final class Dino {
     private TextDisplay plate;        // cartel con el nombre y el dueño
     private int poseEvery = 2;   // ticks entre poses (0 = nadie lo ve, no se manda nada)
     private int lastPose;
+    private boolean wasStill, quiet;
     private final Map<UUID, Integer> rammed = new HashMap<>();
 
     public Dino(Wolf wolf, Species species, Keys keys, Settings settings, DinoManager manager) {
@@ -1044,9 +1045,19 @@ public final class Dino {
         }
 
         drawnYaw = bodyYaw;
-        // la pose solo se calcula y se manda cuando alguien la puede ver, y menos seguido de lejos
-        if (rider != null || perch != null) poseEvery = 1;
-        else if (age % 10 == 0 || poseEvery == 1) poseEvery = poseRate(loc);
+        // la pose solo se calcula y se manda cuando alguien la puede ver, menos seguido de lejos y mucho menos
+        // si esta quieto (parado o sentado sin hacer nada): ahi solo respira y mueve la cabeza
+        boolean still = isStill(rider);
+        if (rider != null || perch != null) {
+            poseEvery = 1;
+        } else if (still != wasStill) {
+            poseEvery = poseRate(loc, still);
+            if (!still) lastPose = age - poseEvery;     // arranco a moverse: pose ya, sin esperar
+        } else if (age % 10 == 0 || poseEvery == 1) {
+            poseEvery = poseRate(loc, still);
+        }
+        wasStill = still;
+        quiet = still;
         if (poseEvery > 0 && age - lastPose >= poseEvery) {
             lastPose = age;
             animate();
@@ -1060,19 +1071,43 @@ public final class Dino {
     }
 
     /**
-     * Cada cuantos ticks mandar la pose segun el jugador mas cercano que lo ve:
-     * cerca fluido, lejos menos seguido, y nunca si nadie lo tiene cargado (0).
+     * Cada cuantos ticks mandar la pose segun el jugador mas cercano que lo ve: cerca fluido, lejos menos seguido,
+     * y nunca si nadie lo tiene cargado (0). Con distancia de vista 8 nadie lo ve a mas de 128 bloques.
+     * Quieto: el cliente interpola entre poses, asi que respirar y girar la cabeza se ven suaves igual.
      */
-    private int poseRate(Location loc) {
+    private int poseRate(Location loc, boolean still) {
         double best = Double.MAX_VALUE;
         for (Player p : model.viewers()) {
             if (p.getWorld() == loc.getWorld()) best = Math.min(best, p.getLocation().distanceSquared(loc));
         }
         if (best == Double.MAX_VALUE) return 0;
-        if (best < 24 * 24) return 2;
-        if (best < 48 * 48) return 4;
-        if (best < 96 * 96) return 8;
-        return 16;
+        if (best < 16 * 16) return still ? 6 : 2;
+        if (best < 32 * 32) return still ? 8 : 3;
+        if (best < 64 * 64) return still ? 12 : 5;
+        return still ? 20 : 8;
+    }
+
+    /** Sin jinete, sin caminar y sin ninguna animacion en curso (ataque, rugido, comer, sentarse...). */
+    private boolean isStill(Player rider) {
+        if (rider != null || perch != null || flying || isDying()) return false;
+        if (speed > 0.04f || attack >= 0 || roar >= 0 || spit >= 0 || eating >= 0 || hurt > 0 || tailSwing >= 0) {
+            return false;
+        }
+        float sitTarget = wolf.isSitting() ? 1f : 0f;
+        return Math.abs(sit - sitTarget) < 0.03f;
+    }
+
+    /** Para /dino stats: si en el ultimo tick estaba quieto (pose espaciada). */
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    public int modelParts() {
+        return model.size() + (plate != null && plate.isValid() ? 1 : 0);
+    }
+
+    public boolean isSeen() {
+        return poseEvery > 0;
     }
 
     /** Distancia de dibujado en el cliente: los chicos desaparecen antes que los grandes. */

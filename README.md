@@ -67,6 +67,7 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 /dino item <id> [cantidad] [jugador] (monturas, drops, silbato, jaula: para armar los trades de Shopkeepers)
 /dino remove [radio] [especie]
 /dino count
+/dino stats                         (cuánto consume: dinos, entidades, red estimada, tick, dueños con más dinos)
 /dino comedero <carne|plantas|pescado> [cantidad]
 /dino dinopedia [jugador]
 /dino hambre [%]                    (pone el hambre de los domesticados a 10 bloques, para probar)
@@ -75,6 +76,12 @@ T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés d
 
 Todos los jugadores: `/dino mis`, `/dino llamar [id] [id]`, `/dino dar <jugador>`, `/dino aceptar`, `/dino rechazar`,
 `/dino pack`. La espera y el máximo del silbato de regreso se cambian en `config.yml` (`recall`).
+
+Límite de domesticados: `limits.max-tamed-per-player` en `config.yml` (20 por defecto, 0 = sin límite). Cuentan todos
+los dinos del jugador, cargados o no; los guardados en jaulas no cuentan, pero no se sueltan si ya tiene el máximo.
+Con el máximo no puede domesticar, aceptar regalos ni soltar jaulas, y sus huevos esperan listos hasta que tenga lugar.
+Para dar más: permiso `dinoearth.limit.<número>` (vale el mayor) o `dinoearth.limit.unlimited`. `/dino tame` de un admin
+no tiene límite (avisa si se pasa).
 
 Items (`/dino item <id>`): `silbato`, `jaula`, `montura_<especie>` (raptor, triceratops, trex, pteranodon,
 parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus) y los drops: `cuero_<especie>`,
@@ -90,9 +97,20 @@ Especies: `raptor`, `triceratops` (`trike`), `dilophosaurus` (`dilo`), `compsogn
 
 ## Rendimiento
 
-- Cada dino manda su pose solo a los jugadores que lo tienen cargado, y menos seguido cuanto más lejos está el más cercano:
-  cada 2 ticks a menos de 24 bloques, 4 hasta 48, 8 hasta 96 y 16 más lejos. Montado se actualiza cada tick.
+- Cada dino manda su pose solo a los jugadores que lo tienen cargado, y menos seguido cuanto más lejos está el más cercano
+  (pensado para distancia de vista 8, o sea 128 bloques como mucho):
+
+  | Más cercano que lo ve | Moviéndose | Quieto (parado o sentado sin hacer nada) |
+  |---|---|---|
+  | menos de 16 bloques | cada 2 ticks | cada 6 |
+  | 16 a 32 | cada 3 | cada 8 |
+  | 32 a 64 | cada 5 | cada 12 |
+  | más de 64 | cada 8 | cada 20 |
+
+  Montado se actualiza cada tick. El cliente interpola entre poses, así que quieto sigue respirando suave.
   **Si nadie lo ve, no se calcula ni se manda nada** (la IA, el crecimiento y los huevos siguen andando igual).
+- Además, un hueso que casi no se movió desde la última vez (menos de 0,03 px o 0,3°) no se manda.
+- `/dino stats` muestra cuántos huesos por segundo se mandan y cuántos se ahorran, la red estimada y cuánto tarda el tick.
 - El cliente deja de dibujarlos según su tamaño: compsognathus a ~32 bloques, raptor y dilophosaurus a ~64,
   triceratops y pteranodon a ~96, T-Rex a ~128 (las crías, antes). Eso se multiplica por la opción "Distancia de entidades" de cada jugador.
 

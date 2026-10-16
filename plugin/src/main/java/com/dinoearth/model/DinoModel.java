@@ -51,7 +51,8 @@ public final class DinoModel {
     private final ItemDisplay[] parts;
     private final ItemStack[] shown;      // lo que muestra cada parte cuando no esta oculta
     private final boolean[] hidden;
-    private final Quaternionf[] lastRot;  // para mandar siempre el cuaternion del mismo "lado" que el anterior
+    private final Quaternionf[] lastRot;
+    private final Transformation[] sent;     // lo ultimo que se mando de cada hueso  // para mandar siempre el cuaternion del mismo "lado" que el anterior
     private final BonePose[] pose;
     private final Matrix4f[] world;
     private final Matrix4f extra = new Matrix4f();
@@ -75,6 +76,7 @@ public final class DinoModel {
         this.shown = new ItemStack[n];
         this.hidden = new boolean[n];
         this.lastRot = new Quaternionf[n];
+        this.sent = new Transformation[n];
         this.pose = new BonePose[n];
         this.world = new Matrix4f[n];
         Location spawn = at.clone();
@@ -173,6 +175,7 @@ public final class DinoModel {
      *             (punto de pasajero), asi que compensamos esa diferencia.
      */
     public void applyPose(Location base, float yaw, float scale, int interpolation) {
+        int watching = parts[0].getTrackedBy().size();
         if (vehicle != null && parts[0].getVehicle() == vehicle) {
             Location at = parts[0].getLocation();
             double dx = at.getX() - base.getX(), dy = at.getY() - base.getY(), dz = at.getZ() - base.getZ();
@@ -205,11 +208,34 @@ public final class DinoModel {
             if (p.scale != 1) m.scale(p.scale);
 
             setHidden(i, p.hidden);
+            Transformation t = decompose(i, m);
+            if (sent[i] != null && same(sent[i], t)) {
+                skippedUpdates++;
+                continue;      // el hueso casi no se movio: no se manda nada
+            }
+            sent[i] = t;
             ItemDisplay d = parts[i];
-            d.setTransformation(decompose(i, m));
+            d.setTransformation(t);
             d.setInterpolationDelay(0);
             d.setInterpolationDuration(interpolation);
+            boneUpdates++;
+            viewerUpdates += watching;
         }
+    }
+
+    /** Diferencia que no se nota: menos de 0,03 px de un bloque, 0,3 grados o 0,1 % de escala. */
+    private static boolean same(Transformation a, Transformation b) {
+        if (a.getTranslation().distanceSquared(b.getTranslation()) > 0.002f * 0.002f) return false;
+        if (a.getScale().distanceSquared(b.getScale()) > 0.001f * 0.001f) return false;
+        return Math.abs(a.getLeftRotation().dot(b.getLeftRotation())) > 0.999996f;
+    }
+
+    // ------------------------------------------------------------ cuentas para /dino stats
+    /** Huesos mandados, huesos mandados x jugadores que los reciben, y huesos que no hizo falta mandar. */
+    public static long boneUpdates, viewerUpdates, skippedUpdates;
+
+    public int size() {
+        return parts.length;
     }
 
     /**

@@ -69,7 +69,8 @@ public final class GuiPreview {
                 "Tranquilo", "Colores: 4/5")), slots));
 
         slots = new LinkedHashMap<>();
-        slots.put("49", "dinoearth:dinopedia");
+        slots.put("49", "minecraft:barrier");
+        slots.put("53", "dinoearth:dinopedia");
         screens.put("ficha", screen(DexLayout.card(gui, new DexLayout.CardView("raptor", "verde", "Garrita",
                 "Velociraptor", false, "Hembra", "Cría (45%)", "Selva", false, 0.7, 0.25, TextColor.color(0xC87A28), List.of(
                 new DexLayout.Line("de Angeloww_", DexLayout.INK), new DexLayout.Line("Quieto", DexLayout.INK_SOFT),

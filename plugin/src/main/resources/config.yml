@@ -45,10 +45,6 @@ recall:
 alerts:
   attack-cooldown-seconds: 30
 
-# Maximo de dinos domesticados por jugador (0 = sin limite). Cuentan todos los suyos, cargados o no; los que estan
-# guardados en una jaula no cuentan (pero no se pueden soltar si ya tiene el maximo). Los huevos de un jugador que
-# llego al maximo esperan a que tenga lugar para nacer.
-# Para dar mas a algunos (VIP, rangos): permiso dinoearth.limit.<numero> (vale el mayor) o dinoearth.limit.unlimited
 # Misiones diarias de la Dinopedia: 3 por jugador, distintas para cada uno, que cambian todos los dias a la hora
 # reset-hour (en la zona horaria timezone). Solo piden especies que alguien vio en el server en los ultimos
 # recent-days dias (o que estan cargadas ahora). Cada jugador puede cambiar rerolls-per-day misiones por dia.
@@ -64,6 +60,10 @@ missions:
   all-done-xp: 200
   all-done-commands: []
 
+# Maximo de dinos domesticados por jugador (0 = sin limite). Cuentan todos los suyos, cargados o no; los que estan
+# guardados en una jaula no cuentan (pero no se pueden soltar si ya tiene el maximo). Los huevos de un jugador que
+# llego al maximo esperan a que tenga lugar para nacer.
+# Para dar mas a algunos (VIP, rangos): permiso dinoearth.limit.<numero> (vale el mayor) o dinoearth.limit.unlimited
 limits:
   max-tamed-per-player: 20
 

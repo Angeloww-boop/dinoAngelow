@@ -28,6 +28,9 @@ Cada especie montable tiene **su propia montura** (se pone con la montura común
 raptor = de carrera con manta roja · triceratops = de carga con baranda de madera y alforjas ·
 T-Rex = de guerra con placas de hierro y púas de hueso · pteranodon = arnés de vuelo con manija.
 
+Guía completa con fotos y capturas de los menús: **[DinoEarth-Guia.pdf](DinoEarth-Guia.pdf)** (se regenera con
+`generator/.venv/Scripts/python docs/guia/build_guia.py`).
+
 ## Cómo se juega
 
 | Acción | Cómo |

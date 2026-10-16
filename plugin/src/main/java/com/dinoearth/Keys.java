@@ -46,6 +46,20 @@ public final class Keys {
     public final NamespacedKey patrolX;
     public final NamespacedKey patrolZ;
     public final NamespacedKey menuIcon;
+    // genetica (lobo, huevo, jaula) y color ya elegido de la cria que va a salir de un huevo
+    public final NamespacedKey genes;
+    public final NamespacedKey geneMother;
+    public final NamespacedKey geneFather;
+    public final NamespacedKey eggVariant;
+    // nidos salvajes
+    public final NamespacedKey nest;
+    public final NamespacedKey nestSpecies;
+    public final NamespacedKey nestMother;
+    public final NamespacedKey nestEggs;
+    public final NamespacedKey nestBorn;
+    /** Lobo: madre salvaje que cuida un nido (uuid de la Interaction del nido). */
+    public final NamespacedKey guarding;
+    public final NamespacedKey nestCooldown;
 
     private final Plugin plugin;
     private final Map<String, NamespacedKey> dynamic = new HashMap<>();
@@ -85,6 +99,17 @@ public final class Keys {
         patrolX = new NamespacedKey(plugin, "patrol_x");
         patrolZ = new NamespacedKey(plugin, "patrol_z");
         menuIcon = new NamespacedKey(plugin, "menu_icon");
+        genes = new NamespacedKey(plugin, "genes");
+        geneMother = new NamespacedKey(plugin, "gene_mother");
+        geneFather = new NamespacedKey(plugin, "gene_father");
+        eggVariant = new NamespacedKey(plugin, "egg_variant");
+        nest = new NamespacedKey(plugin, "nest");
+        nestSpecies = new NamespacedKey(plugin, "nest_species");
+        nestMother = new NamespacedKey(plugin, "nest_mother");
+        nestEggs = new NamespacedKey(plugin, "nest_eggs");
+        nestBorn = new NamespacedKey(plugin, "nest_born");
+        guarding = new NamespacedKey(plugin, "guarding");
+        nestCooldown = new NamespacedKey(plugin, "nest_cooldown");
         this.plugin = plugin;
     }
 
@@ -101,6 +126,11 @@ public final class Keys {
     /** Dinopedia en el jugador: cuantos de una especie domestico. */
     public NamespacedKey dexTamed(String species) {
         return dynamic.computeIfAbsent("dex_tamed_" + species, k -> new NamespacedKey(plugin, k));
+    }
+
+    /** Contadores del jugador para los tops (crias nacidas, huevos robados, misiones hechas...). */
+    public NamespacedKey stat(String name) {
+        return dynamic.computeIfAbsent("stat_" + name, k -> new NamespacedKey(plugin, k));
     }
 
     public void tagPart(Display display) {

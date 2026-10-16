@@ -25,7 +25,7 @@ import java.util.UUID;
 public final class DinoRegistry {
 
     public record Entry(UUID id, UUID owner, String species, String variant, boolean male, String name,
-                        UUID world, double x, double y, double z, String order, long seen) {
+                        UUID world, double x, double y, double z, String order, long seen, float score) {
         public int chunkX() {
             return (int) Math.floor(x) >> 4;
         }
@@ -59,7 +59,8 @@ public final class DinoRegistry {
         Location at = w.getLocation();
         String name = d.name() != null ? PlainTextComponentSerializer.plainText().serialize(d.name()) : null;
         entries.put(w.getUniqueId(), new Entry(w.getUniqueId(), owner, d.species().id, d.variant(), d.isMale(), name,
-                at.getWorld().getUID(), at.getX(), at.getY(), at.getZ(), d.order().name(), System.currentTimeMillis()));
+                at.getWorld().getUID(), at.getX(), at.getY(), at.getZ(), d.order().name(), System.currentTimeMillis(),
+                d.genes() != null ? d.genes().score() : 1f));
         dirty = true;
     }
 
@@ -68,7 +69,7 @@ public final class DinoRegistry {
         Entry e = entries.get(id);
         if (e == null) return;
         entries.put(id, new Entry(e.id(), e.owner(), e.species(), e.variant(), e.male(), e.name(), at.getWorld().getUID(),
-                at.getX(), at.getY(), at.getZ(), e.order(), System.currentTimeMillis()));
+                at.getX(), at.getY(), at.getZ(), e.order(), System.currentTimeMillis(), e.score()));
         dirty = true;
     }
 
@@ -119,7 +120,7 @@ public final class DinoRegistry {
                     entries.put(id, new Entry(id, UUID.fromString(s.getString("owner")), s.getString("species"),
                             s.getString("variant"), s.getBoolean("male"), s.getString("name"),
                             UUID.fromString(s.getString("world")), s.getDouble("x"), s.getDouble("y"), s.getDouble("z"),
-                            s.getString("order", "FOLLOW"), s.getLong("seen")));
+                            s.getString("order", "FOLLOW"), s.getLong("seen"), (float) s.getDouble("genes", 1)));
                 } catch (RuntimeException e) {
                     plugin.getLogger().warning("dinos.yml: entrada " + key + " invalida, se ignora.");
                 }
@@ -154,6 +155,7 @@ public final class DinoRegistry {
             yml.set(k + ".z", Math.round(e.z() * 100) / 100.0);
             yml.set(k + ".order", e.order());
             yml.set(k + ".seen", e.seen());
+            yml.set(k + ".genes", Math.round(e.score() * 100) / 100.0);
         }
         for (Map.Entry<UUID, List<String>> n : notices.entrySet()) yml.set("notices." + n.getKey(), n.getValue());
         try {

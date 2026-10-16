@@ -182,6 +182,7 @@
   "egg": {
     "item": "dinoearth:carnotaurus/egg/egg",
     "cracked": "dinoearth:carnotaurus/egg_cracked/egg",
-    "icon": "dinoearth:carnotaurus/egg_item"
+    "icon": "dinoearth:carnotaurus/egg_item",
+    "size": 1.15
   }
 }

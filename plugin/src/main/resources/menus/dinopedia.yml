@@ -230,6 +230,26 @@ items:
       - '&f'
       - '&#41FF00✔ Click para abrir'
 
+  'ficha-genes':
+    model: 'dinoearth:gui/stamp/criado'
+    slot: 51
+    display_name: '&#ff00d9Genética &8» &f%calidad%'
+    lore:
+      - '&f'
+      - '&8| &fVida &8» &#ff00d9%vida%%'
+      - '&8| &fVelocidad &8» &#ff00d9%velocidad%%'
+      - '&8| &fTamaño &8» &#ff00d9%tamano%%'
+      - '&8| &fPromedio &8» &#ff00d9%promedio%%'
+      - '&f'
+      - '&8| &fGeneración &8» &#ff00d9%generacion%'
+      - '%padres%'
+      - '%mutacion%'
+      - '%apagada%'
+      - '&f'
+      - '&8| &fLas crías sacan los rasgos de los padres,'
+      - '&8| &fcon un poco de suerte salen mejores.'
+      - '&f'
+
   # ------------------------------------------------------------ misiones
   'mision':
     display_name: '&#ff00d9%mision%'
@@ -289,3 +309,9 @@ textos:
   pagina-misiones: 'Misiones'
   pagina-cambian: 'Nuevas en %tiempo%'
   pagina-completada: 'Completada'
+  # genetica (ficha de un dino)
+  genes-salvaje: '&8| &fPadres &8» &#ff00d9desconocidos&f, nació en libertad.'
+  genes-madre: '&8| &fMadre &8» &#ff00d9%madre%'
+  genes-padre: '&8| &fPadre &8» &#ff00d9%padre%'
+  genes-mutacion: '&8| &#ff00d9Mutación&f, su color no es el de sus padres.'
+  genes-apagada: '&8| &fLa genética está apagada en este server, no cambia sus stats.'

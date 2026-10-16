@@ -182,6 +182,7 @@
   "egg": {
     "item": "dinoearth:gallimimus/egg/egg",
     "cracked": "dinoearth:gallimimus/egg_cracked/egg",
-    "icon": "dinoearth:gallimimus/egg_item"
+    "icon": "dinoearth:gallimimus/egg_item",
+    "size": 1.05
   }
 }

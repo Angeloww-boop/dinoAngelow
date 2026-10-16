@@ -218,6 +218,7 @@
   "egg": {
     "item": "dinoearth:stegosaurus/egg/egg",
     "cracked": "dinoearth:stegosaurus/egg_cracked/egg",
-    "icon": "dinoearth:stegosaurus/egg_item"
+    "icon": "dinoearth:stegosaurus/egg_item",
+    "size": 1.3
   }
 }

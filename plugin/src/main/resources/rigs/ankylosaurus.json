@@ -218,6 +218,7 @@
   "egg": {
     "item": "dinoearth:ankylosaurus/egg/egg",
     "cracked": "dinoearth:ankylosaurus/egg_cracked/egg",
-    "icon": "dinoearth:ankylosaurus/egg_item"
+    "icon": "dinoearth:ankylosaurus/egg_item",
+    "size": 1.25
   }
 }

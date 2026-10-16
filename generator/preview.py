@@ -141,6 +141,9 @@ POSES = {
               "mem_r2": (0, 0, 0, 0, 0.12), "mem_l2": (0, 0, 0, 0, 0.12)},
     "vuelo": {"leg_r": (75, 0, 0, 0), "leg_l": (75, 0, 0, 0), "head": (12, 0, 0, 0),
               "wing_r": (0, 0, 4, 0), "wing_l": (0, 0, -4, 0), "wing_r2": (0, 0, -3, 0), "wing_l2": (0, 0, 3, 0)},
+    # mosasaurus nadando: cola ondulando y aletas abiertas
+    "nadar": {"tail1": (0, 12, 0, 0), "tail2": (0, -18, 0, 0), "head": (0, -6, 0, 0),
+              "leg_fr": (0, 0, -12, 0), "leg_fl": (0, 0, 12, 0), "leg_br": (0, 0, -8, 0), "leg_bl": (0, 0, 8, 0)},
     "aleteo": {"leg_r": (75, 0, 0, 0), "leg_l": (75, 0, 0, 0), "head": (12, 0, 0, 0),
                "wing_r": (0, 0, 32, 0), "wing_l": (0, 0, -32, 0), "wing_r2": (0, 0, 16, 0), "wing_l2": (0, 0, -16, 0)},
 }
@@ -239,6 +242,16 @@ if __name__ == "__main__":
             render(dino(sets, "dimorphodon/loro/male", "suelo", k=0.5), 120, 12, ppx=14, cy_frac=0.75),
             render(dino(sets, "dimorphodon/tucan/male", "aleteo", k=0.5), 150, 30, ppx=8, cy_frac=0.6),
             render(dino(sets, "dimorphodon/cielo/baby", "suelo", k=0.5), 130, 14, ppx=20, cy_frac=0.75),
+        ],
+        "spinosaurus": [
+            render(dino(sets, "spinosaurus/pantano/male", k=1.2), 120, 12, ppx=3.0, cy_frac=0.8),
+            render(dino(sets, "spinosaurus/rio/female", "caminar", saddle=True, k=1.2), 60, 18, ppx=3.0, cy_frac=0.8),
+            render(dino(sets, "spinosaurus/arcilla/baby"), 130, 14, ppx=8, cy_frac=0.72),
+        ],
+        "mosasaurus": [
+            render(dino(sets, "mosasaurus/abismo/male", "nadar", k=1.5), 120, 20, ppx=2.6, cy_frac=0.6),
+            render(dino(sets, "mosasaurus/arrecife/female", "nadar", saddle=True, k=1.5), 60, 25, ppx=2.6, cy_frac=0.6),
+            render(dino(sets, "mosasaurus/tiburon/baby", "nadar"), 130, 14, ppx=8, cy_frac=0.6),
         ],
         "monturas": [
             render(dino(sets, "raptor/gris/male", saddle=True), 40, 30, ppx=10, cy_frac=0.85),

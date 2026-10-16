@@ -14,8 +14,8 @@ import java.util.Set;
  */
 public final class Species {
 
-    /** FLYER: camina en cuatro patas (las alas plegadas) y vuela. */
-    public enum Body { BIPED, QUADRUPED, FLYER }
+    /** FLYER: camina en cuatro patas (las alas plegadas) y vuela. SWIMMER: vive en el agua (en tierra queda varado). */
+    public enum Body { BIPED, QUADRUPED, FLYER, SWIMMER }
 
     public enum Temper {
         /** Neutral (como un lobo), caza animales chicos, se domestica con carne. */
@@ -116,6 +116,10 @@ public final class Species {
     public final float swing;
     public double flySpeed;
     public double flySprint;
+    /** Nada (en el agua no tiene gravedad y se mueve solo, como el vuelo): spinosaurus y mosasaurus. */
+    public final boolean swims;
+    public double swimSpeed;
+    public double swimSprint;
     private final Set<Material> food;
     public final TailAttack tail;
     /** Las flechas y otros proyectiles le hacen mucho menos daño. */
@@ -162,6 +166,9 @@ public final class Species {
         swing = b.swing;
         flySpeed = b.flySpeed;
         flySprint = b.flySprint;
+        swims = b.swims;
+        swimSpeed = b.swimSpeed;
+        swimSprint = b.swimSprint;
         food = b.food;
         tail = b.tail;
         armored = b.armored;
@@ -212,6 +219,11 @@ public final class Species {
         return body == Body.FLYER;
     }
 
+    /** Vive en el agua: fuera de ella casi no se mueve y solo caza a los que nadan. */
+    public boolean aquatic() {
+        return body == Body.SWIMMER;
+    }
+
     public Diet diet() {
         Set<Material> f = food();
         return f == FISH ? Diet.FISH : f == PLANTS ? Diet.PLANTS : Diet.MEAT;
@@ -237,6 +249,8 @@ public final class Species {
         rideJump = c.getDouble("ride.jump", rideJump);
         flySpeed = c.getDouble("ride.fly-speed", flySpeed);
         flySprint = c.getDouble("ride.fly-sprint-speed", flySprint);
+        swimSpeed = c.getDouble("ride.swim-speed", swimSpeed);
+        swimSprint = c.getDouble("ride.swim-sprint-speed", swimSprint);
         hungerMinutes = c.getDouble("hunger-minutes", hungerMinutes);
     }
 
@@ -307,8 +321,19 @@ public final class Species {
             .food(FISH).tame(0.33).perches().hunger(90, 16)
             .drops().build();
 
+    public static final Species SPINOSAURUS = new Builder("spinosaurus", Body.BIPED, Temper.CARNIVORE)
+            .aliases("spino", "espinosaurio").stats(140, 13, 0.3).hitbox(3.0).knockback(1.1).stride(1.4).swing(28)
+            .food(FISH).tame(0.1).ride(0.26, 0.42, 0.5).swim(0.32, 0.5).view(2).hunger(80, 110)
+            .drops(new Drop(Material.BEEF, 3, 6)).build();
+
+    public static final Species MOSASAURUS = new Builder("mosasaurus", Body.SWIMMER, Temper.CARNIVORE)
+            .aliases("mosa", "mosasaurio").stats(170, 16, 0.06).hitbox(2.2).knockback(1.3).stride(1.0)
+            .food(FISH).tame(0.08).ride(0.04, 0.06, 0).swim(0.42, 0.68).territorial().view(2.5).hunger(90, 140)
+            .drops(new Drop(Material.COD, 3, 6)).build();
+
     public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS, TREX, PTERANODON,
-            PARASAUROLOPHUS, GALLIMIMUS, STEGOSAURUS, ANKYLOSAURUS, GIGANOTOSAURUS, CARNOTAURUS, DIMORPHODON);
+            PARASAUROLOPHUS, GALLIMIMUS, STEGOSAURUS, ANKYLOSAURUS, GIGANOTOSAURUS, CARNOTAURUS, DIMORPHODON,
+            SPINOSAURUS, MOSASAURUS);
 
     public static Species byId(String id) {
         if (id == null) return null;
@@ -325,9 +350,9 @@ public final class Species {
         final Temper temper;
         List<String> aliases = List.of();
         double health = 20, damage = 4, speed = 0.3, hitbox = 1, knockback = 0, tameChance = 0, viewRange = 1;
-        double rideWalk, rideSprint, rideJump, flySpeed, flySprint;
+        double rideWalk, rideSprint, rideJump, flySpeed, flySprint, swimSpeed, swimSprint;
         float maleScale = 1.06f, stride = 2.4f, swing = 38;
-        boolean rideable, spits, charges, roars, territorial, eggTameOnly, armored, perches;
+        boolean rideable, spits, charges, roars, territorial, eggTameOnly, armored, perches, swims;
         TailAttack tail = TailAttack.NONE;
         Set<Material> food;
         double hungerMinutes;
@@ -446,6 +471,13 @@ public final class Species {
         Builder fly(double speed, double sprint) {
             flySpeed = speed;
             flySprint = sprint;
+            return this;
+        }
+
+        Builder swim(double speed, double sprint) {
+            swims = true;
+            swimSpeed = speed;
+            swimSprint = sprint;
             return this;
         }
 

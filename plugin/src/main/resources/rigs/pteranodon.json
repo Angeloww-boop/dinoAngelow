@@ -290,6 +290,7 @@
   "egg": {
     "item": "dinoearth:pteranodon/egg/egg",
     "cracked": "dinoearth:pteranodon/egg_cracked/egg",
-    "icon": "dinoearth:pteranodon/egg_item"
+    "icon": "dinoearth:pteranodon/egg_item",
+    "size": 0.9
   }
 }

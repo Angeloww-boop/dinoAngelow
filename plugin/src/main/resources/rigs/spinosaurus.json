@@ -1,0 +1,242 @@
+{
+  "species": "spinosaurus",
+  "scale": 1.2,
+  "item": "dinoearth:spinosaurus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "pantano",
+      "name": "Pantano",
+      "weight": 30
+    },
+    {
+      "id": "rio",
+      "name": "R\u00edo",
+      "weight": 26
+    },
+    {
+      "id": "arcilla",
+      "name": "Arcilla",
+      "weight": 24
+    },
+    {
+      "id": "ceniza",
+      "name": "Ceniza",
+      "weight": 17
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 52.0,
+      "radius": 54.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            28.0,
+            0.0
+          ]
+        },
+        {
+          "name": "sail",
+          "parent": "body",
+          "joint": [
+            0.0,
+            34.0,
+            2.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            29.0,
+            21.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            32.0,
+            27.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            29.0,
+            -9.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            28.0,
+            -32.0
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            6.5,
+            28.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "shin_r",
+          "parent": "leg_r",
+          "joint": [
+            7.0,
+            18.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -6.5,
+            28.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "shin_l",
+          "parent": "leg_l",
+          "joint": [
+            -7.0,
+            18.0,
+            -4.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 21.84,
+      "radius": 22.68,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            11.76,
+            0.0
+          ]
+        },
+        {
+          "name": "sail",
+          "parent": "body",
+          "joint": [
+            0.0,
+            14.28,
+            0.84
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            12.18,
+            8.82
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            13.880999999999998,
+            12.222
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            12.18,
+            -3.78
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            11.76,
+            -13.44
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            2.73,
+            11.76,
+            -1.68
+          ]
+        },
+        {
+          "name": "shin_r",
+          "parent": "leg_r",
+          "joint": [
+            2.94,
+            7.56,
+            -1.68
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -2.73,
+            11.76,
+            -1.68
+          ]
+        },
+        {
+          "name": "shin_l",
+          "parent": "leg_l",
+          "joint": [
+            -2.94,
+            7.56,
+            -1.68
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      28.0,
+      0.0
+    ],
+    "item": "dinoearth:spinosaurus/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:spinosaurus/egg/egg",
+    "cracked": "dinoearth:spinosaurus/egg_cracked/egg",
+    "icon": "dinoearth:spinosaurus/egg_item",
+    "size": 1.4
+  }
+}

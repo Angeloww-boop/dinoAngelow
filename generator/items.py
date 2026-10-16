@@ -46,6 +46,10 @@ DROPS = {
     "carnotaurus": [("cuero_carnotaurus", "Cuero de carnotaurus", "hide", None, 1, 3, 1.0),
                     ("cuerno_carnotaurus", "Cuerno de carnotaurus", "horn", None, 1, 2, 0.5)],
     "dimorphodon": [("membrana_dimorphodon", "Membrana de dimorphodon", "membrane", "wing", 1, 1, 0.8)],
+    "spinosaurus": [("cuero_spinosaurus", "Cuero de spinosaurus", "hide", None, 2, 4, 1.0),
+                    ("espina_spinosaurus", "Espina de la vela", "crest", "accent", 1, 2, 0.5)],
+    "mosasaurus": [("cuero_mosasaurus", "Cuero de mosasaurus", "hide", None, 3, 5, 1.0),
+                   ("diente_mosasaurus", "Diente de mosasaurus", "tooth", None, 1, 3, 0.8)],
 }
 
 
@@ -299,6 +303,27 @@ huevo:
     - '&f'
     - '&8| &fPonelo en el suelo y esperá a que eclosione.'
     - '&8| &fLa cría sale de un color al azar y es tuya.'
+    - '&f'
+huevo-cria:
+  display_name: '&#ff00d9Huevo de %especie%'
+  lore:
+    - '&f'
+    - '&8| &fMadre &8» &#ff00d9%madre%'
+    - '&8| &fPadre &8» &#ff00d9%padre%'
+    - '&8| &fGeneración &8» &#ff00d9%generacion%'
+    - '&f'
+    - '&8| &fPonelo en el suelo y esperá a que eclosione.'
+    - '&8| &fLa cría hereda el color y los rasgos de los padres.'
+    - '&f'
+huevo-nido:
+  display_name: '&#ff00d9Huevo salvaje de %especie%'
+  lore:
+    - '&f'
+    - '&8| &fSacado de un nido salvaje.'
+    - '&8| &fMadre &8» &#ff00d9%madre%'
+    - '&f'
+    - '&8| &fPonelo en el suelo y esperá a que eclosione.'
+    - '&8| &fLa cría nace domesticada por vos.'
     - '&f'
 comedero:
   display_name: '&#ff00d9Comedero de %dieta%'

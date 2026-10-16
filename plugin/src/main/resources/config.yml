@@ -56,8 +56,10 @@ missions:
   rerolls-per-day: 1
   recent-days: 3
   reward-xp: 100
+  reward-money: 0           # plata con Vault (0 = nada)
   reward-commands: []
   all-done-xp: 200
+  all-done-money: 0
   all-done-commands: []
 
 # Maximo de dinos domesticados por jugador (0 = sin limite). Cuentan todos los suyos, cargados o no; los que estan
@@ -67,6 +69,35 @@ missions:
 limits:
   max-tamed-per-player: 20
 
+# Genetica: cada dino tiene tres rasgos (vida, velocidad y tamaño; 1 = normal) que cambian sus stats. Los salvajes
+# nacen con rasgos al azar; las crias sacan el promedio de los padres con un poco de variacion, asi criando a los
+# mejores se consiguen dinos mejores. El color sale de uno de los padres, a veces uno cualquiera, y con
+# mutation-chance el color raro. Con enabled: false se siguen guardando pero no cambian nada.
+genetics:
+  enabled: true
+  wild-variation: 0.05       # cuanto varian los salvajes (0.05 = la mayoria entre 90 % y 110 %)
+  variation: 0.04            # cuanto varian las crias respecto del promedio de los padres
+  jump-chance: 0.1           # probabilidad de que una cria varie el doble y medio (para bien o para mal)
+  min: 0.8                   # ningun rasgo baja de 80 % ...
+  max: 1.3                   # ... ni pasa de 130 %
+  mutation-chance: 0.03      # probabilidad de que la cria salga del color raro (albino)
+  random-color-chance: 0.08  # probabilidad de que salga de un color cualquiera de la especie
+
+# Nidos salvajes: las hembras adultas salvajes de las especies con huevo arman un nido cada tanto y lo cuidan.
+# Se le puede sacar un huevo con click izquierdo (la cria nace domesticada por quien lo pone), pero la madre
+# ataca a quien se acerca o le roba. Es la forma de conseguir T-Rex y Giganotosaurus sin admins.
+nests:
+  enabled: true
+  chance: 0.15               # probabilidad por minuto de que una hembra salvaje sin nido arme uno
+  max-eggs: 3
+  spacing: 48                # bloques minimos entre nidos
+  max-loaded: 12             # nidos cargados a la vez como maximo en todo el server
+  lifetime-minutes: 90       # despues de esto el nido se deshace (si no hay nadie cerca)
+  cooldown-minutes: 60       # espera de la hembra entre un nido y el siguiente
+  guard-range: 10            # a cuantos bloques del nido la madre ataca (agachado: la mitad)
+  only-wilderness: true      # solo fuera de pueblos de Towny y regiones de WorldGuard
+  species: []                # vacio = todas las que ponen huevos; si no, ej. [trex, giganotosaurus, raptor]
+
 # Dinopedia: cada especie tiene sellos de investigacion (verla, sus colores, el color raro, domesticarla,
 # criarla, montarla...). Cada sello da experiencia y completar una especie da mas. Los comandos se corren
 # desde la consola (%player% = jugador, %species% = id de la especie), por ejemplo para dar plata o un kit.
@@ -75,12 +106,23 @@ dinopedia:
   xp-species-complete: 150
   species-complete-commands: []
   all-complete-commands: []
+  # plata (Vault) por sello y por especie completa, 0 = nada
+  money-per-stamp: 0
+  money-species-complete: 0
   # Distancia a la que se anota un dino al verlo (con la Dinopedia en la mano, mas lejos)
   discover-range: 16
   book-discover-range: 32
   # Con la Dinopedia en la mano: huellas de especies que no conoces y rastreo con la lupa (en bloques)
   tracks-range: 64
   track-range: 160
+
+# Integraciones (se activan solas si el plugin esta instalado):
+# - PlaceholderAPI: %dinoearth_...% para scoreboards, hologramas y tops (lista en el README).
+# - Vault: plata en misiones y sellos (missions.reward-money, dinopedia.money-per-stamp...).
+# - Towny / WorldGuard: los nidos solo aparecen fuera de pueblos y regiones (nests.only-wilderness).
+# Tops: /dino top <categoria>. Se guardan en jugadores.yml; top-size = cuantos muestra.
+tops:
+  top-size: 10
 
 # Valores por especie. Velocidades de montura en bloques por tick
 # (un jugador caminando ~0.22, corriendo ~0.28).
@@ -199,3 +241,26 @@ species:
     damage: 2
     speed: 0.32
     tame-chance: 0.33        # por cada pescado crudo
+  spinosaurus:
+    hunger-minutes: 80
+    health: 140
+    damage: 13
+    speed: 0.3
+    tame-chance: 0.1         # por cada pescado crudo
+    ride:
+      walk-speed: 0.26
+      sprint-speed: 0.42
+      jump: 0.5
+      swim-speed: 0.32       # nadando con W
+      swim-sprint-speed: 0.5 # nadando con W + Ctrl
+  mosasaurus:
+    hunger-minutes: 90
+    health: 170
+    damage: 16
+    speed: 0.06              # en tierra (varado) casi no se mueve
+    tame-chance: 0.08        # por cada pescado crudo, mejor desde un bote
+    ride:
+      walk-speed: 0.04
+      sprint-speed: 0.06
+      swim-speed: 0.42
+      swim-sprint-speed: 0.68

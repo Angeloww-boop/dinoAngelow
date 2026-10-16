@@ -81,6 +81,8 @@ public final class Dino {
 
     private final String variant;
     private final boolean male;
+    private Genes genes;
+    private static final Genes NEUTRAL = Genes.neutral();
     private float growth;
     private boolean saddled;
 
@@ -113,6 +115,15 @@ public final class Dino {
     private float flapPhase;
     private float flightPitch, flightRoll, lastYaw;
     private Player lastRider;
+
+    // nado (spinosaurus, mosasaurus): en el agua no tiene gravedad y se mueve con flyVel, como el vuelo
+    private boolean swimming;
+    private int dryTicks;
+    private Location swimTarget;
+    private int swimRetarget;
+    private int swimStuck;
+    private int biteCooldown;
+    private float swimPhase;
 
     // hambre (solo domesticados)
     private float hunger = 1;    // 1 lleno .. 0 muerto de hambre
@@ -181,12 +192,18 @@ public final class Dino {
         float g = pdc.getOrDefault(keys.growth, PersistentDataType.FLOAT, 1f);
         this.growth = species.hasBabies() ? g : 1f;
         this.saddled = pdc.getOrDefault(keys.saddled, PersistentDataType.BYTE, (byte) 0) == 1;
+        this.genes = Genes.read(pdc, keys);
+        if (genes == null) {
+            // dinos de antes de la genetica: los domesticados quedan normales, los salvajes sacan rasgos al azar
+            genes = wolf.isTamed() ? Genes.neutral() : Genes.wild(settings);
+            genes.write(pdc, keys);
+        }
         this.last = wolf.getLocation();
         this.sit = wolf.isSitting() ? 1 : 0;
         this.rideYaw = wolf.getBodyYaw();
         this.age = ThreadLocalRandom.current().nextInt(1000);
         if (rider() == null) wolf.setAware(true);
-        if (species.flies()) wolf.setGravity(true);   // por si se guardo volando
+        if (species.flies() || species.swims) wolf.setGravity(true);   // por si se guardo volando o nadando
         adjustGoals();
         loadOrders(pdc);
         form = isBabyForm() ? rig.baby() : rig.adult();
@@ -281,7 +298,23 @@ public final class Dino {
     private float modelScale() {
         float s = !species.hasBabies() ? 1f
                 : growth < 0.5f ? lerp(0.65f, 1f, growth / 0.5f) : lerp(0.6f, 1f, (growth - 0.5f) / 0.5f);
-        return s * (male ? species.maleScale : 1f);
+        return s * (male ? species.maleScale : 1f) * g().size;
+    }
+
+    /** Los genes que cuentan para los stats (si la genetica esta apagada en el config, todos normales). */
+    private Genes g() {
+        return settings.genetics ? genes : NEUTRAL;
+    }
+
+    public Genes genes() {
+        return genes;
+    }
+
+    /** Este dino como padre de una cria (color, sexo y nombre sin colores). */
+    public Genes.Parent asParent() {
+        String n = nameComp != null ? net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
+                .serialize(nameComp) : null;
+        return new Genes.Parent(variant, male, n);
     }
 
     private float visualScale() {
@@ -297,9 +330,10 @@ public final class Dino {
     private void updateStats() {
         float size = relativeSize();
         set(Attribute.SCALE, species.hitbox * size);
-        set(Attribute.MAX_HEALTH, Math.round(species.health * (0.25 + 0.75 * Math.min(1f, size))));
+        set(Attribute.MAX_HEALTH, Math.round(species.health * g().health * (0.25 + 0.75 * Math.min(1f, size))));
         set(Attribute.ATTACK_DAMAGE, Math.max(1, species.damage * Math.min(1.1f, size)));
-        set(Attribute.MOVEMENT_SPEED, growth >= 1 ? species.speed : species.speed * (0.85 + 0.15 * growth));
+        double walk = species.speed * g().speed;
+        set(Attribute.MOVEMENT_SPEED, growth >= 1 ? walk : walk * (0.85 + 0.15 * growth));
         set(Attribute.STEP_HEIGHT, growth >= 0.5f && species.hitbox > 1 ? 1.0 : 0.6);
         set(Attribute.ATTACK_KNOCKBACK, species.knockback * Math.min(1f, size));
         set(Attribute.FOLLOW_RANGE, species.hostile() ? 24 : 16);
@@ -422,7 +456,7 @@ public final class Dino {
             }
             if (flying) wildFlight = 0;
             // se echa, como si estuviera mal (salvo que este yendo a comer)
-            if (!flying && feeder == null && !wolf.isSitting() && age % 20 == 0) {
+            if (!flying && !swimming && feeder == null && !wolf.isSitting() && age % 20 == 0) {
                 wolf.setSitting(true);
                 starvingSit = true;
             }
@@ -460,7 +494,7 @@ public final class Dino {
             return;
         }
         if (feeder != null) {
-            if (!feeder.isValid() || feeder.points() <= 0 || rider != null || flying
+            if (!feeder.isValid() || feeder.points() <= 0 || rider != null || flying || swimming
                     || feeder.location().getWorld() != wolf.getWorld()) {
                 feeder = null;
                 return;
@@ -481,7 +515,7 @@ public final class Dino {
             if (seekTicks > 400) feeder = null;   // no llega: se rinde (si no hay hambre extrema, vuelve a probar)
             return;
         }
-        if (age % 40 != 0 || hunger >= 0.6f || rider != null || flying || escort != null || wolf.isLeashed()) return;
+        if (age % 40 != 0 || hunger >= 0.6f || rider != null || flying || swimming || escort != null || wolf.isLeashed()) return;
         if (wolf.isSitting() && !starvingSit) return;   // el dueño lo dejo sentado: espera
         FeederManager.Feeder near = manager.feeders().nearest(wolf.getLocation(), species.diet(), 16);
         if (near == null) return;
@@ -620,7 +654,7 @@ public final class Dino {
     }
 
     private void tickOrders(Player rider, Location loc) {
-        if (!wolf.isTamed() || rider != null || escort != null || flying) return;
+        if (!wolf.isTamed() || rider != null || escort != null || flying || swimming) return;
         // si el dueño lo sento o lo paro con click derecho, la orden pasa a ser eso
         if (age % 10 == 0 && !starvingSit) {
             boolean sitting = wolf.isSitting();
@@ -799,6 +833,11 @@ public final class Dino {
             Entity src = by.getDamager();
             if (src instanceof Projectile p && p.getShooter() instanceof Entity shooter) src = shooter;
             lastAttacker = src.getLocation();
+            // nadando no tiene la IA del lobo: contesta el ataque a mano (el domesticado pasivo no)
+            if (swimming && src instanceof LivingEntity le && src != rider() && !(wolf.isTamed()
+                    && (combat == Combat.PASSIVE || src.getUniqueId().equals(wolf.getOwnerUniqueId())))) {
+                if (!(le instanceof Player p) || huntable(p)) wolf.setTarget(le);
+            }
         } else {
             lastAttacker = null;
         }
@@ -861,6 +900,19 @@ public final class Dino {
             alarm(p.getLocation());
             return;
         }
+    }
+
+    /** Madre cuidando el nido (o al que le robaron un huevo): se le tira encima al jugador y ruge. */
+    public void provoke(Player p) {
+        if (wolf.isTamed() || dying >= 0 || !huntable(p)) return;
+        if (wolf.isSitting()) wolf.setSitting(false);
+        wolf.setTarget(p);
+        wolf.setAngry(true);
+        if (roar < 0) {
+            roar = 0;
+            play("roar", 1f, 1f);
+        }
+        if (species.roars && roarCooldown == 0) scare(null);
     }
 
     /** Se asusta, avisa (trompetazo/grito) y sale corriendo con toda la manada. */
@@ -1034,7 +1086,7 @@ public final class Dino {
 
     public void remove() {
         // que no quede flotando si se descarga el chunk en pleno vuelo (o yendo en un hombro)
-        if ((flying || escort != null) && wolf.isValid()) {
+        if ((flying || swimming || escort != null) && wolf.isValid()) {
             wolf.setGravity(true);
             wolf.setCollidable(true);
         }
@@ -1082,16 +1134,20 @@ public final class Dino {
         if (tailSwing >= 0 && ++tailSwing > TAIL_TICKS) tailSwing = -1;
         if (tailCooldown > 0) tailCooldown--;
         maybeEscort(rider);
+        if (species.swims) updateSwim(rider);
+        if (biteCooldown > 0) biteCooldown--;
         if (escort != null) tickEscort();
         else if (rider != null) ride(rider);
         else if (flying) flyAlone();
+        else if (swimming) swimAlone();
         else {
             if (!wolf.isAware()) wolf.setAware(true);
             if (species.flies()) maybeTakeOff();
+            if (species.aquatic()) beached();
         }
 
         Location loc = wolf.getLocation();
-        float bodyYaw = rider != null || flying || escort != null ? rideYaw : wolf.getBodyYaw();
+        float bodyYaw = rider != null || flying || swimming || escort != null ? rideYaw : wolf.getBodyYaw();
 
         // velocidad horizontal real -> ciclo de pasos
         Vector delta = loc.toVector().subtract(last.toVector()).setY(0);
@@ -1111,7 +1167,8 @@ public final class Dino {
         speed += (target - speed) * 0.25f;
         float prevPhase = phase;
         phase += moved * species.stride / size;
-        if (Math.floor(prevPhase / Math.PI) != Math.floor(phase / Math.PI) && speed > 0.15f && !isBabyForm() && !flying) {
+        if (Math.floor(prevPhase / Math.PI) != Math.floor(phase / Math.PI) && speed > 0.15f && !isBabyForm() && !flying
+                && !swimming) {
             play("step", species.body == Species.Body.QUADRUPED || species.roars ? 0.6f : 0.35f, 1f);
         }
         if (species.flies()) tickWings();
@@ -1145,7 +1202,7 @@ public final class Dino {
         if (poseEvery > 0 && age - lastPose >= poseEvery) {
             lastPose = age;
             animate();
-            boolean free = rider == null && !flying && escort == null;   // mira para donde mira el lobo
+            boolean free = rider == null && !flying && !swimming && escort == null;   // mira para donde mira el lobo
             float headYaw = free ? wrap(loc.getYaw() - bodyYaw) : 0;
             model.pose(head).ry += -clamp(headYaw, -50, 50) * 0.8f;
             model.pose(head).rx += clamp(free ? loc.getPitch() : 0, -35, 35) * 0.7f;
@@ -1173,7 +1230,7 @@ public final class Dino {
 
     /** Sin jinete, sin caminar y sin ninguna animacion en curso (ataque, rugido, comer, sentarse...). */
     private boolean isStill(Player rider) {
-        if (rider != null || escort != null || flying || isDying()) return false;
+        if (rider != null || escort != null || flying || swimming || isDying()) return false;
         if (speed > 0.04f || attack >= 0 || roar >= 0 || spit >= 0 || eating >= 0 || hurt > 0 || tailSwing >= 0) {
             return false;
         }
@@ -1208,6 +1265,7 @@ public final class Dino {
         tickOrders(rider, loc);
         if (species.temper == Species.Temper.PREY && !wolf.isTamed() && rider == null && !flying) tickPrey(loc);
         boolean hunts = species.temper == Species.Temper.HOSTILE || species.territorial && !wolf.isTamed();
+        if (species.aquatic() && !swimming) hunts = false;   // varado no caza
         if (hunts && age % 10 == 0 && rider == null && !flying) hunt(loc);
         if (species.temper == Species.Temper.PACK && age % 20 == 0 && rider == null) packHunt(loc);
         if (species.spits) tickSpit(target);
@@ -1233,6 +1291,7 @@ public final class Dino {
         double bestD = 16 * 16;
         for (Player p : loc.getWorld().getPlayers()) {
             if (!huntable(p)) continue;
+            if (species.aquatic() && (!p.isInWater() || p.getVehicle() != null)) continue;   // solo a los que nadan
             double d = p.getLocation().distanceSquared(loc);
             if (d < bestD && wolf.hasLineOfSight(p)) {
                 best = p;
@@ -1361,17 +1420,22 @@ public final class Dino {
         if (wolf.isSitting()) wolf.setSitting(false);
         Input in = rider.getCurrentInput();
 
-        rideYaw += clamp(wrap(rider.getYaw() - rideYaw), flying ? -9 : -16, flying ? 9 : 16);
+        float turn = flying || swimming ? 9 : 16;
+        rideYaw += clamp(wrap(rider.getYaw() - rideYaw), -turn, turn);
         wolf.setRotation(rideYaw, 0);
         wolf.setBodyYaw(rideYaw);
         if (flying) {
             rideFlight(rider, in);
             return;
         }
+        if (swimming) {
+            rideSwim(rider, in);
+            return;
+        }
 
         double f = (in.isForward() ? 1 : 0) - (in.isBackward() ? 1 : 0);
         double s = (in.isLeft() ? 1 : 0) - (in.isRight() ? 1 : 0);
-        double max = f > 0 && in.isSprint() ? species.rideSprint : species.rideWalk;
+        double max = (f > 0 && in.isSprint() ? species.rideSprint : species.rideWalk) * g().speed;
         if (f < 0) max *= 0.45;
         double rad = Math.toRadians(rideYaw);
         double vx = -Math.sin(rad) * f + Math.cos(rad) * s * 0.6;
@@ -1442,7 +1506,7 @@ public final class Dino {
         wolf.setFallDistance(0);
         rider.setFallDistance(0);
         double pitch = Math.toRadians(clamp(rider.getPitch(), -55, 65));
-        double target = in.isForward() ? (in.isSprint() ? species.flySprint : species.flySpeed)
+        double target = in.isForward() ? (in.isSprint() ? species.flySprint : species.flySpeed) * g().speed
                 : in.isBackward() ? 0.08 : 0.28;
         airSpeed += (target - airSpeed) * (target > airSpeed ? 0.05 : 0.08);
         double yaw = Math.toRadians(rideYaw);
@@ -1564,14 +1628,290 @@ public final class Dino {
         }
     }
 
+    // ------------------------------------------------------------ nado (spinosaurus, mosasaurus)
+    public boolean isSwimming() {
+        return swimming;
+    }
+
+    /** Entra o sale del agua. El anfibio necesita agua hasta la mitad del cuerpo; el acuatico, apenas mojarse. */
+    private void updateSwim(Player rider) {
+        boolean wet = wolf.isInWater();
+        if (wet) wolf.setRemainingAir(wolf.getMaximumAir());   // nunca se ahoga
+        if (!swimming) {
+            flightPitch *= 0.8f;
+            if (wet && deepEnough() && !wolf.isLeashed() && escort == null) startSwim();
+        } else if (!wet) {
+            if (++dryTicks > 6) stopSwim();
+        } else {
+            dryTicks = 0;
+        }
+    }
+
+    private boolean deepEnough() {
+        double k = species.aquatic() ? 0.15 : 0.5;
+        return wolf.getLocation().add(0, wolf.getHeight() * k, 0).getBlock().isLiquid();
+    }
+
+    private void startSwim() {
+        swimming = true;
+        dryTicks = 0;
+        swimTarget = null;
+        swimStuck = 0;
+        wolf.setAware(false);
+        wolf.setGravity(false);
+        flyVel.copy(wolf.getVelocity());
+        rideYaw = wolf.getBodyYaw();
+        play("swim", 0.8f, 1f);
+    }
+
+    private void stopSwim() {
+        swimming = false;
+        wolf.setGravity(true);
+        wolf.setFallDistance(0);
+        wolf.setRotation(rideYaw, 0);
+        wolf.setBodyYaw(rideYaw);
+        if (rider() == null) wolf.setAware(true);
+    }
+
+    /** Sin jinete en el agua: persigue a su presa, sigue al dueño o da vueltas por el agua. */
+    private void swimAlone() {
+        if (wolf.isAware()) wolf.setAware(false);
+        Location at = wolf.getLocation();
+        Location body = at.clone().add(0, wolf.getHeight() * 0.5, 0);
+        LivingEntity target = wolf.getTarget();
+        if (target != null && (!target.isValid() || target.isDead() || target.getWorld() != at.getWorld()
+                || target.getLocation().distanceSquared(at) > 32 * 32 || target instanceof Player p && !huntable(p))) {
+            wolf.setTarget(null);
+            target = null;
+        }
+        if (target != null && wolf.isTamed() && combat == Combat.PASSIVE) target = null;
+        double speed = 0;
+        Vector to = new Vector();
+        boolean wander = false;
+        if (target != null) {
+            Location aim = target.getLocation().add(0, target.getHeight() * 0.5, 0);
+            to = aim.toVector().subtract(body.toVector());
+            speed = species.swimSprint * 0.75 * g().speed;
+            double reach = wolf.getWidth() * 0.5 + 1.2 + 1.2 * visualScale();
+            if (to.length() < reach && biteCooldown == 0) bite(target);
+        } else if (wolf.isTamed() && (order == Order.STAY || wolf.isSitting())) {
+            speed = 0;
+        } else if (wolf.isTamed() && order == Order.FOLLOW && wolf.getOwner() instanceof Player owner && owner.isOnline()
+                && owner.getWorld() == at.getWorld() && owner.getLocation().distanceSquared(at) < 48 * 48) {
+            to = owner.getLocation().add(0, 0.5, 0).toVector().subtract(body.toVector());
+            double d = to.length();
+            speed = d < 4 ? 0 : Math.min(species.swimSprint * g().speed, 0.08 + d * 0.03);
+        } else {
+            wander = true;
+            if (swimTarget == null || swimTarget.getWorld() != at.getWorld() || --swimRetarget <= 0
+                    || swimTarget.distanceSquared(body) < 2.5 * 2.5) {
+                swimTarget = waterSpot(at, 10);
+                swimRetarget = 100 + ThreadLocalRandom.current().nextInt(120);
+            }
+            if (swimTarget != null) {
+                to = swimTarget.toVector().subtract(body.toVector());
+                speed = species.swimSpeed * 0.45 * g().speed;
+            }
+        }
+        double len = to.length();
+        Vector v = len > 1e-3 ? to.multiply(speed / len) : new Vector();
+        // el acuatico no se asoma solo: si arriba hay aire, baja (salvo que persiga a alguien)
+        if (species.aquatic() && target == null) {
+            boolean airAbove = !at.clone().add(0, wolf.getHeight() + 0.3, 0).getBlock().isLiquid();
+            if (airAbove) v.setY(Math.min(v.getY(), -0.03));
+            Vector flat = v.clone().setY(0);
+            if (flat.lengthSquared() > 1e-4) {
+                Location ahead = body.clone().add(flat.normalize().multiply(1.5 + wolf.getWidth() / 2));
+                if (!ahead.getBlock().isLiquid()) {
+                    swimTarget = null;   // adelante no hay agua: busca otro lado
+                    v.multiply(0.2);
+                }
+            }
+        } else if (!species.aquatic() && wander) {
+            v.setY(v.getY() + 0.02);   // el anfibio tiende a flotar
+        }
+        // trabado (contra la orilla): el anfibio sube para salir, el acuatico busca otro lado
+        if (speed > 0.05 && Math.hypot(wolf.getVelocity().getX(), wolf.getVelocity().getZ()) < 0.02) {
+            if (++swimStuck > 20) {
+                if (species.aquatic()) swimTarget = null;
+                else v.setY(0.3);
+            }
+        } else if (swimStuck > 0) {
+            swimStuck--;
+        }
+        steer(v.getX(), v.getY(), v.getZ(), 0.12);
+        Vector fv = flyVel;
+        if (Math.abs(fv.getX()) + Math.abs(fv.getZ()) > 0.02) {
+            float heading = (float) Math.toDegrees(Math.atan2(-fv.getX(), fv.getZ()));
+            rideYaw += clamp(wrap(heading - rideYaw), -7, 7);
+        } else if (target != null) {
+            float heading = (float) Math.toDegrees(Math.atan2(-to.getX(), to.getZ()));
+            rideYaw += clamp(wrap(heading - rideYaw), -7, 7);
+        }
+        wolf.setRotation(rideYaw, 0);
+        wolf.setBodyYaw(rideYaw);
+        if (age % 70 == 0 && speed > 0.15) play("swim", 0.5f, 1f);
+    }
+
+    /** Un punto con agua cerca (para nadar sin rumbo); el anfibio lo busca cerca de la superficie. */
+    private Location waterSpot(Location around, int radius) {
+        World w = around.getWorld();
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        for (int tries = 0; tries < 10; tries++) {
+            int x = around.getBlockX() + r.nextInt(-radius, radius + 1);
+            int z = around.getBlockZ() + r.nextInt(-radius, radius + 1);
+            if (!w.isChunkLoaded(x >> 4, z >> 4)) continue;
+            int y = around.getBlockY() + r.nextInt(-3, 3);
+            Block b = w.getBlockAt(x, y, z);
+            if (!b.isLiquid()) continue;
+            if (!species.aquatic()) {
+                while (b.getRelative(BlockFace.UP).isLiquid() && b.getY() < around.getBlockY() + 6) b = b.getRelative(BlockFace.UP);
+                return b.getLocation().add(0.5, -0.3, 0.5);
+            }
+            if (!b.getRelative(BlockFace.UP).isLiquid()) b = b.getRelative(BlockFace.DOWN);   // no en la superficie
+            if (b.isLiquid()) return b.getLocation().add(0.5, 0.5, 0.5);
+        }
+        return null;
+    }
+
+    /** Mordida en el agua (sin la IA del lobo hay que hacerla a mano). */
+    private void bite(LivingEntity target) {
+        biteCooldown = 20;
+        onAttack();
+        double damage = species.damage * Math.min(1.1f, relativeSize());
+        target.damage(damage, wolf);
+        Vector push = target.getLocation().toVector().subtract(wolf.getLocation().toVector()).setY(0);
+        if (push.lengthSquared() > 1e-4) target.setVelocity(push.normalize().multiply(0.5).setY(0.15));
+    }
+
+    /** Acuatico en tierra: se arrastra despacio hacia el agua mas cercana. */
+    private void beached() {
+        if (age % 40 != 0 || wolf.isTamed() && (wolf.isSitting() || order != Order.FOLLOW) || wolf.isLeashed()) return;
+        Location at = wolf.getLocation();
+        Location water = null;
+        double best = Double.MAX_VALUE;
+        World w = at.getWorld();
+        for (int dx = -12; dx <= 12; dx += 3) {
+            for (int dz = -12; dz <= 12; dz += 3) {
+                for (int dy = -3; dy <= 2; dy++) {
+                    Block b = w.getBlockAt(at.getBlockX() + dx, at.getBlockY() + dy, at.getBlockZ() + dz);
+                    if (!b.isLiquid()) continue;
+                    double d = dx * dx + dz * dz + dy * dy;
+                    if (d < best) {
+                        best = d;
+                        water = b.getLocation().add(0.5, 0, 0.5);
+                    }
+                }
+            }
+        }
+        if (water != null) wolf.getPathfinder().moveTo(water, 1.0);
+    }
+
+    /**
+     * Nadando con jinete: W nada hacia donde mirás (mirar abajo = bucear), Ctrl mas rapido, espacio sube.
+     * Al jinete le da respiracion bajo el agua mientras va montado.
+     */
+    private void rideSwim(Player rider, Input in) {
+        if (age % 40 == 0) {
+            rider.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 100, 0, false, false, true));
+        }
+        wolf.setFallDistance(0);
+        rider.setFallDistance(0);
+        double pitch = Math.toRadians(clamp(rider.getPitch(), -70, 70));
+        double max = (in.isSprint() ? species.swimSprint : species.swimSpeed) * g().speed;
+        double f = (in.isForward() ? 1 : 0) - (in.isBackward() ? 0.5 : 0);
+        double s = (in.isLeft() ? 1 : 0) - (in.isRight() ? 1 : 0);
+        double yaw = Math.toRadians(rideYaw);
+        double h = Math.cos(pitch) * max * f;
+        double vy = -Math.sin(pitch) * max * f;
+        if (in.isJump()) vy = Math.max(vy, 0.25);
+        else if (f == 0) vy = species.aquatic() ? 0 : 0.04;   // quieto: el anfibio flota
+        double vx = -Math.sin(yaw) * h + Math.cos(yaw) * s * max * 0.4;
+        double vz = Math.cos(yaw) * h + Math.sin(yaw) * s * max * 0.4;
+        steer(vx, vy, vz, 0.18);
+        if (age % 60 == 0 && f > 0) play("swim", 0.6f, 1f);
+    }
+
+    /** Mosasaurus: ondula la cola, rema con las aletas y se inclina con la subida y bajada. Varado se arrastra. */
+    private void animateSwimmer() {
+        float t = age;
+        float sw = swimming ? 1f : 0f;
+        float s = swimming ? Math.max(0.3f, Math.min(1f, speed + (float) flyVel.length() * 2)) : speed;
+        float k = form.height() / 18f;
+        swimPhase += swimming ? 0.12f + 0.22f * s : 0.25f * s;
+        float w = (float) Math.sin(swimPhase);
+        float w2 = (float) Math.sin(swimPhase - 1.1f);
+
+        DinoModel.BonePose pBody = model.pose(body);
+        DinoModel.BonePose pHead = model.pose(head);
+        DinoModel.BonePose pJaw = model.pose(jaw);
+        DinoModel.BonePose pT1 = model.pose(tail1);
+        DinoModel.BonePose pT2 = model.pose(tail2);
+        DinoModel.BonePose fr = model.pose(legFR), fl = model.pose(legFL), br = model.pose(legBR), bl = model.pose(legBL);
+
+        pBody.dy = (float) Math.sin(t * 0.05f) * 0.3f * k;
+        float amp = 0.35f + s;
+        pHead.ry = -w * 4 * amp;
+        pT1.ry = w * 10 * amp;
+        pT2.ry = w2 * 18 * amp;
+        pBody.rz = w * 2 * sw;
+        // aletas: reman en el agua; en tierra quedan apoyadas y empujan al arrastrarse
+        float paddle = (float) Math.sin(swimPhase * 0.5f);
+        fr.rz = (6 + 16 * paddle) * sw - 8 * (1 - sw);
+        fl.rz = -(6 + 16 * paddle) * sw + 8 * (1 - sw);
+        br.rz = 10 * (float) Math.sin(swimPhase * 0.5f + 1.2f) * sw - 6 * (1 - sw);
+        bl.rz = -10 * (float) Math.sin(swimPhase * 0.5f + 1.2f) * sw + 6 * (1 - sw);
+        fr.ry = -12 * paddle * sw + 20 * w * s * (1 - sw);
+        fl.ry = 12 * paddle * sw + 20 * w * s * (1 - sw);
+
+        if (attack >= 0) {
+            float a = (float) Math.sin(Math.PI * attack / ATTACK_TICKS);
+            pHead.rx -= 12 * a;
+            pJaw.rx += 45 * a;
+        }
+        if (roar >= 0) {
+            float r = (float) Math.sin(Math.PI * roar / ROAR_TICKS);
+            pHead.rx -= 18 * r;
+            pJaw.rx += 35 * r;
+        }
+        if (hurt > 0) {
+            float h = hurt / 7f;
+            pBody.rz += (float) Math.sin(hurt * 2.2f) * 6 * h;
+            pT1.ry += (float) Math.sin(hurt * 2.0f) * 12 * h;
+        }
+        if (swimming) tilt(1f);
+    }
+
+    /** Spinosaurus nadando: patea con las patas, la cola-remo ondula y se inclina como el mosasaurus. */
+    private void swimPose() {
+        swimPhase += 0.15f + 0.2f * speed;
+        float w = (float) Math.sin(swimPhase);
+        model.pose(tail1).ry += w * 12;
+        model.pose(tail2).ry += (float) Math.sin(swimPhase - 1.0f) * 22;
+        if (legR >= 0) {
+            model.pose(legR).rx += w * 30 + 20;
+            model.pose(legL).rx += -w * 30 + 20;
+        }
+        model.pose(head).rx -= 8;
+        tilt(0.6f);
+    }
+
+    /** Inclinacion de todo el modelo alrededor del cuerpo segun suba o baje (flightPitch lo calcula steer). */
+    private void tilt(float amount) {
+        float y = form.bones().get(body).jy() / 16f;
+        model.extra().translate(0, y, 0).rotateX((float) Math.toRadians(flightPitch * amount)).translate(0, -y, 0);
+    }
+
     // ------------------------------------------------------------ animacion
     private void animate() {
         model.resetPose();
         switch (species.body) {
             case QUADRUPED -> animateQuadruped();
             case FLYER -> animateFlyer();
+            case SWIMMER -> animateSwimmer();
             default -> animateBiped();
         }
+        if (swimming && species.body != Species.Body.SWIMMER) swimPose();
         if (sick > 0.01f) {
             // muerto de hambre: cabeza y cola caidas
             model.pose(head).rx += 22 * sick;
@@ -1893,6 +2233,7 @@ public final class Dino {
             key = switch (name) {
                 case "hurt", "death" -> "baby_hurt";
                 case "step" -> null;
+                case "swim" -> "swim";
                 default -> "baby_ambient";
             };
             if (key == null) return;

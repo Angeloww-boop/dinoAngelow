@@ -1,0 +1,218 @@
+{
+  "species": "mosasaurus",
+  "scale": 1.5,
+  "item": "dinoearth:mosasaurus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "abismo",
+      "name": "Abismo",
+      "weight": 30
+    },
+    {
+      "id": "arrecife",
+      "name": "Arrecife",
+      "weight": 25
+    },
+    {
+      "id": "tiburon",
+      "name": "Tibur\u00f3n",
+      "weight": 24
+    },
+    {
+      "id": "noche",
+      "name": "Noche",
+      "weight": 18
+    },
+    {
+      "id": "albino",
+      "name": "Albino",
+      "weight": 3
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 17.0,
+      "radius": 57.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            10.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            11.0,
+            17.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            8.5,
+            22.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            10.0,
+            -11.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            9.5,
+            -33.0
+          ]
+        },
+        {
+          "name": "leg_fr",
+          "parent": "body",
+          "joint": [
+            6.0,
+            7.0,
+            12.0
+          ]
+        },
+        {
+          "name": "leg_fl",
+          "parent": "body",
+          "joint": [
+            -6.0,
+            7.0,
+            12.0
+          ]
+        },
+        {
+          "name": "leg_br",
+          "parent": "body",
+          "joint": [
+            5.5,
+            6.0,
+            -7.0
+          ]
+        },
+        {
+          "name": "leg_bl",
+          "parent": "body",
+          "joint": [
+            -5.5,
+            6.0,
+            -7.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 6.800000000000001,
+      "radius": 22.8,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            4.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            4.4,
+            6.800000000000001
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            3.1,
+            9.4
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            4.0,
+            -4.4
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            3.8000000000000003,
+            -13.200000000000001
+          ]
+        },
+        {
+          "name": "leg_fr",
+          "parent": "body",
+          "joint": [
+            2.4000000000000004,
+            2.8000000000000003,
+            4.800000000000001
+          ]
+        },
+        {
+          "name": "leg_fl",
+          "parent": "body",
+          "joint": [
+            -2.4000000000000004,
+            2.8000000000000003,
+            4.800000000000001
+          ]
+        },
+        {
+          "name": "leg_br",
+          "parent": "body",
+          "joint": [
+            2.2,
+            2.4000000000000004,
+            -2.8000000000000003
+          ]
+        },
+        {
+          "name": "leg_bl",
+          "parent": "body",
+          "joint": [
+            -2.2,
+            2.4000000000000004,
+            -2.8000000000000003
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      10.0,
+      0.0
+    ],
+    "item": "dinoearth:mosasaurus/saddle/saddle"
+  }
+}

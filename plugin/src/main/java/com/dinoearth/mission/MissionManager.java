@@ -128,6 +128,7 @@ public final class MissionManager implements Listener {
     private final List<String> commandsEach;
     private final List<String> commandsAll;
     private final long recentMs;
+    private final double moneyEach, moneyAll;
 
     public MissionManager(JavaPlugin plugin, DinoManager dinos, DinoRegistry registry, Settings settings) {
         instance = this;
@@ -148,6 +149,8 @@ public final class MissionManager implements Listener {
         xpEach = c != null ? Math.max(0, c.getInt("reward-xp", 100)) : 100;
         xpAll = c != null ? Math.max(0, c.getInt("all-done-xp", 200)) : 200;
         commandsEach = c != null ? c.getStringList("reward-commands") : List.of();
+        moneyEach = c != null ? Math.max(0, c.getDouble("reward-money", 0)) : 0;
+        moneyAll = c != null ? Math.max(0, c.getDouble("all-done-money", 0)) : 0;
         commandsAll = c != null ? c.getStringList("all-done-commands") : List.of();
         recentMs = (long) (c != null ? Math.max(1, c.getDouble("recent-days", 3)) : 3) * 86_400_000L;
 
@@ -437,6 +440,9 @@ public final class MissionManager implements Listener {
             lang.chat(p, "mision-completa", "mision", m.text(), "xp", xpEach);
             p.playSound(p, "minecraft:entity.player.levelup", SoundCategory.PLAYERS, 0.6f, 1.2f);
             if (xpEach > 0) p.giveExp(xpEach);
+            money(p, moneyEach);
+            var stats = com.dinoearth.stats.PlayerStats.get();
+            if (stats != null) stats.add(p, "misiones", 1);
             run(commandsEach, p, m);
             boolean all = true;
             for (Mission x : st.list) all &= x == null || x.done;
@@ -444,10 +450,23 @@ public final class MissionManager implements Listener {
                 lang.chat(p, "misiones-todas", "xp", xpAll);
                 p.playSound(p, "minecraft:ui.toast.challenge_complete", SoundCategory.PLAYERS, 0.6f, 1.1f);
                 if (xpAll > 0) p.giveExp(xpAll);
+                money(p, moneyAll);
                 run(commandsAll, p, m);
             }
         }
         store(p, st);
+    }
+
+    private static void money(Player p, double amount) {
+        String given = com.dinoearth.integration.Money.give(p, amount);
+        if (given != null) Lang.get().chat(p, "dinero", "dinero", given);
+    }
+
+    /** Misiones de hoy completadas (para PlaceholderAPI). */
+    public int doneToday(Player p) {
+        int n = 0;
+        for (Mission m : state(p).list) if (m != null && m.done) n++;
+        return n;
     }
 
     private static void run(List<String> commands, Player p, Mission m) {

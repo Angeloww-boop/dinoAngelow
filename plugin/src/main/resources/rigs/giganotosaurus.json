@@ -200,6 +200,7 @@
   "egg": {
     "item": "dinoearth:giganotosaurus/egg/egg",
     "cracked": "dinoearth:giganotosaurus/egg_cracked/egg",
-    "icon": "dinoearth:giganotosaurus/egg_item"
+    "icon": "dinoearth:giganotosaurus/egg_item",
+    "size": 1.5
   }
 }

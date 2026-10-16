@@ -82,11 +82,19 @@ public final class DinoManager {
      * @param owner   dueño (queda domesticado), o null para salvaje
      */
     public Dino spawn(Species species, Location loc, String variant, Boolean male, float growth, OfflinePlayer owner) {
+        return spawn(species, loc, variant, male, growth, owner, null);
+    }
+
+    /** @param genes rasgos ya decididos (cria de un huevo, jaula), o null para unos de salvaje al azar */
+    public Dino spawn(Species species, Location loc, String variant, Boolean male, float growth, OfflinePlayer owner,
+                      Genes genes) {
+        Genes gn = genes != null ? genes : Genes.wild(settings);
         String v = variant != null ? species.rig.variant(variant).id() : species.rig.randomVariant().id();
         boolean m = male != null ? male : ThreadLocalRandom.current().nextBoolean();
         float g = species.hasBabies() ? growth : 1f;
         Wolf wolf = loc.getWorld().spawn(loc, Wolf.class, w -> {
             Dino.setup(w, keys, species, v, m, g);
+            gn.write(w.getPersistentDataContainer(), keys);
             if (owner != null && species.tameable()) w.setOwner(owner);
         });
         Dino d = attach(wolf);

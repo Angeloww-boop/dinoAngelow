@@ -32,7 +32,8 @@ public final class GuiPreview {
         List<Boolean> complete = new ArrayList<>(List.of(true, false, false, false, true, false, false, false, false,
                 false, false, false, false));
         String[] ids = {"raptor", "triceratops", "dilophosaurus", "compsognathus", "trex", "pteranodon", "parasaurolophus",
-                "gallimimus", "stegosaurus", "ankylosaurus", "giganotosaurus", "carnotaurus", "dimorphodon"};
+                "gallimimus", "stegosaurus", "ankylosaurus", "giganotosaurus", "carnotaurus", "dimorphodon", "spinosaurus",
+                "mosasaurus"};
         Map<String, String> slots = new LinkedHashMap<>();
         int[][] rows = {{10, 11, 12, 13, 14, 15, 16}, {28, 29, 30, 31, 32, 33, 34}};
         for (int i = 0; i < ids.length; i++) {

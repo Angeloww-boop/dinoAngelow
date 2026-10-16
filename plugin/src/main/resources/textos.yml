@@ -131,6 +131,8 @@ montura:
   ruge: 'Sí, espacio ruge en vez de saltar.'
   embiste: 'Sí, corriendo arrolla lo que tenga adelante.'
   normal: 'Sí, rápido y salta alto.'
+  nada: 'Sí, en tierra y en el agua, donde nada rápido.'
+  bucea: 'Sí, bajo el agua, y te da respiración mientras lo montás.'
 crias:
   pone: 'Macho y hembra domesticados y bien alimentados ponen huevos.'
   ninguna: 'No pone huevos.'
@@ -144,6 +146,8 @@ habilidad:
   embiste: 'Embestida que tira lejos.'
   vuela: 'Vuela. Si lo lastimás salvaje, se escapa por el aire.'
   manada: 'Caza en grupo.'
+  nada: 'Nada rápido y no se ahoga. Come pescado y es dueño de los ríos.'
+  acuatico: 'Vive en el agua y ataca a los que nadan cerca. En tierra queda varado y se arrastra al agua. Domesticalo desde un bote.'
 sellos:
   VISTO: {nombre: 'Avistado', tarea: 'Ver uno de cerca.'}
   COLORES: {nombre: 'Coleccionista', tarea: 'Ver todos sus colores comunes.'}
@@ -165,6 +169,32 @@ huellas:
   grandes: 'grandes'
   medianas: 'medianas'
   chiquitas: 'chiquitas'
+
+# ---------------------------------------------------------------- genetica
+genes:
+  # uno de los padres de un dino (en los huevos y en la ficha)
+  padre-con-nombre: '%nombre% (%color%)'
+  padre-sin-nombre: '%color% %sexo%'
+  desconocido: 'salvaje'
+  calidad:
+    debil: 'Débil'
+    normal: 'Normal'
+    buena: 'Buena'
+    excelente: 'Excelente'
+    legendaria: 'Legendaria'
+
+# ---------------------------------------------------------------- tops (/dino top y PlaceholderAPI)
+tops:
+  dinos: 'dinos domesticados'
+  sellos: 'sellos de la Dinopedia'
+  especies: 'especies descubiertas'
+  crias: 'crías nacidas'
+  domesticados: 'dinos domesticados en total'
+  nidos: 'huevos sacados de nidos'
+  cazados: 'dinos derrotados'
+  misiones: 'misiones completadas'
+  genes: 'mejor genética'
+  genes-valor: '%valor%%'
 
 # ---------------------------------------------------------------- misiones (descripcion de cada tipo)
 misiones:
@@ -306,4 +336,24 @@ especies:
       tucan: 'Tucán'
       pardo: 'Pardo'
       cielo: 'Cielo'
+      albino: 'Albino'
+  spinosaurus:
+    nombre: 'Spinosaurus'
+    tamano: '4 × 7,4 bloques'
+    descripcion: 'El gran pescador: vela enorme en el lomo y hocico de cocodrilo. Camina y nada, y se monta en los dos.'
+    colores:
+      pantano: 'Pantano'
+      rio: 'Río'
+      arcilla: 'Arcilla'
+      ceniza: 'Ceniza'
+      albino: 'Albino'
+  mosasaurus:
+    nombre: 'Mosasaurus'
+    tamano: '1,7 × 9 bloques'
+    descripcion: 'Reptil marino gigante. Ataca a los que nadan cerca. Domesticado te lleva bajo el agua.'
+    colores:
+      abismo: 'Abismo'
+      arrecife: 'Arrecife'
+      tiburon: 'Tiburón'
+      noche: 'Noche'
       albino: 'Albino'

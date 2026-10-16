@@ -13,6 +13,7 @@ import zipfile
 import zlib
 
 import feeder
+import nest
 import geometry as G
 import species_ankylosaurus
 import species_carnotaurus
@@ -21,9 +22,11 @@ import species_dilophosaurus
 import species_dimorphodon
 import species_gallimimus
 import species_giganotosaurus
+import species_mosasaurus
 import species_parasaurolophus
 import species_pteranodon
 import species_raptor
+import species_spinosaurus
 import species_stegosaurus
 import species_trex
 import species_triceratops
@@ -34,7 +37,7 @@ ALL_SPECIES = [species_raptor.SPECIES, species_triceratops.SPECIES,
                species_parasaurolophus.SPECIES, species_gallimimus.SPECIES,
                species_stegosaurus.SPECIES, species_ankylosaurus.SPECIES,
                species_giganotosaurus.SPECIES, species_carnotaurus.SPECIES,
-               species_dimorphodon.SPECIES]
+               species_dimorphodon.SPECIES, species_spinosaurus.SPECIES, species_mosasaurus.SPECIES]
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACK_DIR = os.path.join(ROOT, "resourcepack")
@@ -561,6 +564,11 @@ def build_feeders(files):
     return sets
 
 
+def build_nest(files):
+    """Nido salvaje (uno solo para todas las especies: los huevos los pone el plugin)."""
+    return {"nest": build_set(nest.rig(), Ctx(saddle={**G.SADDLE_COLORS, **nest.PALETTE}), "nest", "nest", files)}
+
+
 def build():
     files = {}
     all_sets = {}
@@ -568,6 +576,7 @@ def build():
         for key, s in build_species(sp, files).items():
             all_sets[f"{sp['id']}/{key}"] = s
     all_sets.update(build_feeders(files))
+    all_sets.update(build_nest(files))
     import icons  # aca y no arriba: icons usa el render de preview.py, que importa este modulo
     raws = icons.build_icons(ALL_SPECIES, all_sets, files)
     import items  # drops, monturas, silbato y jaula (tambien escribe items.json para el plugin)
@@ -646,7 +655,7 @@ def write_rig(sp):
         rig["saddle"] = {"name": b.name, "parent": b.parent, "joint": list(b.joint), "item": f"{NS}:{sid}/saddle/saddle"}
     if sp["egg"]:
         rig["egg"] = {"item": f"{NS}:{sid}/egg/egg", "cracked": f"{NS}:{sid}/egg_cracked/egg",
-                      "icon": f"{NS}:{sid}/egg_item"}
+                      "icon": f"{NS}:{sid}/egg_item", "size": sp["egg"]["k"]}
     write_if_changed(os.path.join(RIG_DIR, sid + ".json"), json.dumps(rig, indent=2).encode())
 
 

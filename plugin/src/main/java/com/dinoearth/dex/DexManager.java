@@ -219,6 +219,31 @@ public final class DexManager {
         return out;
     }
 
+    // ------------------------------------------------------------ para los tops y PlaceholderAPI
+    public int speciesFound(Player p) {
+        return (int) Species.ALL.stream().filter(s -> discovered(p, s)).count();
+    }
+
+    public int stampsDone(Player p) {
+        return doneStamps(p);
+    }
+
+    public int stampsTotal() {
+        return totalStamps();
+    }
+
+    public String rankOf(Player p) {
+        return rankName(rank(doneStamps(p)));
+    }
+
+    /** Copia sellos y especies descubiertas a jugadores.yml (los tops comparan tambien a los desconectados). */
+    public void syncStats(Player p) {
+        var stats = com.dinoearth.stats.PlayerStats.get();
+        if (stats == null) return;
+        stats.set(p, "sellos", doneStamps(p));
+        stats.set(p, "especies", speciesFound(p));
+    }
+
     private int totalStamps() {
         return Species.ALL.stream().mapToInt(s -> stampsOf(s).size()).sum();
     }
@@ -249,6 +274,7 @@ public final class DexManager {
         p.getPersistentDataContainer().set(keys.dexSeen(s.id), PersistentDataType.STRING, String.join(",", seen));
         DinoRig.Variant v = s.rig.variant(variant);
         if (first) {
+            syncStats(p);
             lang().action(p, "dex-especie-nueva", "especie", s.name);
             p.playSound(p, "minecraft:entity.player.levelup", SoundCategory.PLAYERS, 0.5f, 1.4f);
         } else if (v.weight() <= 5) {
@@ -308,12 +334,15 @@ public final class DexManager {
         lang().chat(p, "sello", "sello", stamp.label(), "especie", s.name, "xp", xp);
         p.playSound(p, "minecraft:ui.cartography_table.take_result", SoundCategory.PLAYERS, 0.8f, 1.1f);
         if (xp > 0) p.giveExp(xp);
+        money(p, settings.moneyStamp);
+        syncStats(p);
 
         if (have.containsAll(all)) {
             int bonus = settings.dexXpSpecies;
             lang().chat(p, "pagina-completa", "especie", s.name, "xp", bonus);
             p.playSound(p, "minecraft:ui.toast.challenge_complete", SoundCategory.PLAYERS, 0.6f, 1.2f);
             if (bonus > 0) p.giveExp(bonus);
+            money(p, settings.moneySpecies);
             run(settings.dexSpeciesCommands, p, s);
         }
         int done = doneStamps(p);
@@ -323,6 +352,11 @@ public final class DexManager {
             p.playSound(p, "minecraft:entity.player.levelup", SoundCategory.PLAYERS, 0.7f, 0.9f);
         }
         if (done == totalStamps()) run(settings.dexAllCommands, p, s);
+    }
+
+    private static void money(Player p, double amount) {
+        String given = com.dinoearth.integration.Money.give(p, amount);
+        if (given != null) lang().chat(p, "dinero", "dinero", given);
     }
 
     private static void run(List<String> commands, Player p, Species s) {
@@ -522,7 +556,8 @@ public final class DexManager {
                 ? l.plain("domesticar.comida", "dieta", Fmt.diet(s.diet()), "chance", Math.round(s.tameChance * 100))
                 : l.plain("domesticar.imposible");
         String ride = !s.rideable ? l.plain(s.perches ? "montura.hombro" : "montura.ninguna")
-                : l.plain(s.flies() ? "montura.vuela" : s.roars ? "montura.ruge" : s.charges ? "montura.embiste" : "montura.normal");
+                : l.plain(s.aquatic() ? "montura.bucea" : s.swims ? "montura.nada" : s.flies() ? "montura.vuela"
+                : s.roars ? "montura.ruge" : s.charges ? "montura.embiste" : "montura.normal");
         String ability = ability(s);
         List<String> abilityLines = new ArrayList<>();
         if (ability != null) {
@@ -583,9 +618,31 @@ public final class DexManager {
                 "hambre", hungerLine, "patrulla", patrol, "sexo", Fmt.sex(male), "edad", age);
         tag(info);
         for (int slot : menu.slots("ficha-datos")) inv.setItem(slot, info);
+        ItemStack genes = genesItem(menu, d);
+        if (genes != null) put(inv, menu, "ficha-genes", genes);
         action(holder, inv, menu, "ver-especie", menu.item("ver-especie", "especie", s.name), () -> openSpecies(p, s, v.id()));
         action(holder, inv, menu, "cerrar", menu.item("cerrar"), p::closeInventory);
         open(p, holder, inv, title);
+    }
+
+    /** Genetica del dino: rasgos, calidad, generacion, padres y si su color es una mutacion. */
+    private ItemStack genesItem(com.dinoearth.text.Menu menu, Dino d) {
+        com.dinoearth.dino.Genes g = d.genes();
+        if (g == null) return null;
+        Species s = d.species();
+        List<String> parents = new ArrayList<>();
+        if (g.mother == null && g.father == null) {
+            parents.add(menu.text("genes-salvaje"));
+        } else {
+            parents.add(menu.text("genes-madre", "madre", Fmt.parent(s, g.mother)));
+            parents.add(menu.text("genes-padre", "padre", Fmt.parent(s, g.father)));
+        }
+        return menu.item("ficha-genes", null, s.rig.eggIcon() != null ? s.rig.eggIcon().toString() : null,
+                "vida", com.dinoearth.dino.Genes.percent(g.health), "velocidad", com.dinoearth.dino.Genes.percent(g.speed),
+                "tamano", com.dinoearth.dino.Genes.percent(g.size), "calidad", Fmt.quality(g.score()),
+                "promedio", com.dinoearth.dino.Genes.percent(g.score()), "generacion", g.generation,
+                "padres", parents, "mutacion", g.mutant ? List.of(menu.text("genes-mutacion")) : List.of(),
+                "apagada", settings.genetics ? List.of() : List.of(menu.text("genes-apagada")));
     }
 
     // ------------------------------------------------------------ misiones
@@ -792,7 +849,9 @@ public final class DexManager {
 
     private static String ability(Species s) {
         String key;
-        if (s.perches) key = "escolta";
+        if (s.aquatic()) key = "acuatico";
+        else if (s.swims) key = "nada";
+        else if (s.perches) key = "escolta";
         else if (s.tail == Species.TailAttack.SPIKES) key = "puas";
         else if (s.tail == Species.TailAttack.CLUB) key = "maza";
         else if (s.temper == Species.Temper.PREY) key = "presa";

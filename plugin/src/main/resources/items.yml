@@ -239,6 +239,48 @@ membrana_dimorphodon:
     - '&8| &fLo suelta el &#ff00d9Dimorphodon&f.'
     - '&8| &fSe usa para craftear monturas.'
     - '&f'
+cuero_spinosaurus:
+  display_name: '&#ff00d9Cuero de spinosaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Spinosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+espina_spinosaurus:
+  display_name: '&#ff00d9Espina de la vela'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Spinosaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_spinosaurus:
+  display_name: '&#ff00d9Montura de Spinosaurus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Spinosaurus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+cuero_mosasaurus:
+  display_name: '&#ff00d9Cuero de mosasaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Mosasaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+diente_mosasaurus:
+  display_name: '&#ff00d9Diente de mosasaurus'
+  lore:
+    - '&f'
+    - '&8| &fLo suelta el &#ff00d9Mosasaurus&f.'
+    - '&8| &fSe usa para craftear monturas.'
+    - '&f'
+montura_mosasaurus:
+  display_name: '&#ff00d9Montura de Mosasaurus'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Mosasaurus&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
 silbato:
   display_name: '&#ff00d9Silbato de dinos'
   lore:
@@ -263,6 +305,27 @@ huevo:
     - '&f'
     - '&8| &fPonelo en el suelo y esperá a que eclosione.'
     - '&8| &fLa cría sale de un color al azar y es tuya.'
+    - '&f'
+huevo-cria:
+  display_name: '&#ff00d9Huevo de %especie%'
+  lore:
+    - '&f'
+    - '&8| &fMadre &8» &#ff00d9%madre%'
+    - '&8| &fPadre &8» &#ff00d9%padre%'
+    - '&8| &fGeneración &8» &#ff00d9%generacion%'
+    - '&f'
+    - '&8| &fPonelo en el suelo y esperá a que eclosione.'
+    - '&8| &fLa cría hereda el color y los rasgos de los padres.'
+    - '&f'
+huevo-nido:
+  display_name: '&#ff00d9Huevo salvaje de %especie%'
+  lore:
+    - '&f'
+    - '&8| &fSacado de un nido salvaje.'
+    - '&8| &fMadre &8» &#ff00d9%madre%'
+    - '&f'
+    - '&8| &fPonelo en el suelo y esperá a que eclosione.'
+    - '&8| &fLa cría nace domesticada por vos.'
     - '&f'
 comedero:
   display_name: '&#ff00d9Comedero de %dieta%'

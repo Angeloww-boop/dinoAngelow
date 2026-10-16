@@ -187,6 +187,7 @@
   "egg": {
     "item": "dinoearth:raptor/egg/egg",
     "cracked": "dinoearth:raptor/egg_cracked/egg",
-    "icon": "dinoearth:raptor/egg_item"
+    "icon": "dinoearth:raptor/egg_item",
+    "size": 1.0
   }
 }

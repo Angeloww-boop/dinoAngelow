@@ -218,6 +218,7 @@
   "egg": {
     "item": "dinoearth:parasaurolophus/egg/egg",
     "cracked": "dinoearth:parasaurolophus/egg_cracked/egg",
-    "icon": "dinoearth:parasaurolophus/egg_item"
+    "icon": "dinoearth:parasaurolophus/egg_item",
+    "size": 1.25
   }
 }

@@ -19,6 +19,8 @@ Dinosaurios para la modalidad Earth (Paper 1.21.11; el pack funciona en clientes
 | **Giganotosaurus** | 3,3 × 7,6 bloques | Como el T-Rex: salvaje te caza y ruge; un poco más rápido | **Solo criándolo desde el huevo** | Sí; espacio = rugido | Sí | arena, gris, rojizo, verde, albino |
 | **Carnotaurus** | 2,4 × 4,4 bloques | Carnívoro neutral, muy rápido; montado y corriendo **embiste** | Carne cruda (12 %) | Sí, rápida | Sí | rojo, pardo, gris, verde, albino |
 | **Dimorphodon** | 0,7 bloques, 2 de ala a ala | Pterosaurio chiquito; vuela y aterriza | Pescado crudo (33 %) | No: **vuela a tu lado** y chilla si hay monstruos cerca | Sí | loro, tucán, pardo, cielo, albino |
+| **Spinosaurus** | 4 × 7,4 bloques | Carnívoro neutral **anfibio**: camina y **nada rápido**, no se ahoga | Pescado crudo (10 %) | Sí, **en tierra y en el agua** | Sí | pantano, río, arcilla, ceniza, albino |
+| **Mosasaurus** | 1,7 × 9 bloques | **Acuático**: salvaje ataca a los que **nadan** cerca. En tierra queda varado y se arrastra al agua | Pescado crudo (8 %), mejor **desde un bote** | Sí, **bajo el agua** (te da respiración) | No pone huevos | abismo, arrecife, tiburón, noche, albino |
 
 El albino es raro (3 %). Los machos son un poco más grandes y más coloridos
 (cresta en el raptor, cuernos más largos y gola con rayos en el triceratops, crestas más altas en el dilophosaurus,
@@ -57,8 +59,12 @@ Guía completa con fotos y capturas de los menús: **[DinoEarth-Guia.pdf](DinoEa
 | Sellos y rangos | Cada especie tiene sellos: verla, todos sus colores comunes, el color raro, domesticarla (o derrotarla si no se domestica), criar una de huevo, montarla (o que vuele a tu lado). Cada sello da experiencia, completar una especie da más y podés poner comandos de premio en `config.yml` (`dinopedia`). Con los sellos subís de rango: Aprendiz, Explorador, Rastreador, Naturalista, Paleontólogo y Leyenda jurásica |
 | Misiones del día | Cada jugador tiene **3 misiones propias por día** (distintas a las de los demás): avistar dinos de una especie, ver un color que te falta, domesticar, criar una cría de huevo, recorrer bloques montado, derrotar salvajes o cargar comederos. Solo piden especies que alguien vio en el server en los últimos días. Se ven en la Dinopedia (botón **Misiones del día** o `/dino misiones`), cada avance muestra una bossbar unos segundos y se puede **cambiar una misión por día**. Premios (experiencia y comandos) en `config.yml` (`missions`) |
 | Llevar la Dinopedia | En la mano: anotás dinos desde **32 bloques** (sin ella, 16), te avisa con **huellas** cuando hay una especie que no conocés cerca (y hacia dónde) y, si activaste la **lupa** en la página de una especie, la barra de acción te marca con una flecha dónde está la más cercana y a cuántos metros (primero los colores que te faltan) |
-| Criar | Dar comida a un macho y una hembra adultos domesticados → la hembra pone un **huevo** |
-| Huevo | Click derecho en el suelo. Se mueve, se agrieta y a los 5 min nace una cría al azar, domesticada por quien lo puso. Click derecho = ver %, golpe = recogerlo |
+| Criar | Dar comida a un macho y una hembra adultos domesticados → la hembra pone un **huevo** con la cría ya decidida (en la descripción del huevo: madre, padre y generación) |
+| Genética | Cada dino tiene 3 rasgos: **vida, velocidad y tamaño** (100 % = normal, entre 80 % y 130 %). Los salvajes nacen con rasgos al azar; las crías sacan el promedio de los padres con un poco de suerte (para bien o para mal), así **criando a los mejores con los mejores** salen dinos más fuertes, rápidos o grandes. El **color** sale de uno de los padres (a veces uno cualquiera) y con un 3 % **muta al color raro**. En la ficha (Dinopedia → click derecho al dino) el botón **Genética** muestra los rasgos, la calidad (débil, normal, buena, excelente, legendaria), la generación y los padres. Se configura en `config.yml` (`genetics`) |
+| Nidos | Cada tanto una **hembra salvaje adulta** de una especie con huevos arma un **nido** con 1 a 3 huevos y lo cuida. **Golpe = sacarle un huevo** (nace domesticado por quien lo pone, con los genes de la madre), pero los carnívoros y herbívoros **atacan** a quien se acerca a menos de 10 bloques (agachado, la mitad) o les roba; las presas se asustan y huyen. **Es la forma de conseguir T-Rex y Giganotosaurus sin admins.** Click derecho = cuántos huevos quedan. Solo aparecen fuera de pueblos de Towny y regiones de WorldGuard. `config.yml` (`nests`) |
+| Nadar (spinosaurus, mosasaurus) | No se ahogan. Montados en el agua: **W nada hacia donde mirás** (mirar abajo = bucear), Ctrl más rápido, espacio sube. Al jinete le da **respiración acuática** mientras va montado. El mosasaurus en tierra casi no se mueve |
+| Tops | `/dino top [categoría]`: dinos, sellos, especies, crías, domesticados, nidos, cazados, misiones y genes (cuenta también a los desconectados, se guarda en `jugadores.yml`) |
+| Huevo | Click derecho en el suelo. Se mueve, se agrieta y a los 5 min nace la cría, domesticada por quien lo puso. Click derecho = ver %, golpe = recogerlo |
 | Cría | Crece sola (40 min). Darle su comida la hace crecer un 5 % |
 
 ## Comandos (OP)
@@ -68,6 +74,7 @@ Guía completa con fotos y capturas de los menús: **[DinoEarth-Guia.pdf](DinoEa
 /dino egg <especie> [cantidad]
 /dino grow [%]                      (crías a 10 bloques)
 /dino tame [jugador]                (domestica el dino que mirás; sirve para T-Rex y Giganotosaurus)
+/dino nido                          (la hembra salvaje que mirás arma un nido ya, para probar)
 /dino item <id> [cantidad] [jugador] (monturas, drops, silbato, jaula: para armar los trades de Shopkeepers)
 /dino remove [radio] [especie]
 /dino count
@@ -79,8 +86,8 @@ Guía completa con fotos y capturas de los menús: **[DinoEarth-Guia.pdf](DinoEa
 /dino pack [reload|info]
 ```
 
-Todos los jugadores: `/dino mis`, `/dino llamar [id] [id]`, `/dino misiones`, `/dino dar <jugador>`, `/dino aceptar`, `/dino rechazar`,
-`/dino pack`. La espera y el máximo del silbato de regreso se cambian en `config.yml` (`recall`).
+Todos los jugadores: `/dino mis`, `/dino llamar [id] [id]`, `/dino misiones`, `/dino top [categoría]`, `/dino dar <jugador>`,
+`/dino aceptar`, `/dino rechazar`, `/dino pack`. La espera y el máximo del silbato de regreso se cambian en `config.yml` (`recall`).
 
 Límite de domesticados: `limits.max-tamed-per-player` en `config.yml` (20 por defecto, 0 = sin límite). Cuentan todos
 los dinos del jugador, cargados o no; los guardados en jaulas no cuentan, pero no se sueltan si ya tiene el máximo.
@@ -93,12 +100,37 @@ parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotau
 `garra_raptor`, `cuerno_triceratops`, `cuerno_carnotaurus`, `diente_trex`, `diente_giganotosaurus`,
 `diente_compsognathus`, `glandula_dilophosaurus`, `cresta_dilophosaurus`, `cresta_pteranodon`,
 `cresta_parasaurolophus`, `pluma_gallimimus`, `placa_stegosaurus`, `mazo_ankylosaurus`, `membrana_pteranodon`,
-`membrana_dimorphodon`. Los items propios no sirven en crafteos, yunques, hornos ni dispensers: los crafteos se arman
+`membrana_dimorphodon`, `espina_spinosaurus`, `diente_mosasaurus` (monturas también de spinosaurus y mosasaurus). Los items propios no sirven en crafteos, yunques, hornos ni dispensers: los crafteos se arman
 con Shopkeepers.
 
 Especies: `raptor`, `triceratops` (`trike`), `dilophosaurus` (`dilo`), `compsognathus` (`compy`), `trex` (`rex`),
 `pteranodon` (`ptera`, `pterodactilo`), `parasaurolophus` (`para`), `gallimimus` (`galli`), `stegosaurus` (`stego`),
-`ankylosaurus` (`anky`), `giganotosaurus` (`giga`), `carnotaurus` (`carno`), `dimorphodon` (`dimo`).
+`ankylosaurus` (`anky`), `giganotosaurus` (`giga`), `carnotaurus` (`carno`), `dimorphodon` (`dimo`),
+`spinosaurus` (`spino`), `mosasaurus` (`mosa`).
+
+## Integraciones (se activan solas)
+
+| Plugin | Qué agrega |
+|---|---|
+| **PlaceholderAPI** | Placeholders para scoreboards, hologramas y tops (abajo) |
+| **Vault** (+ un plugin de economía) | Plata en misiones y sellos: `missions.reward-money`, `missions.all-done-money`, `dinopedia.money-per-stamp`, `dinopedia.money-species-complete` |
+| **Towny / WorldGuard** | Los nidos solo aparecen fuera de pueblos y regiones (`nests.only-wilderness`). Poner comederos y soltar jaulas ya respetaba la protección |
+
+Placeholders (`%dinoearth_<x>%`):
+
+| `<x>` | Qué devuelve |
+|---|---|
+| `dinos`, `limite` | Dinos domesticados que tiene y su máximo |
+| `especies`, `especies_total`, `sellos`, `sellos_total`, `rango` | Dinopedia |
+| `crias`, `domesticados`, `nidos`, `cazados`, `misiones`, `misiones_hoy` | Contadores (crías nacidas, domesticados en total, huevos de nido, dinos derrotados, misiones) |
+| `mejor_genes` | El mejor promedio de rasgos de sus dinos (%) |
+| `tiene_<especie>` | Cuántos tiene de esa especie (ej. `tiene_trex`) |
+| `montando` | La especie que está montando (vacío si ninguna) |
+| `cargados` | Dinos cargados en el server |
+| `puesto_<categoría>` | Su puesto en un top |
+| `top_<categoría>_<n>_nombre`, `top_<categoría>_<n>_valor` | El top: `top_dinos_1_nombre`, `top_sellos_3_valor`... |
+
+Categorías: `dinos`, `sellos`, `especies`, `crias`, `domesticados`, `nidos`, `cazados`, `misiones`, `genes`.
 
 ## Textos y menús
 
@@ -159,6 +191,7 @@ El zip es determinista: su hash solo cambia cuando cambia el contenido, así los
 | `generator/species_*.py` | **Los modelos y colores** de cada especie |
 | `generator/geometry.py` | Piezas comunes (cubos, huesos, huevo, materiales de las monturas) |
 | `generator/feeder.py` | Modelo del comedero (3 dietas × 4 niveles de comida) |
+| `generator/nest.py` | Modelo del nido salvaje (los huevos los pone el plugin encima) |
 | `generator/icons.py` | Íconos de la Dinopedia (cada color renderizado, silueta, libro) |
 | `generator/gui.py` | Menús dibujados de la Dinopedia: fondos, fotos grandes, fuentes y botones (`font_widths.json` = anchos de las letras de vanilla) |
 | `generator/gui_preview.py` | Dibuja los menús como en el juego para revisarlos sin entrar (ver CLAUDE.md) |

@@ -218,6 +218,7 @@
   "egg": {
     "item": "dinoearth:triceratops/egg/egg",
     "cracked": "dinoearth:triceratops/egg_cracked/egg",
-    "icon": "dinoearth:triceratops/egg_item"
+    "icon": "dinoearth:triceratops/egg_item",
+    "size": 1.3
   }
 }

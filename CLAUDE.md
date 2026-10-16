@@ -86,6 +86,22 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
   desde lo ultimo mandado (`same`), y cuenta lo mandado/ahorrado para `/dino stats`; view range por tamaño.
 - Limite de domesticados (`DinoManager.tamedLimit/canOwnMore`, cuenta con `DinoRegistry`): comida, regalo aceptado,
   jaula soltada y huevos (esperan listos). `/dino tame` de admin no tiene limite.
+- Genetica (0.14, `dino/Genes`): rasgos vida/velocidad/tamaño (multiplican stats en `updateStats`/`modelScale`/montura),
+  generacion, mutacion y padres. Mismas claves PDC en lobo, item de huevo, huevo puesto y jaula (`Genes.write/read/copy`).
+  La cria se decide al poner el huevo (`DinoListener.onBreed`: `Genes.childColor` + `Genes.child`); el item lleva
+  `egg_variant`. Dinos viejos sin genes: domesticados = neutros, salvajes = al azar. Ficha: item `ficha-genes` (slot 51).
+- Nidos (0.14, `nest/NestManager`): Interaction + displays (nido + 3 huevos escalados por `DinoRig.eggSize`). Cada
+  minuto una hembra adulta salvaje con huevo (sin cooldown) puede armar uno; la madre (`Dino.provoke`) ataca al que se
+  acerca o roba (las PREY huyen). Golpe = sacar huevo (genes de la madre + padre salvaje). Solo en naturaleza
+  (`integration/Wilderness`: Towny/WorldGuard por reflexion). Es la forma natural de conseguir T-Rex/Giga.
+- Nado (0.14, `Species.swims`, `Body.SWIMMER`): como el vuelo, en el agua `setGravity(false)` + `setAware(false)` +
+  `flyVel` (`swimAlone`, `rideSwim`, `steer`); la IA del lobo no corre, asi que la mordida (`bite`) y el contraataque
+  se hacen a mano. Nunca se ahogan (aire al maximo + se cancela DROWNING). El acuatico (mosasaurus) en tierra queda
+  varado (`beached`: busca agua con el pathfinder) y solo caza a jugadores que nadan. Montado: respiracion acuatica.
+- Integraciones (0.14, `integration/`): PlaceholderAPI (`DinoPlaceholders`, unica dependencia de compilacion: pom con
+  repo extendedclip, scope provided; se registra solo si el plugin esta), Vault (`Money`, por reflexion). Tops:
+  `stats/PlayerStats` (jugadores.yml; dinos y genes salen de `DinoRegistry`, que ahora guarda el puntaje de genes),
+  `/dino top`.
 - Resource pack: el plugin lo manda solo (`PackManager`, modo `url` o `host`). El zip es determinista y
   una copia va dentro del jar (`plugin/src/main/resources/pack/`).
 
@@ -93,9 +109,9 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 
 | Ruta | Qué |
 |---|---|
-| `generator/species_*.py` | Modelo, colores y montura de cada especie (13: raptor, triceratops, dilophosaurus, compsognathus, trex, pteranodon, parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus, dimorphodon) |
+| `generator/species_*.py` | Modelo, colores y montura de cada especie (15: raptor, triceratops, dilophosaurus, compsognathus, trex, pteranodon, parasaurolophus, gallimimus, stegosaurus, ankylosaurus, giganotosaurus, carnotaurus, dimorphodon, spinosaurus, mosasaurus) |
 | `generator/geometry.py` | Cube/Bone/Rig, huevo y materiales de montura (`SADDLE_COLORS`, cada especie los pisa con `saddle_colors`) |
-| `generator/feeder.py`, `generator/icons.py` | Modelo del comedero; iconos de la Dinopedia (los llama build.py) |
+| `generator/feeder.py`, `generator/nest.py`, `generator/icons.py` | Modelo del comedero y del nido; iconos de la Dinopedia (los llama build.py) |
 | `generator/gui.py`, `gui_preview.py`, `font_widths.py` | Menus dibujados de la Dinopedia (ver arriba) |
 | `generator/items.py` | Items propios: drops por especie, monturas como item, silbato, jaula. Dibuja sus iconos y escribe `plugin/src/main/resources/items.json` (el plugin lee todo de ahí) |
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
@@ -156,5 +172,10 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   `/dino reload`, menú de llamar con páginas (21 por página) y Volver/Cerrar; misiones diarias personales
   (`mission/MissionManager`: 3 por jugador, solo especies vistas en el server en `recent-days`, 1 cambio por día,
   premios en `missions.*`, PDC del jugador + `misiones.yml` con las especies vistas) en la Dinopedia y `/dino misiones`.
+- v0.14.0 **sin probar en el juego**: genetica (rasgos, color heredado, mutacion, padres y generacion en la ficha),
+  nidos salvajes con madre, spinosaurus (anfibio) y mosasaurus (acuatico) con nado y montura bajo el agua,
+  PlaceholderAPI + Vault + Towny/WG (nidos) + `/dino top`. Escrito en la nube: compila contra las stubs (scratchpad)
+  sin errores, pero el jar real hay que armarlo en la PC (`mvn package`, baja tambien placeholderapi 2.11.6 de
+  repo.extendedclip.com). Sonidos nuevos generados en Linux (los viejos se restauraron con git para no cambiar el hash).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
-  (Mosasaurus/Spinosaurus acuaticos, Brachiosaurus con varios jinetes); órdenes, herencia de color.
+  (Brachiosaurus con varios jinetes).

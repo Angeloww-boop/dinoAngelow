@@ -152,6 +152,24 @@
    "chars": [
     ""
    ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/spinosaurus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/mosasaurus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
   }
  ]
 }

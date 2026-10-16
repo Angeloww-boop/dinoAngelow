@@ -5,6 +5,7 @@ import com.dinoearth.text.Lang;
 import com.dinoearth.Keys;
 import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
+import com.dinoearth.dino.Genes;
 import com.dinoearth.feeder.Protection;
 import com.dinoearth.species.Species;
 import net.kyori.adventure.text.Component;
@@ -82,6 +83,7 @@ public final class CageManager {
         pdc.set(keys.health, PersistentDataType.DOUBLE, ratio);
         pdc.set(keys.combat, PersistentDataType.STRING, d.combat().name());
         if (d.name() != null) pdc.set(keys.name, PersistentDataType.STRING, GsonComponentSerializer.gson().serialize(d.name()));
+        d.genes().write(pdc, keys);
         full.setItemMeta(meta);
 
         Location at = wolf.getLocation().add(0, wolf.getHeight() / 2, 0);
@@ -125,7 +127,8 @@ public final class CageManager {
         at.setYaw(player.getYaw() + 180);
         Dino d = dinos.spawn(s, at, pdc.get(keys.variant, PersistentDataType.STRING),
                 "male".equals(pdc.get(keys.sex, PersistentDataType.STRING)),
-                pdc.getOrDefault(keys.growth, PersistentDataType.FLOAT, 1f), player);
+                pdc.getOrDefault(keys.growth, PersistentDataType.FLOAT, 1f), player,
+                java.util.Objects.requireNonNullElseGet(Genes.read(pdc, keys), Genes::neutral));
         if (d == null) return;
         if (pdc.getOrDefault(keys.saddled, PersistentDataType.BYTE, (byte) 0) == 1 && s.rideable && d.isAdult()) {
             d.setSaddled(true);

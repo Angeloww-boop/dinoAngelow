@@ -14,6 +14,8 @@ chat:
     - '&8| &#ff00d9/dino mis &8- &fLista de tus dinos con dónde están.'
     - '&8| &#ff00d9/dino llamar &8- &fLlamar a tus dinos lejanos.'
     - '&8| &#ff00d9/dino dar &8<&fjugador&8> &8- &fRegalar el dino que estás mirando.'
+    - '&8| &#ff00d9/dino top &8[&fcategoría&8] &8- &fLos mejores del server.'
+    - '&8| &#ff00d9/dino misiones &8- &fTus misiones del día.'
     - '&8| &#ff00d9/dino aceptar &8| &#ff00d9/dino rechazar &8- &fResponder un regalo.'
     - '&8| &#ff00d9/dino pack &8- &fVolver a pedir el pack de dinosaurios.'
   ayuda-admin:
@@ -22,6 +24,7 @@ chat:
     - '&8| &#ff00d9/dino egg &8<&fespecie&8> [&fcantidad&8] &8- &fTe da huevos.'
     - '&8| &#ff00d9/dino grow &8[&f%&8] &8- &fHace crecer a las crías cercanas.'
     - '&8| &#ff00d9/dino tame &8[&fjugador&8] &8- &fDomestica el dino que estás mirando.'
+    - '&8| &#ff00d9/dino nido &8- &fLa hembra salvaje que mirás arma un nido ya.'
     - '&8| &#ff00d9/dino item &8<&fid&8> [&fcantidad&8] [&fjugador&8] &8- &fMonturas, drops, silbato y jaula.'
     - '&8| &#ff00d9/dino remove &8[&fradio&8] [&fespecie&8] &8- &fBorra dinos cercanos.'
     - '&8| &#ff00d9/dino count &8- &fDinos cargados por especie.'
@@ -31,7 +34,7 @@ chat:
     - '&8| &#ff00d9/dino hambre &8[&f%&8] &8- &fPone el hambre de los dinos cercanos.'
     - '&8| &#ff00d9/dino pack &8[&freload&8|&finfo&8] &8- &fResource pack.'
     - '&8| &#ff00d9/dino reload &8- &fRecarga textos y menús.'
-    - '&8| &#ff00d9/dino mis &8| &#ff00d9/dino llamar &8| &#ff00d9/dino dar &8- &fLo mismo que los jugadores.'
+    - '&8| &#ff00d9/dino mis &8| &#ff00d9/dino llamar &8| &#ff00d9/dino dar &8| &#ff00d9/dino top &8- &fLo mismo que los jugadores.'
 
   # ---------------------------------------------------------------- comandos de admin
   huevo-especies: '&9&lDINOEARTH &8» &fEspecies con huevo&8: &#ff00d9%lista%&f.'
@@ -128,6 +131,20 @@ chat:
   pagina-completa: '&9&lDINOEARTH &8» &fCompletaste la página de &#ff00d9%especie%&f en la Dinopedia &8(&#ff00d9+%xp%&f de experiencia&8)&f.'
   rango: '&9&lDINOEARTH &8» &fNuevo rango de paleontólogo&8: &#ff00d9%rango%&f.'
 
+  # ---------------------------------------------------------------- genetica y nidos
+  mutacion: '&9&lDINOEARTH &8» &fTu cría de &#ff00d9%especie%&f salió &#ff00d9%color%&f por una mutación, es muy rara.'
+  nido-mira: '&9&lDINOEARTH &8» &fMirá a una hembra adulta salvaje y volvé a usar &#ff00d9/dino nido&f.'
+  nido-hecho: '&9&lDINOEARTH &8» &fLa &#ff00d9%especie%&f armó un nido.'
+  nido-no: '&9&lDINOEARTH &8» &fNo se pudo, tiene que ser una hembra adulta salvaje parada en el suelo, lejos de otro nido.'
+
+  # ---------------------------------------------------------------- tops y plata
+  top-titulo: '&9&lDINOEARTH &8» &fTop de &#ff00d9%categoria%&f.'
+  top-linea: '&8| &#ff00d9#%puesto% &f%player% &8» &#ff00d9%valor%&f.'
+  top-tu-puesto: '&9&lDINOEARTH &8» &fVos estás en el puesto &#ff00d9#%puesto%&f.'
+  top-vacio: '&9&lDINOEARTH &8» &fTodavía nadie tiene nada en &#ff00d9%categoria%&f.'
+  top-categorias: '&9&lDINOEARTH &8» &fCategorías&8: &#ff00d9%lista%&f.'
+  dinero: '&9&lDINOEARTH &8» &fGanaste &#ff00d9%dinero%&f.'
+
   # ---------------------------------------------------------------- misiones
   misiones-nuevas: '&9&lDINOEARTH &8» &fTenés misiones nuevas en la &#ff00d9Dinopedia&f.'
   mision-completa: '&9&lDINOEARTH &8» &fCompletaste la misión &#ff00d9%mision% &8(&#ff00d9+%xp%&f de experiencia&8)&f.'
@@ -179,6 +196,11 @@ actionbar:
   rastreo: '&8| %flecha% &#ff00d9%especie%&f a &#ff00d9%metros%&f metros.'
   rastreo-color-nuevo: '&8| %flecha% &#ff00d9%especie%&f a &#ff00d9%metros%&f metros &8- &fcolor nuevo.'
   rastreo-nada: '&8| &fNo hay rastros de &#ff00d9%especie%&f cerca.'
+  nido: '&8| &fNido de &#ff00d9%especie%&f con &#ff00d9%huevos%&f huevo(s), la madre no está cerca.'
+  nido-madre-cerca: '&8| &fNido de &#ff00d9%especie%&f con &#ff00d9%huevos%&f huevo(s), cuidado con la madre.'
+  nido-madre: '&8| &fLa &#ff00d9%especie%&f defiende su nido.'
+  nido-robado: '&8| &fSacaste un huevo de &#ff00d9%especie%&f, quedan &#ff00d9%huevos%&f.'
+  nido-robado-madre: '&8| &fSacaste un huevo de &#ff00d9%especie%&f y la madre te vio, corré.'
   huellas: '&8| %huella% &fHuellas &#ff00d9%tamano%&f de algo que no conocés %flecha%&f.'
 
 bossbar:

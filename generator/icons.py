@@ -10,7 +10,7 @@ from preview import dino, mat_t, render
 SIZE = 32   # en el menu se ven a 16 px x la escala de la interfaz: 32 alcanza y ocupa 1/4 que 64
 CANVAS = 300
 # pose y angulo de camara (yaw, pitch) de cada especie; el resto usa la de reposo
-POSE = {"pteranodon": ("vuelo", 120, 28), "dimorphodon": ("vuelo", 120, 28)}
+POSE = {"pteranodon": ("vuelo", 120, 28), "dimorphodon": ("vuelo", 120, 28), "mosasaurus": ("nadar", 125, 22)}
 SILHOUETTE = (46, 50, 58)
 
 

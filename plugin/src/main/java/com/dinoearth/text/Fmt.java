@@ -34,6 +34,21 @@ public final class Fmt {
         return l().plain("dietas." + d.name());
     }
 
+    /** Uno de los padres de un dino: "Luna (Rojizo)" o "Rojizo hembra"; sin datos, "salvaje". */
+    public static String parent(Species s, com.dinoearth.dino.Genes.Parent p) {
+        if (p == null) return l().plain("genes.desconocido");
+        String color = s.colorName(p.variant());
+        return p.name() != null ? l().plain("genes.padre-con-nombre", "nombre", p.name(), "color", color)
+                : l().plain("genes.padre-sin-nombre", "color", color, "sexo", sex(p.male()));
+    }
+
+    /** Calidad de los genes en una palabra (segun el promedio de los rasgos). */
+    public static String quality(float score) {
+        String k = score >= 1.15f ? "legendaria" : score >= 1.08f ? "excelente" : score >= 1.02f ? "buena"
+                : score >= 0.96f ? "normal" : "debil";
+        return l().plain("genes.calidad." + k);
+    }
+
     public static String food(Species.Diet d) {
         return l().plain("comida." + d.name());
     }

@@ -17,6 +17,10 @@ import com.dinoearth.registry.RecallManager;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.pack.PackManager;
 import com.dinoearth.species.Species;
+import com.dinoearth.integration.Money;
+import com.dinoearth.integration.Wilderness;
+import com.dinoearth.nest.NestManager;
+import com.dinoearth.stats.PlayerStats;
 import com.dinoearth.text.Fmt;
 import com.dinoearth.text.Lang;
 import net.kyori.adventure.text.Component;
@@ -56,6 +60,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private DinoRegistry registry;
     private RecallManager recall;
     private MissionManager missions;
+    private PlayerStats stats;
+    private NestManager nests;
 
     private static final int OFFER_TICKS = 60 * 20;
 
@@ -109,6 +115,10 @@ public final class DinoEarthPlugin extends JavaPlugin {
         cages = new CageManager(items, dinos, keys);
         registry = new DinoRegistry(this);
         dinos.setRegistry(registry);
+        stats = new PlayerStats(this, registry);
+        stats.setRefresher(dex::syncStats);
+        getServer().getPluginManager().registerEvents(stats, this);
+        getServer().getScheduler().runTaskTimer(this, stats::save, 1200L, 1200L);
         missions = new MissionManager(this, dinos, registry, settings);
         dex.setMissions(missions);
         getServer().getPluginManager().registerEvents(missions, this);
@@ -117,7 +127,9 @@ public final class DinoEarthPlugin extends JavaPlugin {
         getServer().getScheduler().runTaskTimer(this, registry::save, 600L, 600L);
         getServer().getPluginManager().registerEvents(new OrderMenu(dinos, items, keys, recall), this);
         getServer().getPluginManager().registerEvents(new ItemListener(items, cages, dinos), this);
-        getServer().getPluginManager().registerEvents(new DinoListener(this, dinos, eggs, keys, items, cages), this);
+        nests = new NestManager(this, keys, settings, dinos, eggs);
+        getServer().getPluginManager().registerEvents(nests, this);
+        getServer().getPluginManager().registerEvents(new DinoListener(this, dinos, eggs, keys, items, cages, nests), this);
         getServer().getScheduler().runTaskTimer(this, () -> {
             dinos.tick();
             eggs.tick();
@@ -128,6 +140,18 @@ public final class DinoEarthPlugin extends JavaPlugin {
             dinos.attachLoaded();
             eggs.attachLoaded();
             feeders.attachLoaded();
+            nests.attachLoaded();
+            // integraciones: despues de que arrancaron todos los plugins (la economia de Vault se registra tarde)
+            Money.setup(getLogger());
+            Wilderness.setup(getLogger());
+            if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                try {
+                    com.dinoearth.integration.DinoPlaceholders.register(this, dinos, dex, missions, stats);
+                } catch (LinkageError e) {
+                    getLogger().warning("No se pudo conectar con PlaceholderAPI: " + e);
+                }
+            }
+            getServer().getOnlinePlayers().forEach(dex::syncStats);
         });
         pack = new PackManager(this);
         getServer().getPluginManager().registerEvents(pack, this);
@@ -139,6 +163,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public void onDisable() {
         if (dinos != null) dinos.shutdown();
         if (eggs != null) eggs.shutdown();
+        if (nests != null) nests.shutdown();
+        if (stats != null) stats.save();
         if (feeders != null) feeders.shutdown();
         if (pack != null) pack.stop();
         if (recall != null) recall.shutdown();
@@ -182,6 +208,9 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 if (!(sender instanceof Player player)) return chat(sender, "solo-jugadores");
                 dex.openMissions(player);
                 return true;
+            }
+            case "top", "tops" -> {
+                return top(sender, args);
             }
             default -> {
             }
@@ -252,6 +281,12 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 chat(sender, "hambre-puesta", "porcentaje", Math.round(value * 100), "cantidad", n);
             }
             case "tame", "domesticar" -> tame(sender, args);
+            case "nido", "nest" -> {
+                if (!(sender instanceof Player player)) return chat(sender, "solo-jugadores");
+                Dino d = lookedAt(player);
+                if (d == null) return chat(sender, "nido-mira");
+                chat(sender, nests.forceNest(d) ? "nido-hecho" : "nido-no", "especie", d.species().name);
+            }
             case "stats", "estadisticas" -> stats(sender);
             case "reload", "recargar" -> {
                 lang.reload();
@@ -370,6 +405,31 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 .hoverEvent(HoverEvent.showText(lang.chatMsg("boton-rechazar-hover")));
         lang.chat(target, "dar-oferta", "aceptar", yes, "rechazar", no, "player", player.getName(),
                 "dino", OrderMenu.label(d), "detalle", detail);
+        return true;
+    }
+
+    /** /dino top [categoria]: los mejores del server (los mismos datos que los placeholders de PlaceholderAPI). */
+    private boolean top(CommandSender sender, String[] args) {
+        String category = args.length > 1 ? args[1].toLowerCase() : "dinos";
+        if (!PlayerStats.CATEGORIES.contains(category)) {
+            return chat(sender, "top-categorias", "lista", String.join(", ", PlayerStats.CATEGORIES));
+        }
+        int size = Math.max(1, getConfig().getInt("tops.top-size", 10));
+        List<PlayerStats.Row> rows = stats.top(category);
+        String title = lang.plain("tops." + category);
+        if (rows.isEmpty()) return chat(sender, "top-vacio", "categoria", title);
+        chat(sender, "top-titulo", "categoria", title);
+        for (int i = 0; i < Math.min(size, rows.size()); i++) {
+            PlayerStats.Row r = rows.get(i);
+            double v = r.value();
+            String value = v == Math.rint(v) ? String.valueOf((long) v) : String.format("%.1f", v);
+            if (category.equals("genes")) value = lang.plain("tops.genes-valor", "valor", value);
+            chat(sender, "top-linea", "puesto", i + 1, "player", r.name(), "valor", value);
+        }
+        if (sender instanceof Player p) {
+            int pos = stats.position(p.getUniqueId(), category);
+            if (pos > size) chat(sender, "top-tu-puesto", "puesto", pos);
+        }
         return true;
     }
 
@@ -545,9 +605,9 @@ public final class DinoEarthPlugin extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
-            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "item", "mis", "llamar", "misiones", "dar", "aceptar",
-                    "rechazar", "remove", "count", "stats", "comedero", "dinopedia", "hambre", "pack", "reload")
-                    : List.of("mis", "llamar", "misiones", "dar", "aceptar", "rechazar", "pack"), args[0]);
+            return filter(admin ? List.of("spawn", "egg", "grow", "tame", "nido", "item", "mis", "llamar", "misiones", "top",
+                    "dar", "aceptar", "rechazar", "remove", "count", "stats", "comedero", "dinopedia", "hambre", "pack", "reload")
+                    : List.of("mis", "llamar", "misiones", "top", "dar", "aceptar", "rechazar", "pack"), args[0]);
         }
         String sub = args[0].toLowerCase();
         if (sub.equals("llamar") && args.length <= 3 && sender instanceof Player p) {
@@ -558,6 +618,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
             return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[1]);
         }
         if (args.length == 2 && sub.equals("pack") && admin) return filter(List.of("reload", "info"), args[1]);
+        if (args.length == 2 && (sub.equals("top") || sub.equals("tops"))) return filter(PlayerStats.CATEGORIES, args[1]);
         if (!admin) return List.of();
         if (sub.equals("item") || sub.equals("items")) {
             if (args.length == 2) return filter(items.ids(), args[1]);

@@ -5,6 +5,7 @@ import com.dinoearth.text.Lang;
 import com.dinoearth.Keys;
 import com.dinoearth.dino.Dino;
 import com.dinoearth.dino.DinoManager;
+import com.dinoearth.dino.Genes;
 import com.dinoearth.model.DinoModel;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.species.Species;
@@ -91,12 +92,31 @@ public final class EggManager {
 
     // ------------------------------------------------------------ item
     public ItemStack createItem(Species species, int amount) {
+        return createItem(species, amount, null, null);
+    }
+
+    /**
+     * Huevo con la cria ya decidida (puesto por una hembra domesticada o sacado de un nido): lleva el color y los
+     * genes, que se ven en la descripcion (los padres, la generacion). Sin genes es un huevo comun (de admin).
+     */
+    public ItemStack createItem(Species species, int amount, Genes genes, String variant) {
         ItemStack item = new ItemStack(Material.TURTLE_EGG, amount);
         ItemMeta meta = item.getItemMeta();
         meta.setItemModel(species.rig.eggIcon());
-        Lang.get().itemTexts(meta, "huevo", "especie", species.name);
-        meta.setMaxStackSize(16);
-        meta.getPersistentDataContainer().set(keys.eggItem, PersistentDataType.STRING, species.id);
+        if (genes == null) {
+            Lang.get().itemTexts(meta, "huevo", "especie", species.name);
+        } else {
+            Lang.get().itemTexts(meta, genes.father == null ? "huevo-nido" : "huevo-cria", "especie", species.name,
+                    "madre", Fmt.parent(species, genes.mother), "padre", Fmt.parent(species, genes.father),
+                    "generacion", genes.generation);
+        }
+        meta.setMaxStackSize(genes == null ? 16 : 1);
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.set(keys.eggItem, PersistentDataType.STRING, species.id);
+        if (genes != null) {
+            genes.write(pdc, keys);
+            if (variant != null) pdc.set(keys.eggVariant, PersistentDataType.STRING, variant);
+        }
         item.setItemMeta(meta);
         return item;
     }
@@ -124,6 +144,11 @@ public final class EggManager {
 
     /** Pone un huevo con la base en loc (centro del bloque). */
     public void place(Species species, Location loc, Player owner) {
+        place(species, loc, owner, null);
+    }
+
+    /** @param from el item del huevo (sus genes y color pasan al huevo puesto), o null */
+    public void place(Species species, Location loc, Player owner, ItemStack from) {
         Location at = loc.clone();
         at.setYaw(ThreadLocalRandom.current().nextFloat() * 360f);
         at.setPitch(0);
@@ -136,6 +161,12 @@ public final class EggManager {
             pdc.set(keys.eggSpecies, PersistentDataType.STRING, species.id);
             pdc.set(keys.eggProgress, PersistentDataType.INTEGER, 0);
             if (owner != null) pdc.set(keys.eggOwner, PersistentDataType.STRING, owner.getUniqueId().toString());
+            if (from != null && from.hasItemMeta()) {
+                PersistentDataContainer item = from.getItemMeta().getPersistentDataContainer();
+                Genes.copy(item, pdc, keys);
+                String v = item.get(keys.eggVariant, PersistentDataType.STRING);
+                if (v != null) pdc.set(keys.eggVariant, PersistentDataType.STRING, v);
+            }
         });
         attach(box);
         at.getWorld().playSound(at, "minecraft:entity.turtle.lay_egg", SoundCategory.BLOCKS, 1f, 0.9f);
@@ -161,7 +192,9 @@ public final class EggManager {
         Egg egg = eggs.remove(box.getUniqueId());
         if (egg != null) egg.model.remove();
         Location at = box.getLocation();
-        at.getWorld().dropItemNaturally(at.clone().add(0, 0.3, 0), createItem(speciesOf(box), 1));
+        PersistentDataContainer pdc = box.getPersistentDataContainer();
+        at.getWorld().dropItemNaturally(at.clone().add(0, 0.3, 0), createItem(speciesOf(box), 1, Genes.read(pdc, keys),
+                pdc.get(keys.eggVariant, PersistentDataType.STRING)));
         at.getWorld().playSound(at, "minecraft:entity.item.pickup", SoundCategory.BLOCKS, 0.8f, 0.8f);
         box.remove();
     }
@@ -245,7 +278,10 @@ public final class EggManager {
 
     private void hatch(Egg egg) {
         Location at = egg.box.getLocation();
-        String ownerId = egg.box.getPersistentDataContainer().get(keys.eggOwner, PersistentDataType.STRING);
+        PersistentDataContainer data = egg.box.getPersistentDataContainer();
+        String ownerId = data.get(keys.eggOwner, PersistentDataType.STRING);
+        Genes genes = Genes.read(data, keys);
+        String variant = data.get(keys.eggVariant, PersistentDataType.STRING);
         egg.model.remove();
         egg.box.remove();
 
@@ -256,11 +292,16 @@ public final class EggManager {
         world.spawnParticle(Particle.HAPPY_VILLAGER, at.clone().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3);
 
         var owner = ownerId != null ? Bukkit.getOfflinePlayer(UUID.fromString(ownerId)) : null;
-        Dino baby = dinos.spawn(egg.species, at, null, null, 0f, owner);
+        Dino baby = dinos.spawn(egg.species, at, variant, null, 0f, owner, genes);
         Player online = owner != null ? owner.getPlayer() : null;
         if (baby != null && online != null) {
             dinos.dex().addTamed(online, egg.species, baby.variant());
             dinos.dex().onHatch(online, egg.species);
+            com.dinoearth.stats.PlayerStats.get().add(online, "crias", 1);
+            if (genes != null && genes.mutant) {
+                Lang.get().chat(online, "mutacion", "especie", egg.species.name, "color",
+                        egg.species.colorName(baby.variant()));
+            }
             var missions = com.dinoearth.mission.MissionManager.get();
             if (missions != null) missions.onHatch(online, egg.species);
         }

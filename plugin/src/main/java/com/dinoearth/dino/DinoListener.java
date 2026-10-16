@@ -66,11 +66,14 @@ public final class DinoListener implements Listener {
     private final Keys keys;
     private final DinoItems items;
     private final CageManager cages;
+    private final com.dinoearth.nest.NestManager nests;
     /** Ultimo tick en que manejamos un click con la mano principal (para ignorar el de la mano secundaria). */
     private final Map<UUID, Integer> handled = new HashMap<>();
 
-    public DinoListener(Plugin plugin, DinoManager dinos, EggManager eggs, Keys keys, DinoItems items, CageManager cages) {
+    public DinoListener(Plugin plugin, DinoManager dinos, EggManager eggs, Keys keys, DinoItems items, CageManager cages,
+                        com.dinoearth.nest.NestManager nests) {
         this.plugin = plugin;
+        this.nests = nests;
         this.items = items;
         this.cages = cages;
         this.dinos = dinos;
@@ -92,6 +95,8 @@ public final class DinoListener implements Listener {
             Bukkit.getScheduler().runTask(plugin, () -> eggs.attach((Interaction) e));
         } else if (feeders.isFeeder(e)) {
             Bukkit.getScheduler().runTask(plugin, () -> feeders.attach((Interaction) e));
+        } else if (nests.isNest(e)) {
+            Bukkit.getScheduler().runTask(plugin, () -> nests.attach((Interaction) e));
         }
     }
 
@@ -101,6 +106,7 @@ public final class DinoListener implements Listener {
         if (dinos.isDino(e)) dinos.detach(e);
         else if (eggs.isEgg(e)) eggs.detach(e);
         else if (feeders.isFeeder(e)) feeders.detach(e);
+        else if (nests.isNest(e)) nests.detach(e);
     }
 
     @EventHandler
@@ -117,6 +123,14 @@ public final class DinoListener implements Listener {
     public void onDamage(EntityDamageEvent event) {
         Dino d = dinos.get(event.getEntity());
         if (d != null) d.onHurt(event);
+    }
+
+    /** Los que nadan no se ahogan (el lobo de base si se ahogaria). */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onDrown(EntityDamageEvent event) {
+        if (event.getCause() != EntityDamageEvent.DamageCause.DROWNING) return;
+        Species s = dinos.speciesOf(event.getEntity());
+        if (s != null && s.swims) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -172,6 +186,7 @@ public final class DinoListener implements Listener {
         Player killer = wolf.getKiller();
         if (killer != null && !killer.getUniqueId().equals(wolf.getOwnerUniqueId())) {
             dex.onKill(killer, species);
+            com.dinoearth.stats.PlayerStats.get().add(killer, "cazados", 1);
             var missions = com.dinoearth.mission.MissionManager.get();
             if (missions != null) missions.onKill(killer, species);
         }
@@ -188,6 +203,11 @@ public final class DinoListener implements Listener {
                 Interaction box = (Interaction) event.getRightClicked();
                 Lang.get().action(player, "huevo", "especie", eggs.speciesName(box), "porcentaje", eggs.percent(box));
             }
+            return;
+        }
+        if (nests.isNest(event.getRightClicked())) {
+            event.setCancelled(true);
+            if (event.getHand() == EquipmentSlot.HAND) nests.inspect(player, (Interaction) event.getRightClicked());
             return;
         }
         if (feeders.isFeeder(event.getRightClicked())) {
@@ -252,6 +272,7 @@ public final class DinoListener implements Listener {
                 d.onTamed();
                 if (dinos.registry() != null) dinos.registry().update(d);
                 dex.addTamed(player, species, d.variant());
+                com.dinoearth.stats.PlayerStats.get().add(player, "domesticados", 1);
                 var missions = com.dinoearth.mission.MissionManager.get();
                 if (missions != null) missions.onTame(player, species);
             } else {
@@ -425,13 +446,18 @@ public final class DinoListener implements Listener {
         Dino b = dinos.get(event.getFather());
         if (a == null || b == null || ma != pa || a.isMale() == b.isMale() || !ma.rig.hasEgg()) return;
         Dino female = a.isMale() ? b : a;
+        Dino male = a.isMale() ? a : b;
+        // la cria se decide ahora: color de uno de los padres (o mutado) y rasgos mezclados
+        String[] color = Genes.childColor(ma, female.variant(), male.variant(), dinos.settings());
+        Genes genes = Genes.child(female.genes(), male.genes(), female.asParent(), male.asParent(),
+                "1".equals(color[1]), dinos.settings());
         Wolf w = female.wolf();
         w.getWorld().spawnParticle(Particle.HEART, w.getLocation().add(0, w.getHeight(), 0), 6, 0.6, 0.3, 0.6);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (!w.isValid()) return;
             Location at = w.getLocation();
             w.getWorld().playSound(at, "minecraft:entity.turtle.lay_egg", SoundCategory.NEUTRAL, 1f, 0.8f);
-            w.getWorld().dropItemNaturally(at.add(0, 0.4, 0), eggs.createItem(ma, 1));
+            w.getWorld().dropItemNaturally(at.add(0, 0.4, 0), eggs.createItem(ma, 1, genes, color[0]));
         }, 60L);
     }
 
@@ -448,7 +474,7 @@ public final class DinoListener implements Listener {
         if (!target.isPassable() || target.isLiquid() || !below.getType().isSolid()) return;
         Location at = target.getLocation().add(0.5, 0, 0.5);
         if (!at.getNearbyEntitiesByType(Interaction.class, 0.45).stream().filter(eggs::isEgg).toList().isEmpty()) return;
-        eggs.place(species, at, event.getPlayer());
+        eggs.place(species, at, event.getPlayer(), item);
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE) item.subtract();
         event.getPlayer().swingHand(event.getHand() != null ? event.getHand() : EquipmentSlot.HAND);
     }
@@ -463,6 +489,9 @@ public final class DinoListener implements Listener {
         if (eggs.isEgg(event.getAttacked())) {
             event.setCancelled(true);
             if (event.getPlayer().getGameMode() != GameMode.ADVENTURE) eggs.breakEgg((Interaction) event.getAttacked());
+        } else if (nests.isNest(event.getAttacked())) {
+            event.setCancelled(true);
+            nests.take(event.getPlayer(), (Interaction) event.getAttacked());
         } else if (feeders.isFeeder(event.getAttacked())) {
             event.setCancelled(true);
             if (event.getPlayer().getGameMode() != GameMode.ADVENTURE) {
@@ -504,7 +533,7 @@ public final class DinoListener implements Listener {
         if (!target.isPassable() || target.isLiquid() || !below.getType().isSolid()) return;
         Location at = target.getLocation().add(0.5, 0, 0.5);
         boolean taken = at.getNearbyEntitiesByType(Interaction.class, 0.6).stream()
-                .anyMatch(i -> feeders.isFeeder(i) || eggs.isEgg(i));
+                .anyMatch(i -> feeders.isFeeder(i) || eggs.isEgg(i) || nests.isNest(i));
         if (taken) return;
         if (!Protection.canBuild(player, target)) {
             Lang.get().action(player, "comedero-aca");

@@ -280,6 +280,7 @@
   "egg": {
     "item": "dinoearth:dimorphodon/egg/egg",
     "cracked": "dinoearth:dimorphodon/egg_cracked/egg",
-    "icon": "dinoearth:dimorphodon/egg_item"
+    "icon": "dinoearth:dimorphodon/egg_item",
+    "size": 0.6
   }
 }

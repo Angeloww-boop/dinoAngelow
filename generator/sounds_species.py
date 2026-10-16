@@ -571,3 +571,112 @@ SPECIES_SOUNDS_3 = {
     ],
 }
 
+
+
+# ---------------------------------------------------------------- spinosaurus y mosasaurus (0.14)
+def splash(dur=0.5, gain=1.0):
+    """Chapoteo: ruido filtrado con ataque seco y burbujitas."""
+    n = int(dur * SR)
+    body = norm(spectral(noise(n), band(250, 5000))) * curve([(0, 0), (0.03, 1), (0.3, 0.35), (1, 0)], n)
+    bubbles = place(dur, [(rng.uniform(0.05, dur * 0.8), click(0.012, 500, 2500), rng.uniform(0.3, 0.7))
+                          for _ in range(7)])
+    return (norm(body) + 0.5 * norm(bubbles)[:n]) * gain
+
+
+def spino_ambient():
+    a = rex_voice(1.2, [(0, 70), (0.4, 92), (1, 64)], [(0, 0), (0.2, 1), (0.75, 0.8), (1, 0)], rough=0.55)
+    b = seq([rex_voice(0.35, [(0, 84), (1, 74)], [(0, 0), (0.25, 1), (1, 0)], rough=0.6),
+             rex_voice(0.55, [(0, 90), (0.5, 104), (1, 70)], [(0, 0), (0.2, 1), (1, 0)], rough=0.6)], [0.12])
+    return [a, b]
+
+
+def spino_roar():
+    body = rex_voice(2.0, [(0, 74), (0.2, 170), (0.6, 150), (1, 70)], [(0, 0), (0.08, 1), (0.7, 0.9), (1, 0)],
+                     rough=1.0, drive=3.0, breath=0.5)
+    hiss = voice(2.0, [(0, 300), (0.2, 520), (1, 260)], [(0, 0), (0.12, 0.7), (0.6, 0.6), (1, 0)], harmonics=24,
+                 tilt=0.8, sub=0.3, rough=1.0, rough_hz=36, vib=(5, 0.05), peaks=((900, 1.0, 400), (2200, 0.6, 600)),
+                 breath=0.7, drive=2.6)
+    return [norm(body) + 0.4 * norm(hiss)]
+
+
+def spino_hurt():
+    return [rex_voice(0.6, [(0, 140), (0.3, 190), (1, 100)], [(0, 0), (0.1, 1), (1, 0)], rough=0.9, drive=3.0)
+            for _ in range(2)]
+
+
+def spino_death():
+    return [rex_voice(2.6, [(0, 150), (0.15, 170), (0.7, 70), (1, 40)], [(0, 0), (0.06, 1), (0.6, 0.7), (1, 0)],
+                      rough=1.0, breath=0.55)]
+
+
+def mosa_voice(dur, f0, env, rough=0.7):
+    """Bramido de ballena con garganta de cocodrilo: muy grave y lleno de aire."""
+    return voice(dur, f0, env, harmonics=50, tilt=0.8, sub=1.0, rough=rough, rough_hz=14, vib=(1.8, 0.03),
+                 jitter=0.02, peaks=((140, 1.0, 100), (420, 0.6, 200), (1000, 0.2, 400)), breath=0.45,
+                 breath_band=(150, 1500), drive=2.4)
+
+
+def mosa_ambient():
+    a = mosa_voice(1.8, [(0, 40), (0.5, 56), (1, 36)], [(0, 0), (0.25, 1), (0.8, 0.7), (1, 0)])
+    b = place(1.6, [(0, splash(0.5, 0.6), 0.7), (0.35, mosa_voice(1.1, [(0, 46), (1, 38)], [(0, 0), (0.3, 1), (1, 0)]), 1.0)])
+    return [a, b]
+
+
+def mosa_roar():
+    body = mosa_voice(2.4, [(0, 44), (0.2, 96), (0.6, 84), (1, 40)], [(0, 0), (0.08, 1), (0.7, 0.9), (1, 0)], rough=1.0)
+    return [place(2.6, [(0, body, 1.0), (0.05, splash(0.6, 0.8), 0.6)])]
+
+
+def mosa_hurt():
+    return [mosa_voice(0.7, [(0, 90), (0.3, 120), (1, 60)], [(0, 0), (0.1, 1), (1, 0)], rough=0.9) for _ in range(2)]
+
+
+def mosa_death():
+    return [place(3.2, [(0, mosa_voice(3.0, [(0, 100), (0.15, 110), (0.7, 48), (1, 26)],
+                                       [(0, 0), (0.06, 1), (0.6, 0.7), (1, 0)], rough=1.0), 1.0),
+                        (2.2, splash(0.8, 0.7), 0.6)])]
+
+
+def mosa_attack():
+    out = []
+    for f in (55, 48):
+        chomp = place(0.3, [(0, thump(0.3, (f * 2, f), 1.0), 1.0), (0.02, click(0.02, 300, 4000), 0.8)])
+        out.append(place(0.8, [(0, splash(0.4, 0.8), 0.6), (0.3, chomp, 1.0)]))
+    return out
+
+
+def mosa_step():
+    """En tierra se arrastra: golpe sordo y chapoteo."""
+    return [place(0.5, [(0, thump(0.35, (44, 24), 0.6), 1.0), (0.02, splash(0.35, 0.4), 0.4)]) for _ in range(2)]
+
+
+def mosa_baby_ambient():
+    return [voice(0.5, [(0, a), (0.4, a * 1.25), (1, a * 0.8)], [(0, 0), (0.2, 1), (1, 0)], harmonics=20, tilt=1.0,
+                  sub=0.4, rough=0.4, rough_hz=30, vib=(6, 0.06), peaks=((600, 1.0, 300), (1500, 0.4, 500)),
+                  breath=0.4, drive=2.0) for a in (260, 300)]
+
+
+SPECIES_SOUNDS_4 = {
+    "spinosaurus": [
+        ("ambient", spino_ambient, "Spinosaurus gruñe", "Spinosaurus growls"),
+        ("roar", spino_roar, "Spinosaurus ruge", "Spinosaurus roars"),
+        ("hurt", spino_hurt, "Spinosaurus herido", "Spinosaurus hurts"),
+        ("death", spino_death, "Spinosaurus muere", "Spinosaurus dies"),
+        ("attack", rex_attack, "Spinosaurus muerde", "Spinosaurus bites"),
+        ("step", rex_step, "Pisadas pesadas", "Heavy footsteps"),
+        ("swim", lambda: [splash(0.5, 0.8), splash(0.4, 0.7)], "Chapoteo", "Splashing"),
+        ("baby_ambient", rex_baby_ambient, "Cría de spinosaurus chilla", "Baby spinosaurus squeaks"),
+        ("baby_hurt", rex_baby_hurt, "Cría de spinosaurus herida", "Baby spinosaurus hurts"),
+    ],
+    "mosasaurus": [
+        ("ambient", mosa_ambient, "Mosasaurus brama", "Mosasaurus rumbles"),
+        ("roar", mosa_roar, "Mosasaurus ruge", "Mosasaurus roars"),
+        ("hurt", mosa_hurt, "Mosasaurus herido", "Mosasaurus hurts"),
+        ("death", mosa_death, "Mosasaurus muere", "Mosasaurus dies"),
+        ("attack", mosa_attack, "Mosasaurus muerde", "Mosasaurus bites"),
+        ("step", mosa_step, "Mosasaurus se arrastra", "Mosasaurus drags itself"),
+        ("swim", lambda: [splash(0.6, 0.9), splash(0.5, 0.8)], "Chapoteo", "Splashing"),
+        ("baby_ambient", mosa_baby_ambient, "Cría de mosasaurus llama", "Baby mosasaurus calls"),
+        ("baby_hurt", rex_baby_hurt, "Cría de mosasaurus herida", "Baby mosasaurus hurts"),
+    ],
+}

@@ -273,6 +273,54 @@
       "model": "dinoearth:items/membrana_dimorphodon"
     },
     {
+      "id": "cuero_spinosaurus",
+      "kind": "drop",
+      "species": "spinosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_spinosaurus"
+    },
+    {
+      "id": "espina_spinosaurus",
+      "kind": "drop",
+      "species": "spinosaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/espina_spinosaurus"
+    },
+    {
+      "id": "montura_spinosaurus",
+      "kind": "saddle",
+      "species": "spinosaurus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_spinosaurus"
+    },
+    {
+      "id": "cuero_mosasaurus",
+      "kind": "drop",
+      "species": "mosasaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/cuero_mosasaurus"
+    },
+    {
+      "id": "diente_mosasaurus",
+      "kind": "drop",
+      "species": "mosasaurus",
+      "material": "PAPER",
+      "max_stack": 64,
+      "model": "dinoearth:items/diente_mosasaurus"
+    },
+    {
+      "id": "montura_mosasaurus",
+      "kind": "saddle",
+      "species": "mosasaurus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_mosasaurus"
+    },
+    {
       "id": "silbato",
       "kind": "whistle",
       "material": "STICK",
@@ -456,6 +504,34 @@
         "item": "membrana_dimorphodon",
         "min": 1,
         "max": 1,
+        "chance": 0.8
+      }
+    ],
+    "spinosaurus": [
+      {
+        "item": "cuero_spinosaurus",
+        "min": 2,
+        "max": 4,
+        "chance": 1.0
+      },
+      {
+        "item": "espina_spinosaurus",
+        "min": 1,
+        "max": 2,
+        "chance": 0.5
+      }
+    ],
+    "mosasaurus": [
+      {
+        "item": "cuero_mosasaurus",
+        "min": 3,
+        "max": 5,
+        "chance": 1.0
+      },
+      {
+        "item": "diente_mosasaurus",
+        "min": 1,
+        "max": 3,
         "chance": 0.8
       }
     ]

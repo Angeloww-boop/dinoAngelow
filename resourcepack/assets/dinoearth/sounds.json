@@ -712,5 +712,129 @@
     "sounds": [
       "dinoearth:dimorphodon/baby_hurt1"
     ]
+  },
+  "spinosaurus.ambient": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.ambient",
+    "sounds": [
+      "dinoearth:spinosaurus/ambient1",
+      "dinoearth:spinosaurus/ambient2"
+    ]
+  },
+  "spinosaurus.roar": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.roar",
+    "sounds": [
+      "dinoearth:spinosaurus/roar1"
+    ]
+  },
+  "spinosaurus.hurt": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.hurt",
+    "sounds": [
+      "dinoearth:spinosaurus/hurt1",
+      "dinoearth:spinosaurus/hurt2"
+    ]
+  },
+  "spinosaurus.death": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.death",
+    "sounds": [
+      "dinoearth:spinosaurus/death1"
+    ]
+  },
+  "spinosaurus.attack": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.attack",
+    "sounds": [
+      "dinoearth:spinosaurus/attack1",
+      "dinoearth:spinosaurus/attack2"
+    ]
+  },
+  "spinosaurus.step": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.step",
+    "sounds": [
+      "dinoearth:spinosaurus/step1",
+      "dinoearth:spinosaurus/step2",
+      "dinoearth:spinosaurus/step3"
+    ]
+  },
+  "spinosaurus.swim": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.swim",
+    "sounds": [
+      "dinoearth:spinosaurus/swim1",
+      "dinoearth:spinosaurus/swim2"
+    ]
+  },
+  "spinosaurus.baby_ambient": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.baby_ambient",
+    "sounds": [
+      "dinoearth:spinosaurus/baby_ambient1",
+      "dinoearth:spinosaurus/baby_ambient2",
+      "dinoearth:spinosaurus/baby_ambient3"
+    ]
+  },
+  "spinosaurus.baby_hurt": {
+    "subtitle": "subtitles.dinoearth.spinosaurus.baby_hurt",
+    "sounds": [
+      "dinoearth:spinosaurus/baby_hurt1",
+      "dinoearth:spinosaurus/baby_hurt2"
+    ]
+  },
+  "mosasaurus.ambient": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.ambient",
+    "sounds": [
+      "dinoearth:mosasaurus/ambient1",
+      "dinoearth:mosasaurus/ambient2"
+    ]
+  },
+  "mosasaurus.roar": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.roar",
+    "sounds": [
+      "dinoearth:mosasaurus/roar1"
+    ]
+  },
+  "mosasaurus.hurt": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.hurt",
+    "sounds": [
+      "dinoearth:mosasaurus/hurt1",
+      "dinoearth:mosasaurus/hurt2"
+    ]
+  },
+  "mosasaurus.death": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.death",
+    "sounds": [
+      "dinoearth:mosasaurus/death1"
+    ]
+  },
+  "mosasaurus.attack": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.attack",
+    "sounds": [
+      "dinoearth:mosasaurus/attack1",
+      "dinoearth:mosasaurus/attack2"
+    ]
+  },
+  "mosasaurus.step": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.step",
+    "sounds": [
+      "dinoearth:mosasaurus/step1",
+      "dinoearth:mosasaurus/step2"
+    ]
+  },
+  "mosasaurus.swim": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.swim",
+    "sounds": [
+      "dinoearth:mosasaurus/swim1",
+      "dinoearth:mosasaurus/swim2"
+    ]
+  },
+  "mosasaurus.baby_ambient": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.baby_ambient",
+    "sounds": [
+      "dinoearth:mosasaurus/baby_ambient1",
+      "dinoearth:mosasaurus/baby_ambient2"
+    ]
+  },
+  "mosasaurus.baby_hurt": {
+    "subtitle": "subtitles.dinoearth.mosasaurus.baby_hurt",
+    "sounds": [
+      "dinoearth:mosasaurus/baby_hurt1",
+      "dinoearth:mosasaurus/baby_hurt2"
+    ]
   }
 }

@@ -47,6 +47,7 @@ public final class DinoRig {
     private final NamespacedKey eggModel;
     private final NamespacedKey eggCracked;
     private final NamespacedKey eggIcon;
+    private final float eggSize;
 
     private DinoRig(JsonObject root) {
         scale = root.has("scale") ? root.get("scale").getAsFloat() : 1f;
@@ -67,6 +68,7 @@ public final class DinoRig {
         eggModel = egg != null ? NamespacedKey.fromString(egg.get("item").getAsString()) : null;
         eggCracked = egg != null ? NamespacedKey.fromString(egg.get("cracked").getAsString()) : null;
         eggIcon = egg != null ? NamespacedKey.fromString(egg.get("icon").getAsString()) : null;
+        eggSize = egg != null && egg.has("size") ? egg.get("size").getAsFloat() : 1f;
     }
 
     private static Form form(String id, JsonObject o, JsonObject extra) {
@@ -143,6 +145,11 @@ public final class DinoRig {
 
     public NamespacedKey eggIcon() {
         return eggIcon;
+    }
+
+    /** Tamaño del huevo comparado con el de un raptor (los nidos lo achican para que entren los tres). */
+    public float eggSize() {
+        return eggSize;
     }
 
     public Map<String, Variant> variants() {

@@ -200,6 +200,7 @@
   "egg": {
     "item": "dinoearth:trex/egg/egg",
     "cracked": "dinoearth:trex/egg_cracked/egg",
-    "icon": "dinoearth:trex/egg_item"
+    "icon": "dinoearth:trex/egg_item",
+    "size": 1.5
   }
 }

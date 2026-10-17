@@ -115,6 +115,7 @@ public final class MissionManager implements Listener {
     private final DinoManager dinos;
     private final DinoRegistry registry;
     private final NamespacedKey key;
+    private final NamespacedKey seenKey;      // dinos ya avistados hoy: sobrevive a salir y entrar (o pasar por el lobby)
     private final Map<UUID, State> states = new HashMap<>();
     private final Map<String, Long> recent = new HashMap<>();   // especie -> ultima vez que alguien la vio
     private final File dataFile;
@@ -136,6 +137,7 @@ public final class MissionManager implements Listener {
         this.dinos = dinos;
         this.registry = registry;
         this.key = new NamespacedKey(plugin, "missions");
+        this.seenKey = new NamespacedKey(plugin, "missions_seen");
         ConfigurationSection c = plugin.getConfig().getConfigurationSection("missions");
         ZoneId z;
         try {
@@ -234,6 +236,8 @@ public final class MissionManager implements Listener {
         }
         String[] ms = parts[2].split(";", -1);
         for (int i = 0; i < PER_DAY && i < ms.length; i++) st.list[i] = ms[i].isEmpty() ? null : Mission.decode(ms[i]);
+        // los dinos que ya conto hoy (antes solo estaban en memoria: saliendo y entrando el mismo dino contaba de nuevo)
+        readSeen(p.getPersistentDataContainer().get(seenKey, PersistentDataType.STRING), st.day, st.sighted);
         return st;
     }
 
@@ -244,6 +248,34 @@ public final class MissionManager implements Listener {
             if (st.list[i] != null) sb.append(st.list[i].encode());
         }
         p.getPersistentDataContainer().set(key, PersistentDataType.STRING, sb.toString());
+        p.getPersistentDataContainer().set(seenKey, PersistentDataType.STRING, writeSeen(st.day, st.sighted));
+    }
+
+    /** Tope de dinos avistados que se guardan por dia (una mision de avistar pide pocos). */
+    static final int MAX_SEEN = 64;
+
+    /** "dia|uuid,uuid,..." con los dinos avistados hoy. */
+    static String writeSeen(String day, java.util.Collection<UUID> seen) {
+        StringBuilder sb = new StringBuilder(day).append('|');
+        int n = 0;
+        for (UUID id : seen) {
+            if (n >= MAX_SEEN) break;
+            if (n++ > 0) sb.append(',');
+            sb.append(id);
+        }
+        return sb.toString();
+    }
+
+    /** Suma a {@code into} los avistados guardados si son del mismo dia (los de otro dia ya no cuentan). */
+    static void readSeen(String raw, String day, Set<UUID> into) {
+        if (raw == null || day == null || !raw.startsWith(day + "|")) return;
+        for (String id : raw.substring(day.length() + 1).split(",")) {
+            try {
+                if (!id.isEmpty()) into.add(UUID.fromString(id));
+            } catch (IllegalArgumentException ignored) {
+                // dato roto: se ignora
+            }
+        }
     }
 
     private void announce(Player p, State st) {

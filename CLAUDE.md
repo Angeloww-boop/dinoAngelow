@@ -46,6 +46,11 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 - **Nunca usar `Display#setTransformationMatrix`**: Minecraft la descompone con SVD y para rotación + escala pareja
   la división en rotación izquierda/derecha salta de un tick a otro (hasta ~180°) → las piezas tiemblan.
   `DinoModel.decompose` arma traslación + una sola rotación + escala (0.7.7).
+- **El giro se saca con `getUnnormalizedRotation(...).normalize()`** (`DinoModel.rotationOf`), nunca con
+  `getNormalizedRotation`: ese supone una matriz SIN escala, y con escala ≠ 1 (dimorphodon, crías, genes) daba un
+  cuaternión deformado de largo ≠ 1; el slerp del cliente lo inflaba a mitad de cada interpolación (hasta +25 %) y los
+  dinos "respiraban agitados" en cada envío de pose (0.16.1). `PoseCheck` (plugin/src/test) lo prueba con el mismo
+  JOML que el cliente. Altura de montura: sale del atributo SCALE, no de `getHeight()` (que tarda un tick).
 - Z-fighting: caras de cubos distintos en el mismo plano titilan. `geometry.defight` (lo llama build.py) empuja
   0.08 px la cara del cubo más chico; `python generator/zfight.py` confirma que no queda ninguna. Partes que se
   pliegan adentro de otras (membranas, gola) se ocultan con `BonePose.hidden` en vez de achicarlas al mínimo.
@@ -188,5 +193,10 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   pieza extra, una sola variante "carmesi"; Species.*_PLUS con `plusOf`/`ability`/`soundId`, eggTameOnly, sin nidos),
   `plus/PlusAbilities` (activas montado con click derecho con item o F; pasivas cosecha/pesca/iman; respeta Protection),
   `Dino.dash/boost/launch`, `/dino egg <especie> [cantidad] [jugador]` desde consola. Atlas +14 %.
+- v0.16.1: arreglo del "respiran agitados" / patas que suben y bajan al aparecer (ver `rotationOf` arriba; reproducido
+  con un Paper 1.21.11 local que registraba cada pose mandada; los dinos con escala ≠ 1 ahora se ven del tamaño
+  diseñado: dimorphodon ~60 % más grande que antes, los de 0.85 ~12 % más, mosasaurus/giga/spino/T-Rex algo más chicos),
+  primera pose sin corrimiento (altura de montura por escala), misiones de avistar: los dinos ya contados se guardan en
+  el PDC del jugador (`missions_seen`) y no vuelven a contar al salir/entrar o pasar por el lobby (`SeenCheck`).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Brachiosaurus con varios jinetes).

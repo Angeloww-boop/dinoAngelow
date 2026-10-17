@@ -245,11 +245,20 @@ public final class DinoModel {
     private Transformation decompose(int i, Matrix4f m) {
         Vector3f translation = m.getTranslation(new Vector3f());
         Vector3f scale = m.getScale(new Vector3f());
-        Quaternionf rot = m.getNormalizedRotation(new Quaternionf());
+        Quaternionf rot = rotationOf(m);
         Quaternionf prev = lastRot[i];
         if (prev != null && prev.dot(rot) < 0) rot.mul(-1f);   // q y -q son el mismo giro: elegir el cercano
         lastRot[i] = new Quaternionf(rot);
         return new Transformation(translation, rot, scale, new Quaternionf());
+    }
+
+    /**
+     * El giro de una matriz que trae escala, como cuaternion unitario. OJO: getNormalizedRotation de JOML supone una
+     * matriz SIN escala; con escala (dinos chicos, crias, genes) daba un cuaternion deformado y de largo distinto de 1,
+     * y el slerp del cliente lo inflaba y desinflaba a mitad de cada interpolacion: "respiraban agitados" (0.16.1).
+     */
+    static Quaternionf rotationOf(Matrix4f m) {
+        return m.getUnnormalizedRotation(new Quaternionf()).normalize();
     }
 
     public void setGlow(Color color) {

@@ -67,6 +67,7 @@ public final class Dino {
     private static final int ROAR_TICKS = 24;
     // el lobo muerto desaparece a los 20 ticks: la caida tiene que terminar antes
     private static final int DEATH_TICKS = 18;
+    private static final double WOLF_HEIGHT = 0.85;   // alto de un lobo adulto con escala 1
     private static final int SPIT_TICKS = 16;
     private static final int ROAR_COOLDOWN = 140;
     private static final int EAT_TICKS = 40;
@@ -261,8 +262,14 @@ public final class Dino {
         String modelName = isBabyForm() ? "baby" : (male ? "male" : "female");
         NamespacedKey[] items = rig.items(form, variant, modelName);
         if (!isBabyForm() && saddled && rig.hasSaddle()) items[rig.saddleBone()] = rig.saddleItem();
-        // los pasajeros de un lobo van ~0.96 de su altura mas arriba
-        Vector mount = new Vector(0, wolf.getHeight() * 0.963, 0);
+        // los pasajeros de un lobo van ~0.96 de su altura mas arriba. La altura sale de la escala y no de getHeight():
+        // recien cambiada la escala, getHeight() sigue siendo la de un lobo normal hasta el tick siguiente y la primera
+        // pose quedaba corrida (en los grandes, mas de un bloque) hasta que se medía la real
+        var scaleAttr = wolf.getAttribute(Attribute.SCALE);
+        double wolfScale = scaleAttr != null ? scaleAttr.getValue() : 1;
+        // y un poco hacia atras (0.0625 x escala), girado segun para donde mira el lobo
+        double back = 0.0625 * wolfScale, yawRad = Math.toRadians(wolf.getLocation().getYaw());
+        Vector mount = new Vector(back * Math.sin(yawRad), WOLF_HEIGHT * wolfScale * 0.963, -back * Math.cos(yawRad));
         // caja de culling segun el tamaño (si es chica, las partes desaparecen al mirarlas de costado)
         float k = rig.scale() * species.maleScale / 16f;
         float cullWidth = Math.max(4f, form.radius() * k * 2 + 1);

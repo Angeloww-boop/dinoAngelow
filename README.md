@@ -132,6 +132,31 @@ Placeholders (`%dinoearth_<x>%`):
 
 Categorías: `dinos`, `sellos`, `especies`, `crias`, `domesticados`, `nidos`, `cazados`, `misiones`, `genes`.
 
+## Línea Plus (dinos con habilidad)
+
+Ocho dinos con la misma forma que su base pero de la **línea Plus**: negros con detalles rojos, ojos rojos, una pieza
+extra que el normal no tiene (crestas, púas, plumas, placas) y montura negra con costuras rojas. **Solo salen de
+huevo** (no hay salvajes ni nidos): `/dino egg <especie_plus> [cantidad] [jugador]`, que también anda desde la consola
+para venderlos (tienda/Tebex). Dos Plus de la misma especie crían Plus. Aceptan su montura propia o la de su base.
+
+Las habilidades activas se usan **montado, con click derecho con cualquier ítem en la mano** (el click derecho al aire
+con la mano vacía no le llega al server; lo más cómodo es el silbato) **o con la tecla F** (cambiar de mano). Muestran
+cuánto falta para volver a usarse. Tiempos y números en `config.yml` (`plus`).
+
+| Plus | Id | Habilidad |
+|---|---|---|
+| Velociraptor Sombra | `raptor_plus` | **Dash**: impulso hacia donde mira (8 s) |
+| Triceratops Cosechador | `triceratops_plus` | Quieto o patrullando **cosecha y replanta** los cultivos maduros (radio 3) y los guarda en un cofre o barril cercano. Montado: cosecha radio 5 (20 s) |
+| Spinosaurus Pescador | `spinosaurus_plus` | Cerca del agua **pesca solo** para su dueño (cada 45 s). Montado: pesca ya (60 s) |
+| Dimorphodon Buscador | `dimorphodon_plus` | **Imán**: mientras te acompaña junta los ítems del suelo alrededor tuyo (no los que tiró otro) |
+| Parasaurolophus Heraldo | `parasaurolophus_plus` | **Canto**: velocidad y regeneración 10 s y cura a tus dinos cercanos (60 s) |
+| Pteranodon Halcón | `pteranodon_plus` | **Turbo**: en el suelo despega alto, volando acelera (10 s) |
+| Gallimimus Relámpago | `gallimimus_plus` | **Arranque**: 5 s de velocidad extra (30 s) |
+| Ankylosaurus Leñador | `ankylosaurus_plus` | **Tala** el árbol que tiene adelante y suelta la madera (12 s) |
+
+Cosechar y talar respetan Towny y WorldGuard (como si lo hiciera el dueño). En las carreras no hay habilidades: todos
+corren con el mismo dino prestado.
+
 ## Carreras de dinosaurios
 
 Carreras **parejas**: la pista le presta a todos **el mismo dino** (misma especie, genética neutra), así gana el que

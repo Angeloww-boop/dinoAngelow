@@ -1,0 +1,168 @@
+{
+  "species": "raptor_plus",
+  "scale": 1.0,
+  "item": "dinoearth:raptor_plus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "carmesi",
+      "name": "Carmes\u00ed",
+      "weight": 100
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 35.0,
+      "radius": 36.5,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            17.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            19.5,
+            9.5
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            27.0,
+            12.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            19.0,
+            -8.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            18.75,
+            -23.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            5.5,
+            18.0,
+            -5.0
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -5.5,
+            18.0,
+            -5.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 18.0,
+      "radius": 18.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            9.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            10.0,
+            5.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            13.0,
+            8.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            9.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            8.5,
+            -9.5
+          ]
+        },
+        {
+          "name": "leg_r",
+          "parent": null,
+          "joint": [
+            3.25,
+            9.0,
+            -1.5
+          ]
+        },
+        {
+          "name": "leg_l",
+          "parent": null,
+          "joint": [
+            -3.25,
+            9.0,
+            -1.5
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      17.0,
+      0.0
+    ],
+    "item": "dinoearth:raptor_plus/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:raptor_plus/egg/egg",
+    "cracked": "dinoearth:raptor_plus/egg_cracked/egg",
+    "icon": "dinoearth:raptor_plus/egg_item",
+    "size": 1.0
+  }
+}

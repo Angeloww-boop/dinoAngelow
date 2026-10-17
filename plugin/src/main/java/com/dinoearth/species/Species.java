@@ -33,6 +33,17 @@ public final class Species {
     /** Arma de la cola contra el que le pega por atras. */
     public enum TailAttack { NONE, SPIKES, CLUB }
 
+    /**
+     * Habilidades de la linea Plus. Las activas se usan montado con click derecho (con cualquier item en la mano: el
+     * click derecho al aire con la mano vacia no le llega al server) o con la tecla de cambiar de mano (F). Las pasivas
+     * andan solas (cosechar, pescar, juntar items).
+     */
+    public enum Ability { DASH, COSECHA, PESCA, BUSCADOR, CANTO, TURBO, ARRANQUE, TALA }
+
+    public boolean isPlus() {
+        return plusOf != null;
+    }
+
     public record Drop(Material item, int min, int max) {
     }
 
@@ -122,6 +133,11 @@ public final class Species {
     public double swimSprint;
     private final Set<Material> food;
     public final TailAttack tail;
+    /** Linea Plus: especie base de la que sale (misma forma y sonidos) y su habilidad; null en las normales. */
+    public final Species plusOf;
+    public final Ability ability;
+    /** Id de los sonidos (los Plus usan los de su base). */
+    public final String soundId;
     /** Las flechas y otros proyectiles le hacen mucho menos daño. */
     public final boolean armored;
     /** Domesticado acompaña volando al dueño (Dino.tickEscort); agachado + click derecho con la mano vacia: vuela o camina. */
@@ -171,6 +187,9 @@ public final class Species {
         swimSprint = b.swimSprint;
         food = b.food;
         tail = b.tail;
+        plusOf = b.plusOf;
+        ability = b.ability;
+        soundId = b.plusOf != null ? b.plusOf.id : b.id;
         armored = b.armored;
         perches = b.perches;
         hungerMinutes = b.hungerMinutes;
@@ -331,9 +350,54 @@ public final class Species {
             .food(FISH).tame(0.08).ride(0.04, 0.06, 0).swim(0.42, 0.68).territorial().view(2.5).hunger(90, 140)
             .drops(new Drop(Material.COD, 3, 6)).build();
 
+    // ------------------------------------------------------------ linea Plus (solo de huevo: no hay salvajes)
+    public static final Species RAPTOR_PLUS = new Builder("raptor_plus", Body.BIPED, Temper.CARNIVORE)
+            .aliases("sombra", "raptorplus").stats(30, 6, 0.36).hitbox(1.7).stride(2.4)
+            .eggTameOnly().ride(0.32, 0.5, 0.58).hunger(80, 40).plus(RAPTOR, Ability.DASH)
+            .drops(new Drop(Material.CHICKEN, 1, 2)).build();
+
+    public static final Species TRICERATOPS_PLUS = new Builder("triceratops_plus", Body.QUADRUPED, Temper.HERBIVORE)
+            .aliases("cosechador", "triceratopsplus").stats(80, 9, 0.27).hitbox(2.4).knockback(1.5).stride(1.7)
+            .maleScale(1.08f).eggTameOnly().ride(0.24, 0.36, 0.42).view(1.5).hunger(100, 90)
+            .plus(TRICERATOPS, Ability.COSECHA).drops(new Drop(Material.BEEF, 2, 4)).build();
+
+    public static final Species SPINOSAURUS_PLUS = new Builder("spinosaurus_plus", Body.BIPED, Temper.CARNIVORE)
+            .aliases("pescador", "spinosaurusplus").stats(140, 13, 0.3).hitbox(3.0).knockback(1.1).stride(1.4).swing(28)
+            .food(FISH).eggTameOnly().ride(0.26, 0.42, 0.5).swim(0.32, 0.5).view(2).hunger(80, 110)
+            .plus(SPINOSAURUS, Ability.PESCA).drops(new Drop(Material.BEEF, 3, 6)).build();
+
+    public static final Species DIMORPHODON_PLUS = new Builder("dimorphodon_plus", Body.FLYER, Temper.CARNIVORE)
+            .aliases("buscador", "dimorphodonplus").stats(10, 2, 0.32).hitbox(0.75).stride(5).view(0.8)
+            .food(FISH).eggTameOnly().perches().hunger(90, 16).plus(DIMORPHODON, Ability.BUSCADOR)
+            .drops().build();
+
+    public static final Species PARASAUROLOPHUS_PLUS = new Builder("parasaurolophus_plus", Body.QUADRUPED, Temper.PREY)
+            .aliases("heraldo", "parasaurolophusplus").stats(60, 6, 0.3).hitbox(2.2).stride(1.8).view(1.5)
+            .eggTameOnly().ride(0.27, 0.42, 0.5).hunger(100, 80).plus(PARASAUROLOPHUS, Ability.CANTO)
+            .drops(new Drop(Material.BEEF, 2, 3)).build();
+
+    public static final Species PTERANODON_PLUS = new Builder("pteranodon_plus", Body.FLYER, Temper.CARNIVORE)
+            .aliases("halcon", "pteranodonplus").stats(28, 4, 0.3).hitbox(1.6).stride(3.2)
+            .food(FISH).eggTameOnly().ride(0.16, 0.22, 0.55).fly(0.55, 0.9).view(1.5).hunger(80, 36)
+            .plus(PTERANODON, Ability.TURBO).drops(new Drop(Material.CHICKEN, 1, 2)).build();
+
+    public static final Species GALLIMIMUS_PLUS = new Builder("gallimimus_plus", Body.BIPED, Temper.PREY)
+            .aliases("relampago", "gallimimusplus").stats(24, 3, 0.42).hitbox(1.95).stride(2.0).swing(46)
+            .eggTameOnly().ride(0.36, 0.64, 0.62).hunger(70, 40).plus(GALLIMIMUS, Ability.ARRANQUE)
+            .drops(new Drop(Material.CHICKEN, 1, 2)).build();
+
+    public static final Species ANKYLOSAURUS_PLUS = new Builder("ankylosaurus_plus", Body.QUADRUPED, Temper.HERBIVORE)
+            .aliases("lenador", "ankylosaurusplus").stats(110, 8, 0.22).hitbox(2.0).knockback(1.5).stride(2.2).view(1.5)
+            .eggTameOnly().ride(0.2, 0.3, 0.35).tail(TailAttack.CLUB).armored().hunger(110, 90)
+            .plus(ANKYLOSAURUS, Ability.TALA).drops(new Drop(Material.BEEF, 2, 4)).build();
+
+    public static final List<Species> PLUS = List.of(RAPTOR_PLUS, TRICERATOPS_PLUS, SPINOSAURUS_PLUS, DIMORPHODON_PLUS,
+            PARASAUROLOPHUS_PLUS, PTERANODON_PLUS, GALLIMIMUS_PLUS, ANKYLOSAURUS_PLUS);
+
     public static final List<Species> ALL = List.of(RAPTOR, TRICERATOPS, DILOPHOSAURUS, COMPSOGNATHUS, TREX, PTERANODON,
             PARASAUROLOPHUS, GALLIMIMUS, STEGOSAURUS, ANKYLOSAURUS, GIGANOTOSAURUS, CARNOTAURUS, DIMORPHODON,
-            SPINOSAURUS, MOSASAURUS);
+            SPINOSAURUS, MOSASAURUS, RAPTOR_PLUS, TRICERATOPS_PLUS, SPINOSAURUS_PLUS, DIMORPHODON_PLUS,
+            PARASAUROLOPHUS_PLUS, PTERANODON_PLUS, GALLIMIMUS_PLUS, ANKYLOSAURUS_PLUS);
 
     public static Species byId(String id) {
         if (id == null) return null;
@@ -354,6 +418,8 @@ public final class Species {
         float maleScale = 1.06f, stride = 2.4f, swing = 38;
         boolean rideable, spits, charges, roars, territorial, eggTameOnly, armored, perches, swims;
         TailAttack tail = TailAttack.NONE;
+        Species plusOf;
+        Ability ability;
         Set<Material> food;
         double hungerMinutes;
         int stomach = 40;
@@ -493,6 +559,12 @@ public final class Species {
 
         Builder drops(Drop... d) {
             drops = List.of(d);
+            return this;
+        }
+
+        Builder plus(Species base, Ability a) {
+            plusOf = base;
+            ability = a;
             return this;
         }
 

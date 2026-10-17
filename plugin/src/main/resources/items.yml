@@ -281,6 +281,55 @@ montura_mosasaurus:
     - '&8| &fClick derecho sobre tu &#ff00d9Mosasaurus&f adulto.'
     - '&8| &fCon tijeras se la sacás y te la devuelve.'
     - '&f'
+montura_raptor_plus:
+  display_name: '&#ff00d9Montura de Velociraptor Sombra'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Velociraptor Sombra&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+montura_triceratops_plus:
+  display_name: '&#ff00d9Montura de Triceratops Cosechador'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Triceratops Cosechador&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+montura_spinosaurus_plus:
+  display_name: '&#ff00d9Montura de Spinosaurus Pescador'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Spinosaurus Pescador&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+montura_parasaurolophus_plus:
+  display_name: '&#ff00d9Montura de Parasaurolophus Heraldo'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Parasaurolophus Heraldo&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+montura_pteranodon_plus:
+  display_name: '&#ff00d9Montura de Pteranodon Halcón'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Pteranodon Halcón&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+montura_gallimimus_plus:
+  display_name: '&#ff00d9Montura de Gallimimus Relámpago'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Gallimimus Relámpago&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
+montura_ankylosaurus_plus:
+  display_name: '&#ff00d9Montura de Ankylosaurus Leñador'
+  lore:
+    - '&f'
+    - '&8| &fClick derecho sobre tu &#ff00d9Ankylosaurus Leñador&f adulto.'
+    - '&8| &fCon tijeras se la sacás y te la devuelve.'
+    - '&f'
 silbato:
   display_name: '&#ff00d9Silbato de dinos'
   lore:

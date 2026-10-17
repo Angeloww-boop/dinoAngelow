@@ -184,5 +184,9 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   FancyNpcs (comando `dino carrera unirse <pista>`), programadas con anuncio, premios por puesto, records de siempre y
   de la semana, mision CARRERA, sello CORREDOR (solo especies que presta alguna pista; 7.o slot sobre el lomo, 40),
   top `carreras` y placeholders `record_<pista>`/`recordista_<pista>`.
+- v0.16.0 **sin probar en el juego**: linea Plus (`generator/plus.py`: misma forma que la base + paleta negro/rojo +
+  pieza extra, una sola variante "carmesi"; Species.*_PLUS con `plusOf`/`ability`/`soundId`, eggTameOnly, sin nidos),
+  `plus/PlusAbilities` (activas montado con click derecho con item o F; pasivas cosecha/pesca/iman; respeta Protection),
+  `Dino.dash/boost/launch`, `/dino egg <especie> [cantidad] [jugador]` desde consola. Atlas +14 %.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
   (Brachiosaurus con varios jinetes).

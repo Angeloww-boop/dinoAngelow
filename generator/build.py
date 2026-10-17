@@ -39,6 +39,9 @@ ALL_SPECIES = [species_raptor.SPECIES, species_triceratops.SPECIES,
                species_giganotosaurus.SPECIES, species_carnotaurus.SPECIES,
                species_dimorphodon.SPECIES, species_spinosaurus.SPECIES, species_mosasaurus.SPECIES]
 
+import plus  # noqa: E402  linea Plus (dinos con habilidad): misma forma que su base, paleta y piezas propias
+ALL_SPECIES += plus.PLUS_SPECIES
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACK_DIR = os.path.join(ROOT, "resourcepack")
 PACK_ZIP = os.path.join(ROOT, "DinoEarth-ResourcePack.zip")

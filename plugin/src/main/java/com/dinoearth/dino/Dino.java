@@ -99,6 +99,9 @@ public final class Dino {
     private float charge;     // 0..1 cabeza baja embistiendo (triceratops)
     private float rideYaw;
     private int jumpCooldown;
+    // habilidades de la linea Plus (dash, arranque, turbo de vuelo)
+    private int dashTicks, boostTicks;
+    private double dashSpeed, boostMul = 1;
     // carrera pareja: dino de la pista (no es de nadie), quieto hasta la largada y con estamina para correr
     private boolean racing;
     private boolean frozen;
@@ -432,6 +435,29 @@ public final class Dino {
 
     public boolean isExhausted() {
         return exhausted;
+    }
+
+    // ------------------------------------------------------------ habilidades Plus
+    /** Impulso hacia donde mira durante unos ticks (montado). */
+    public void dash(double speed, int ticks) {
+        dashSpeed = speed;
+        dashTicks = ticks;
+        Vector v = wolf.getVelocity();
+        if (wolf.isOnGround()) wolf.setVelocity(v.setY(0.25));
+    }
+
+    /** Mas velocidad un rato: en el suelo multiplica la velocidad; volando, un turbo. */
+    public void boost(double mul, int ticks) {
+        boostMul = mul;
+        boostTicks = ticks;
+    }
+
+    /** Volador en el suelo: despega alto de un salto. */
+    public void launch() {
+        if (flying || !species.flies()) return;
+        takeOff();
+        flyVel.setY(Math.max(flyVel.getY(), 0.9));
+        wolf.setVelocity(flyVel);
     }
 
     public boolean canRide() {
@@ -1489,6 +1515,10 @@ public final class Dino {
             if (exhausted) sprint = false;
         }
         double max = (sprint ? species.rideSprint : species.rideWalk) * g().speed;
+        if (boostTicks > 0) {
+            boostTicks--;
+            max *= boostMul;
+        }
         if (f < 0) max *= 0.45;
         double rad = Math.toRadians(rideYaw);
         double vx = -Math.sin(rad) * f + Math.cos(rad) * s * 0.6;
@@ -1497,6 +1527,12 @@ public final class Dino {
         if (len > 1e-4) {
             vx = vx / Math.max(1, len) * max;
             vz = vz / Math.max(1, len) * max;
+        }
+        if (dashTicks > 0) {
+            // dash: hacia donde mira, sin importar las teclas
+            dashTicks--;
+            vx = -Math.sin(rad) * dashSpeed;
+            vz = Math.cos(rad) * dashSpeed;
         }
 
         Vector v = wolf.getVelocity();
@@ -1561,6 +1597,11 @@ public final class Dino {
         double pitch = Math.toRadians(clamp(rider.getPitch(), -55, 65));
         double target = in.isForward() ? (in.isSprint() ? species.flySprint : species.flySpeed) * g().speed
                 : in.isBackward() ? 0.08 : 0.28;
+        if (boostTicks > 0) {
+            boostTicks--;
+            target = Math.max(target, species.flySprint * boostMul);
+            airSpeed = Math.max(airSpeed, target);
+        }
         airSpeed += (target - airSpeed) * (target > airSpeed ? 0.05 : 0.08);
         double yaw = Math.toRadians(rideYaw);
         double horizontal, vy;
@@ -2295,7 +2336,7 @@ public final class Dino {
         }
         if (species.roars && !isBabyForm()) volume *= 2f;   // el T-Rex se oye el doble de lejos
         float jitter = 1f + (ThreadLocalRandom.current().nextFloat() - 0.5f) * 0.12f;
-        wolf.getWorld().playSound(wolf.getLocation(), "dinoearth:" + species.id + "." + key,
+        wolf.getWorld().playSound(wolf.getLocation(), "dinoearth:" + species.soundId + "." + key,
                 species.hostile() ? SoundCategory.HOSTILE : SoundCategory.NEUTRAL, volume, pitch * jitter);
     }
 

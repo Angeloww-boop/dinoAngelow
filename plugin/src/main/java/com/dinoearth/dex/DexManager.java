@@ -859,7 +859,8 @@ public final class DexManager {
 
     private static String ability(Species s) {
         String key;
-        if (s.aquatic()) key = "acuatico";
+        if (s.ability != null) key = "plus-" + s.ability.name();
+        else if (s.aquatic()) key = "acuatico";
         else if (s.swims) key = "nada";
         else if (s.perches) key = "escolta";
         else if (s.tail == Species.TailAttack.SPIKES) key = "puas";

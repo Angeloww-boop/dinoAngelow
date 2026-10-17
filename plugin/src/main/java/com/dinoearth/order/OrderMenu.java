@@ -100,6 +100,10 @@ public final class OrderMenu implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onWhistleAir(PlayerInteractEvent event) {
         if (!items.is(event.getItem(), DinoItems.Kind.WHISTLE)) return;
+        // montado en un Plus, el click derecho es su habilidad (PlusAbilities)
+        Entity vehicle = event.getPlayer().getVehicle();
+        Dino riding = vehicle != null ? dinos.get(vehicle) : null;
+        if (riding != null && riding.species().isPlus()) return;
         event.setCancelled(true);
         if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;

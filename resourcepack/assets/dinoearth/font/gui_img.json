@@ -170,6 +170,78 @@
    "chars": [
     ""
    ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/raptor_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/triceratops_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/spinosaurus_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/dimorphodon_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/parasaurolophus_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/pteranodon_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/gallimimus_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "dinoearth:gui/render/ankylosaurus_plus.png",
+   "ascent": -7,
+   "height": 64,
+   "chars": [
+    ""
+   ]
   }
  ]
 }

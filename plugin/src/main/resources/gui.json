@@ -159,6 +159,10 @@
    "",
    63
   ],
+  "render/ankylosaurus_plus/carmesi": [
+   "",
+   63
+  ],
   "render/carnotaurus/albino": [
    "",
    63
@@ -231,6 +235,10 @@
    "",
    63
   ],
+  "render/dimorphodon_plus/carmesi": [
+   "",
+   63
+  ],
   "render/gallimimus/albino": [
    "",
    63
@@ -249,6 +257,10 @@
   ],
   "render/gallimimus/verde": [
    "",
+   63
+  ],
+  "render/gallimimus_plus/carmesi": [
+   "",
    63
   ],
   "render/giganotosaurus/albino": [
@@ -311,6 +323,10 @@
    "",
    63
   ],
+  "render/parasaurolophus_plus/carmesi": [
+   "",
+   63
+  ],
   "render/pteranodon/albino": [
    "",
    63
@@ -329,6 +345,10 @@
   ],
   "render/pteranodon/pizarra": [
    "",
+   63
+  ],
+  "render/pteranodon_plus/carmesi": [
+   "",
    63
   ],
   "render/raptor/albino": [
@@ -355,6 +375,10 @@
    "",
    63
   ],
+  "render/raptor_plus/carmesi": [
+   "",
+   63
+  ],
   "render/spinosaurus/albino": [
    "",
    63
@@ -373,6 +397,10 @@
   ],
   "render/spinosaurus/rio": [
    "",
+   63
+  ],
+  "render/spinosaurus_plus/carmesi": [
+   "",
    63
   ],
   "render/stegosaurus/albino": [
@@ -433,6 +461,10 @@
   ],
   "render/triceratops/rojizo": [
    "",
+   63
+  ],
+  "render/triceratops_plus/carmesi": [
+   "",
    63
   ]
  },

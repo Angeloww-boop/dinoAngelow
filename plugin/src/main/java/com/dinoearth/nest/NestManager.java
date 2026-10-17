@@ -155,7 +155,7 @@ public final class NestManager implements Listener {
     }
 
     private boolean allowed(Species s) {
-        if (!s.rig.hasEgg()) return false;
+        if (!s.rig.hasEgg() || s.isPlus()) return false;
         if (settings.nestSpecies.isEmpty()) return true;
         for (String id : settings.nestSpecies) {
             if (Species.byId(id) == s) return true;

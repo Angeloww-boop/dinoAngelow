@@ -346,7 +346,9 @@ public final class DinoListener implements Listener {
         if ((saddleItem || type == Material.SADDLE) && species.rideable) {
             event.setCancelled(true);
             handled.put(player.getUniqueId(), now);
-            if (!saddleItem || !species.id.equals(held.species())) {
+            boolean fits = saddleItem && (species.id.equals(held.species())
+                    || species.plusOf != null && species.plusOf.id.equals(held.species()));
+            if (!fits) {
                 Lang.get().action(player, "montura-necesita", "montura", items.plainName(items.saddleId(species)));
                 return;
             }

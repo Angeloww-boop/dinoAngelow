@@ -321,6 +321,62 @@
       "model": "dinoearth:items/montura_mosasaurus"
     },
     {
+      "id": "montura_raptor_plus",
+      "kind": "saddle",
+      "species": "raptor_plus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_raptor_plus"
+    },
+    {
+      "id": "montura_triceratops_plus",
+      "kind": "saddle",
+      "species": "triceratops_plus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_triceratops_plus"
+    },
+    {
+      "id": "montura_spinosaurus_plus",
+      "kind": "saddle",
+      "species": "spinosaurus_plus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_spinosaurus_plus"
+    },
+    {
+      "id": "montura_parasaurolophus_plus",
+      "kind": "saddle",
+      "species": "parasaurolophus_plus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_parasaurolophus_plus"
+    },
+    {
+      "id": "montura_pteranodon_plus",
+      "kind": "saddle",
+      "species": "pteranodon_plus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_pteranodon_plus"
+    },
+    {
+      "id": "montura_gallimimus_plus",
+      "kind": "saddle",
+      "species": "gallimimus_plus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_gallimimus_plus"
+    },
+    {
+      "id": "montura_ankylosaurus_plus",
+      "kind": "saddle",
+      "species": "ankylosaurus_plus",
+      "material": "SADDLE",
+      "max_stack": 1,
+      "model": "dinoearth:items/montura_ankylosaurus_plus"
+    },
+    {
       "id": "silbato",
       "kind": "whistle",
       "material": "STICK",
@@ -534,6 +590,14 @@
         "max": 3,
         "chance": 0.8
       }
-    ]
+    ],
+    "raptor_plus": [],
+    "triceratops_plus": [],
+    "spinosaurus_plus": [],
+    "dimorphodon_plus": [],
+    "parasaurolophus_plus": [],
+    "pteranodon_plus": [],
+    "gallimimus_plus": [],
+    "ankylosaurus_plus": []
   }
 }

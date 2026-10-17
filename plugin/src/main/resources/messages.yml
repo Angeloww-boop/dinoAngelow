@@ -21,7 +21,7 @@ chat:
   ayuda-admin:
     - '&9&lDINOEARTH &8» &fComandos de administración de &#ff00d9DinoEarth&f.'
     - '&8| &#ff00d9/dino spawn &8<&ftipo&8> [&fcolor&8] [&fsexo&8] [&fedad&8] [&fcantidad&8] &8- &fSpawnea dinos.'
-    - '&8| &#ff00d9/dino egg &8<&fespecie&8> [&fcantidad&8] &8- &fTe da huevos.'
+    - '&8| &#ff00d9/dino egg &8<&fespecie&8> [&fcantidad&8] [&fjugador&8] &8- &fDa huevos (también Plus, desde la consola).'
     - '&8| &#ff00d9/dino grow &8[&f%&8] &8- &fHace crecer a las crías cercanas.'
     - '&8| &#ff00d9/dino tame &8[&fjugador&8] &8- &fDomestica el dino que estás mirando.'
     - '&8| &#ff00d9/dino nido &8- &fLa hembra salvaje que mirás arma un nido ya.'
@@ -39,6 +39,7 @@ chat:
   # ---------------------------------------------------------------- comandos de admin
   huevo-especies: '&9&lDINOEARTH &8» &fEspecies con huevo&8: &#ff00d9%lista%&f.'
   huevo-entregado: '&9&lDINOEARTH &8» &fTe di &#ff00d9%cantidad%&f huevo(s) de &#ff00d9%especie%&f.'
+  huevo-recibido: '&9&lDINOEARTH &8» &fRecibiste &#ff00d9%cantidad%&f huevo(s) de &#ff00d9%especie%&f.'
   crecer: '&9&lDINOEARTH &8» &fCrías que crecieron&8: &#ff00d9%cantidad%&f.'
   remover: '&9&lDINOEARTH &8» &fDinosaurios eliminados&8: &#ff00d9%cantidad%&f.'
   dietas: '&9&lDINOEARTH &8» &fDietas&8: &#ff00d9%lista%&f.'
@@ -283,6 +284,15 @@ actionbar:
   carrera-volves: '&8| &fTe bajaste, volvés a la &#ff00d9última puerta&f.'
   carrera-estado: '&8| &fPuesto &#ff00d9%puesto%&8/&#ff00d9%total% &8• &fVuelta &#ff00d9%vuelta%&8/&#ff00d9%vueltas% &8• &#ff00d9%tiempo% &8• %estamina%'
 
+  plus-usada: '&8| &#ff00d9%habilidad%&f.'
+  plus-espera: '&8| &fLa habilidad está lista en &#ff00d9%segundos%&f s.'
+  plus-cosecha: '&8| &fCosechaste &#ff00d9%cantidad%&f cultivo(s).'
+  plus-sin-cultivos: '&8| &fNo hay cultivos maduros cerca.'
+  plus-sin-agua: '&8| &fTiene que estar cerca del agua para pescar.'
+  plus-pesca: '&8| &fTu &#ff00d9%especie%&f pescó &#ff00d9%item%&f.'
+  plus-sin-arbol: '&8| &fNo hay ningún árbol adelante.'
+  plus-sin-permiso: '&8| &fNo podés talar acá.'
+  plus-tala: '&8| &fTalaste &#ff00d9%cantidad%&f tronco(s).'
 bossbar:
   mision: '&#ff00d9%mision% &fprogreso &8- &f%progreso% de &#ff00d9%total%'
   carrera-cuenta: '&#ff00d9%pista% &flarga en &8- &f%segundos% &#ff00d9segundos'

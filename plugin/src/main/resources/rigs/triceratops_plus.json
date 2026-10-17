@@ -1,0 +1,204 @@
+{
+  "species": "triceratops_plus",
+  "scale": 0.85,
+  "item": "dinoearth:triceratops_plus/{variant}/{model}/{bone}",
+  "variants": [
+    {
+      "id": "carmesi",
+      "name": "Carmes\u00ed",
+      "weight": 100
+    }
+  ],
+  "forms": {
+    "adult": {
+      "height": 45.5,
+      "radius": 52.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            24.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            24.0,
+            24.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            16.0,
+            30.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            30.0,
+            -16.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            27.0,
+            -33.0
+          ]
+        },
+        {
+          "name": "leg_fr",
+          "parent": null,
+          "joint": [
+            10.0,
+            22.0,
+            14.0
+          ]
+        },
+        {
+          "name": "leg_fl",
+          "parent": null,
+          "joint": [
+            -10.0,
+            22.0,
+            14.0
+          ]
+        },
+        {
+          "name": "leg_br",
+          "parent": null,
+          "joint": [
+            9.0,
+            24.0,
+            -11.0
+          ]
+        },
+        {
+          "name": "leg_bl",
+          "parent": null,
+          "joint": [
+            -9.0,
+            24.0,
+            -11.0
+          ]
+        }
+      ]
+    },
+    "baby": {
+      "height": 19.0,
+      "radius": 20.0,
+      "bones": [
+        {
+          "name": "body",
+          "parent": null,
+          "joint": [
+            0.0,
+            9.0,
+            0.0
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "body",
+          "joint": [
+            0.0,
+            10.0,
+            7.0
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "joint": [
+            0.0,
+            7.0,
+            10.0
+          ]
+        },
+        {
+          "name": "tail1",
+          "parent": "body",
+          "joint": [
+            0.0,
+            12.0,
+            -7.0
+          ]
+        },
+        {
+          "name": "tail2",
+          "parent": "tail1",
+          "joint": [
+            0.0,
+            11.0,
+            -13.5
+          ]
+        },
+        {
+          "name": "leg_fr",
+          "parent": null,
+          "joint": [
+            4.5,
+            8.0,
+            4.0
+          ]
+        },
+        {
+          "name": "leg_fl",
+          "parent": null,
+          "joint": [
+            -4.5,
+            8.0,
+            4.0
+          ]
+        },
+        {
+          "name": "leg_br",
+          "parent": null,
+          "joint": [
+            4.5,
+            9.0,
+            -4.0
+          ]
+        },
+        {
+          "name": "leg_bl",
+          "parent": null,
+          "joint": [
+            -4.5,
+            9.0,
+            -4.0
+          ]
+        }
+      ]
+    }
+  },
+  "saddle": {
+    "name": "saddle",
+    "parent": "body",
+    "joint": [
+      0.0,
+      24.0,
+      0.0
+    ],
+    "item": "dinoearth:triceratops_plus/saddle/saddle"
+  },
+  "egg": {
+    "item": "dinoearth:triceratops_plus/egg/egg",
+    "cracked": "dinoearth:triceratops_plus/egg_cracked/egg",
+    "icon": "dinoearth:triceratops_plus/egg_item",
+    "size": 1.3
+  }
+}

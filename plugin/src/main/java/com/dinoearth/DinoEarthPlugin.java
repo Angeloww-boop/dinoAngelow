@@ -60,6 +60,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private DinoRegistry registry;
     private RecallManager recall;
     private com.dinoearth.race.RaceManager races;
+    private com.dinoearth.plus.PlusAbilities plusAbilities;
     private MissionManager missions;
     private PlayerStats stats;
     private NestManager nests;
@@ -124,6 +125,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
         dex.setMissions(missions);
         getServer().getPluginManager().registerEvents(missions, this);
         races = new com.dinoearth.race.RaceManager(this, dinos, keys);
+        plusAbilities = new com.dinoearth.plus.PlusAbilities(this, dinos);
+        getServer().getPluginManager().registerEvents(plusAbilities, this);
         getServer().getPluginManager().registerEvents(races, this);
         recall = new RecallManager(this, dinos, registry, keys, settings);
         getServer().getPluginManager().registerEvents(recall, this);
@@ -230,13 +233,20 @@ public final class DinoEarthPlugin extends JavaPlugin {
             case "item", "items" -> giveItem(sender, args);
             case "spawn" -> spawn(sender, args);
             case "egg", "huevo" -> {
-                if (!(sender instanceof Player player)) return chat(sender, "solo-jugadores");
+                // /dino egg <especie> [cantidad] [jugador]: con jugador sirve desde la consola (tienda, Tebex)
                 Species s = args.length > 1 ? Species.byId(args[1]) : Species.RAPTOR;
                 if (s == null || !s.rig.hasEgg()) return chat(sender, "huevo-especies", "lista", String.join(", ", eggSpecies()));
                 int amount = args.length > 2 ? (int) parse(args[2], 1) : 1;
                 amount = Math.max(1, Math.min(64, amount));
-                player.getInventory().addItem(eggs.createItem(s, amount));
+                Player target = args.length > 3 ? getServer().getPlayerExact(args[3]) : sender instanceof Player p ? p : null;
+                if (target == null) {
+                    return args.length > 3 ? chat(sender, "jugador-desconectado", "player", args[3]) : chat(sender, "solo-jugadores");
+                }
+                for (var rest : target.getInventory().addItem(eggs.createItem(s, amount)).values()) {
+                    target.getWorld().dropItemNaturally(target.getLocation(), rest);
+                }
                 chat(sender, "huevo-entregado", "cantidad", amount, "especie", s.name);
+                if (target != sender) chat(target, "huevo-recibido", "cantidad", amount, "especie", s.name);
             }
             case "grow", "crecer" -> {
                 if (!(sender instanceof Player player)) return chat(sender, "solo-jugadores");
@@ -299,6 +309,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 lang.reload();
                 reloadConfig();
                 races.loadConfig();
+                plusAbilities.loadConfig();
                 for (Species s : Species.ALL) s.applyTexts(lang);
                 chat(sender, "recargado");
             }
@@ -715,6 +726,10 @@ public final class DinoEarthPlugin extends JavaPlugin {
         }
         if (args.length == 2 && sub.equals("spawn")) return filter(ids(), args[1]);
         if (args.length == 2 && (sub.equals("egg") || sub.equals("huevo"))) return filter(eggSpecies(), args[1]);
+        if (args.length == 3 && (sub.equals("egg") || sub.equals("huevo"))) return filter(List.of("1", "5", "16"), args[2]);
+        if (args.length == 4 && (sub.equals("egg") || sub.equals("huevo"))) {
+            return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[3]);
+        }
         if (args.length == 3 && sub.equals("remove")) return filter(ids(), args[2]);
         if (args.length == 2 && (sub.equals("comedero") || sub.equals("feeder"))) return filter(diets(), args[1]);
         if (args.length == 2 && sub.equals("hambre")) return filter(List.of("0", "25", "50", "100"), args[1]);

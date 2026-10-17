@@ -111,6 +111,35 @@ races:
       money: 0
       commands: []
 
+# Linea Plus (dinos con habilidad, solo de huevo: /dino egg <especie_plus> [cantidad] [jugador]). Se activan montado
+# con click derecho (con cualquier item en la mano) o con la tecla de cambiar de mano (F). Tiempos en segundos.
+plus:
+  cooldowns:
+    dash: 8
+    cosecha: 20
+    pesca: 60
+    canto: 60
+    turbo: 10
+    arranque: 30
+    tala: 12
+  dash:
+    speed: 1.3
+  arranque:
+    multiplier: 1.6
+  turbo:
+    multiplier: 1.8
+  # cosecha pasiva (quieto o patrullando) y activa (montado)
+  cosecha:
+    radius: 3
+    active-radius: 5
+    every-seconds: 3
+  pesca:
+    every-seconds: 45
+  buscador:
+    radius: 6
+  tala:
+    max-blocks: 96
+
 limits:
   max-tamed-per-player: 20
 

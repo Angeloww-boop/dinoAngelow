@@ -103,7 +103,7 @@ def build_icons(species, sets, files):
     raws = {}
     for sp in species:
         sid = sp["id"]
-        pose, yaw, pitch = POSE.get(sid, ("reposo", 125, 15))
+        pose, yaw, pitch = POSE.get(sp.get("plus_of", sid), ("reposo", 125, 15))
         first = None
         for vid in sp["variants"]:
             raw = raw_render(sets, f"{sid}/{vid}/male", sp["scale"], pose, yaw, pitch)

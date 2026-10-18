@@ -116,8 +116,13 @@ public final class DinoManager {
     }
 
     public void detach(Entity e) {
+        detach(e, false);
+    }
+
+    /** @param unloading su chunk dejo de estar activo: no se puede borrar el modelo (no persistente, se va con el chunk) */
+    public void detach(Entity e, boolean unloading) {
         Dino d = active.remove(e.getUniqueId());
-        if (d != null && !d.isDying()) d.remove();
+        if (d != null && !d.isDying()) d.remove(!unloading);
     }
 
     public void onDeath(Wolf wolf) {

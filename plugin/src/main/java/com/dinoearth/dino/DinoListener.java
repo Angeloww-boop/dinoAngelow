@@ -103,7 +103,10 @@ public final class DinoListener implements Listener {
     @EventHandler
     public void onRemove(EntityRemoveFromWorldEvent event) {
         Entity e = event.getEntity();
-        if (dinos.isDino(e)) dinos.detach(e);
+        // Vivo = no lo borraron: su chunk dejo de estar activo (el jugador se alejo). Ahi Paper no deja borrar las partes
+        // del modelo (avisaba una vez por parte en la consola); no se guardan, asi que se van solas si el chunk se
+        // descarga, y si vuelve a activarse antes, Dino.buildModel saca las viejas antes de armar el modelo nuevo.
+        if (dinos.isDino(e)) dinos.detach(e, !e.isDead());
         else if (eggs.isEgg(e)) eggs.detach(e);
         else if (feeders.isFeeder(e)) feeders.detach(e);
         else if (nests.isNest(e)) nests.detach(e);

@@ -1,0 +1,321 @@
+% Encantamientos DinoEarth para AdvancedEnchantments
+% Compilar con pdflatex (por ejemplo en Overleaf): solo usa paquetes estandar.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amssymb}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage[table]{xcolor}
+\usepackage{fancyvrb}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{rosa}{HTML}{FF00D9}
+\definecolor{azul}{HTML}{3B5BDB}
+\definecolor{gris}{HTML}{6B6B6B}
+\definecolor{fondo}{HTML}{F4F4F6}
+
+\newcommand{\tr}[1]{\texttt{\small #1}}           % activador de AE
+\newcommand{\rec}{\textcolor{rosa}{\textbf{$\bigstar$}}} % recomendado
+\newcommand{\hecho}{\textcolor{azul}{\textbf{(hecho)}}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.25}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\textcolor{azul}{DinoEarth} --- Encantamientos}\\[4pt]
+  {\large Para AdvancedEnchantments}\\[2pt]
+  {\small\textcolor{gris}{Los que ya están armados y las ideas para espadas, ballestas, escudos y armaduras}}
+\end{center}
+
+\section*{Cómo leer este documento}
+\begin{itemize}[leftmargin=*]
+  \item \hecho: ya está armado en formato de AdvancedEnchantments (el YML está en este documento).
+  \item \rec: recomendado para empezar.
+  \item \textbf{Activador}: el \emph{trigger} de AdvancedEnchantments con el que se haría. Todos los que aparecen
+        están en la lista oficial de la wiki (\url{https://wiki.advancedplugins.net/abilities/triggers.md}).
+  \item Los nombres internos van en minúsculas, sin espacios ni tildes (por ejemplo \tr{ejecucion}).
+  \item Se pegan al final de \tr{plugins/AdvancedEnchantments/enchantments.yml}, después \tr{/ae reload}, y se ponen
+        con el ítem en la mano: \tr{/ae enchant <nombre> <nivel>}.
+\end{itemize}
+
+% =====================================================================================================
+\section{Encantamientos ya armados}
+
+\subsection{Ejecución (espadas)}
+Remata a un rival que tiene 3 corazones o menos. Respeta el tótem: el golpe es un daño normal
+(\tr{DO\_HARM}), así que el tótem lo salva como a cualquier golpe.
+\begin{itemize}[leftmargin=*,itemsep=0pt]
+  \item \textbf{Activador:} \tr{ATTACK} (solo al pegarle a un jugador).
+  \item \textbf{Chance:} 15\,\%. \quad \textbf{Cooldown:} 90 segundos.
+  \item \textbf{Condición:} el rival tiene 6 de vida o menos (3 corazones).
+\end{itemize}
+
+\begin{Verbatim}[frame=single,fontsize=\small,framesep=3mm]
+ejecucion:
+  display: '%group-color%Ejecución'
+  description: |-
+    Chance de rematar a un rival
+    que tenga 3 corazones o menos.
+  applies-to: Espadas
+  type: ATTACK
+  group: UNIQUE
+  applies:
+    - ALL_SWORD
+  levels:
+    '1':
+      chance: 15
+      cooldown: 90
+      conditions:
+        - '%victim health% > 6 : %stop%'
+      effects:
+        - 'DO_HARM:100 @Victim'
+        - 'MESSAGE:&9&lDINOEARTH &8» &fEjecutaste a tu rival. @Attacker'
+        - 'MESSAGE:&9&lDINOEARTH &8» &fTe ejecutaron. @Victim'
+\end{Verbatim}
+
+\subsection{Rugido (cascos)}
+Con poca vida, ruge y deja lentos y débiles a los enemigos cerca. Hace un sonido que escuchan todos los que
+están alrededor.
+\begin{itemize}[leftmargin=*,itemsep=0pt]
+  \item \textbf{Activador:} \tr{DEFENSE} (cuando un jugador te pega).
+  \item \textbf{Chance:} 20\,\%. \quad \textbf{Cooldown:} 60 segundos.
+  \item \textbf{Condición:} te quedan 8 de vida o menos (4 corazones).
+  \item \textbf{Efecto:} Lentitud II y Debilidad I por 3 segundos a los enemigos en 5 bloques (\tr{DAMAGEABLE}: no
+        afecta a aliados ni a vos).
+  \item \textbf{Sonido:} \tr{PLAY\_SOUND\_OUTLOUD:<sonido>:<tono>:<volumen>}. Primero va el tono y después el volumen.
+        Más volumen = se escucha más lejos (1.0 $\approx$ 16 bloques, 2.0 $\approx$ 32).
+\end{itemize}
+
+\begin{Verbatim}[frame=single,fontsize=\small,framesep=3mm]
+rugido:
+  display: '%group-color%Rugido'
+  description: |-
+    Con poca vida, chance de rugir y dejar
+    lentos y débiles a los enemigos cerca.
+  applies-to: Casco
+  type: DEFENSE
+  group: UNIQUE
+  applies:
+    - ALL_HELMET
+  levels:
+    '1':
+      chance: 20
+      cooldown: 60
+      conditions:
+        - '%victim health% > 8 : %stop%'
+      effects:
+        - 'PLAY_SOUND_OUTLOUD:ENTITY_RAVAGER_ROAR:0.6:2.0 @Victim'
+        - 'POTION:SLOW:1:60 @Aoe{radius=5,target=DAMAGEABLE}'
+        - 'POTION:WEAKNESS:0:60 @Aoe{radius=5,target=DAMAGEABLE}'
+        - 'ACTION_BAR:&8| &fRugiste y &#ff00d9asustaste&f a los que estaban cerca. @Victim'
+\end{Verbatim}
+
+Para usar el rugido real del T-Rex del pack, cambiar el sonido por \tr{dinoearth:trex.roar} (o
+\tr{dinoearth:giganotosaurus.roar}). No está confirmado que AE acepte sonidos de un resource pack: si no suena,
+volver a \tr{ENTITY\_RAVAGER\_ROAR}.
+
+\subsection{Otros cuatro ya armados (armadura)}
+Están en \tr{servidor/advancedenchantments/enchantments-dinoearth.yml}. Hoy solo se pueden poner en armadura de
+\emph{cuero}; para cualquier armadura, cambiar en cada uno \tr{applies} por \tr{ALL\_HELMET},
+\tr{ALL\_CHESTPLATE}, \tr{ALL\_LEGGINGS} o \tr{ALL\_BOOTS}.
+
+\begin{longtable}{L{3.4cm} L{1.9cm} L{2.9cm} L{7.1cm}}
+\toprule
+\textbf{Encantamiento} & \textbf{Pieza} & \textbf{Activador} & \textbf{Qué hace}\\
+\midrule
+\endhead
+Visión de Cazador \tr{visioncazador} & Casco & \tr{EFFECT\_STATIC} & Visión nocturna mientras está puesto.\\
+Piel Escamosa \tr{pielescamosa} & Pechera & \tr{DEFENSE\_MOB} & 15\,\% menos daño de mobs y dinos (nivel 2: 25\,\%).\\
+Zancada \tr{zancada} & Pantalones & \tr{EFFECT\_STATIC} & Velocidad I (nivel 2: Velocidad II).\\
+Patas de Raptor \tr{patasderaptor} & Botas & \tr{FALL\_DAMAGE} & 40\,\% menos daño de caída (nivel 2: 70\,\%).\\
+\bottomrule
+\end{longtable}
+
+\subsection{Qué revisar en el server}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Tótem en Ejecución:} que el tótem salve al rival. Si en tu versión \tr{DO\_HARM} mata sin activarlo, hay que cambiar el efecto.
+  \item \textbf{Grupo:} todos están en \tr{UNIQUE} (el único confirmado en la wiki). Si tenés un grupo más alto para los raros, cambialo.
+  \item \textbf{Pociones:} se usaron los nombres viejos como en los ejemplos de la wiki (\tr{SLOW}). Si no aplica, probar \tr{SLOWNESS}.
+  \item \textbf{\tr{@Self} en los \tr{EFFECT\_STATIC}:} comparar con algún encantamiento de casco o botas que ya venga en tu \tr{enchantments.yml}.
+  \item \textbf{Colores de los mensajes:} si no salen, copiar el formato de color de un mensaje que ya venga en AE.
+\end{enumerate}
+
+% =====================================================================================================
+\section{Ideas para espadas (y hachas)}
+
+\begin{longtable}{L{3.5cm} L{3.4cm} L{8.6cm}}
+\toprule
+\textbf{Encantamiento} & \textbf{Activador} & \textbf{Qué hace}\\
+\midrule
+\endhead
+Ejecución \hecho & \tr{ATTACK} & Chance de rematar a un rival con 3 corazones o menos.\\
+Mordida \rec & \tr{ATTACK} & Chance de un golpe extra fuerte y lentitud corta.\\
+Garra de Raptor (sangrado) & \tr{ATTACK} & Daño chico por unos segundos después del golpe.\\
+Veneno de Dilophosaurus & \tr{ATTACK} & Chance de veneno y ceguera corta.\\
+Veneno Jurásico & \tr{ATTACK} & Veneno más largo que el normal, pero de daño bajo.\\
+Manada & \tr{ATTACK} & Más daño cuantos más aliados tengas cerca.\\
+Embestida & \tr{ATTACK} & Chance de empujar al rival hacia atrás y arriba.\\
+Rompecorazas (hacha) & \tr{ATTACK} & Le saca más durabilidad a la armadura del rival.\\
+Rematador & \tr{ATTACK} & Más daño contra quien tenga poca vida.\\
+Robo de Vida \rec & \tr{ATTACK} & Te curás una parte del daño que hacés.\\
+Frenesí & \tr{ATTACK} & Cada golpe seguido al mismo rival pega un poco más.\\
+Aturdir & \tr{ATTACK} & Chance de lentitud y ceguera de un segundo.\\
+Desgarro & \tr{ATTACK} & Chance de bajarle la vida máxima al rival por unos segundos.\\
+Colmillo Helado & \tr{ATTACK} & Chance de lentitud fuerte y fatiga minera (lo deja torpe).\\
+Sed de Sangre & \tr{KILL\_PLAYER} & Al matar a alguien, te curás una parte de la vida.\\
+Furia Primitiva & \tr{ATTACK} & Cuanto menos vida tenés, más daño hacés.\\
+Ataque en Emboscada & \tr{ATTACK} & Más daño si le pegás por la espalda.\\
+Primer Golpe & \tr{ATTACK} & El primer golpe a un rival que no estaba peleando pega mucho más.\\
+Hambre de Depredador & \tr{ATTACK} & Cada golpe te recupera un poco de hambre.\\
+Desarme & \tr{ATTACK} & Chance muy baja de que el rival suelte lo que tiene en la mano.\\
+Quebrantahuesos & \tr{ATTACK} & Chance de debilidad al rival por unos segundos.\\
+Contragolpe & \tr{DEFENSE} + \tr{ATTACK} & Si te pegan y respondés rápido, ese golpe pega más.\\
+Marca del Cazador & \tr{ATTACK} & El rival recibe más daño de todos los ataques por unos segundos (sin brillo).\\
+Terror & \tr{ATTACK} & Chance de náusea y ceguera corta.\\
+Mandíbula de Hierro & \tr{ATTACK} & Chance de que el rival no pueda comer ni usar pociones un par de segundos.\\
+Golpe Sísmico & \tr{ATTACK} & Chance de dañar y empujar a los enemigos alrededor del golpeado.\\
+Instinto de Caza & \tr{KILL\_PLAYER} & Al matar, velocidad y fuerza por unos segundos.\\
+Ancestral & \tr{ATTACK} & Más daño contra jugadores con armadura de diamante o netherite.\\
+Cazador Nocturno & \tr{ATTACK} & Más daño de noche o en lugares oscuros.\\
+Domador & \tr{ATTACK\_MOB} & Más daño contra dinos salvajes.\\
+Carnicero & \tr{KILL\_MOB} & Chance de drop extra al matar dinos.\\
+\bottomrule
+\end{longtable}
+
+% =====================================================================================================
+\section{Ideas para ballestas (y arcos)}
+
+\begin{longtable}{L{3.5cm} L{3.4cm} L{8.6cm}}
+\toprule
+\textbf{Encantamiento} & \textbf{Activador} & \textbf{Qué hace}\\
+\midrule
+\endhead
+Arpón \rec & \tr{SHOOT} & La flecha atrae al rival hacia vos. Combina con Ejecución.\\
+Escupitajo \rec & \tr{SHOOT} & La flecha envenena y ciega un segundo.\\
+Abanico de Púas \rec & \tr{SHOOT} & Chance de disparar 3 flechas en abanico.\\
+Marca Mortal \rec & \tr{SHOOT} & El rival golpeado no puede regenerar vida por unos segundos.\\
+Picada & \tr{SHOOT} & Más daño si estás más alto que el rival.\\
+Sedante & \tr{SHOOT} & La flecha da lentitud fuerte.\\
+Perforante & \tr{SHOOT} & Chance de ignorar parte de la armadura del rival.\\
+Rastro & \tr{SHOOT} & El rival recibe un poco más de daño de tus flechas por unos segundos.\\
+Trueno Jurásico & \tr{SHOOT} & Chance muy baja de rayo donde pega (cooldown largo).\\
+Recarga Rápida & \tr{SHOOT} & Chance de recargar más rápido después de pegar.\\
+Diente de Mosasaurus & \tr{SHOOT} & Más daño contra jugadores dentro del agua.\\
+Lanza Explosiva & \tr{ARROW\_HIT} & Explosión chica donde pega, sin romper bloques (cooldown largo).\\
+Fuego Volcánico & \tr{SHOOT} & Chance de prender fuego al rival.\\
+Ancla & \tr{SHOOT} & El rival no puede saltar por un par de segundos.\\
+Ojo de Cazador & \tr{SHOOT} & Más daño cuanto más lejos está el rival.\\
+Flecha Gemela & \tr{SHOOT} & Chance de que la flecha no se gaste.\\
+Desequilibrio & \tr{SHOOT} & La flecha da náusea corta.\\
+Hueso Roto & \tr{SHOOT} & Chance de debilidad al rival por unos segundos.\\
+Pluma de Pteranodon & \tr{SHOOT} & Chance de impulsarte hacia atrás al disparar, para escapar.\\
+Domador & \tr{SHOOT\_MOB} & Más daño contra dinos salvajes.\\
+\bottomrule
+\end{longtable}
+
+Trueno Jurásico y Lanza Explosiva son vistosos, pero en PvP se sienten como suerte y pueden molestar con el grief.
+
+% =====================================================================================================
+\section{Ideas para escudos}
+
+AdvancedEnchantments tiene un activador propio para escudos: \tr{SHIELD\_BLOCK} (\emph{``se activa cuando un
+jugador bloquea con un escudo''}). La wiki no aclara si en ese activador se puede usar \tr{@Attacker} ni si cuenta
+las flechas bloqueadas: es lo primero que hay que probar.
+
+\begin{longtable}{L{3.4cm} L{2.7cm} L{6.4cm} L{2.8cm}}
+\toprule
+\textbf{Encantamiento} & \textbf{Activador} & \textbf{Qué hace} & \textbf{¿Se puede?}\\
+\midrule
+\endhead
+Contraataque \rec & \tr{SHIELD\_BLOCK} & Después de bloquear, tu próximo golpe pega más (Fuerza corta). & Sí, seguro\\
+Rugido Defensivo \rec & \tr{SHIELD\_BLOCK} & Al bloquear con poca vida, lentitud y debilidad a los enemigos cerca. & Sí\\
+Mazo de Cola \rec & \tr{SHIELD\_BLOCK} & Al bloquear, chance de empujar fuerte al atacante. & Probablemente\\
+Aturdidor & \tr{SHIELD\_BLOCK} & Al bloquear, lentitud y debilidad corta al atacante. & Sí\\
+Espinas de Stegosaurus & \tr{SHIELD\_BLOCK} & Al bloquear cuerpo a cuerpo, veneno corto al atacante. & Sí\\
+Recuperación & \tr{SHIELD\_BLOCK} & Al bloquear con poca vida, regeneración unos segundos. & Sí\\
+Caparazón de Ankylosaurus & \tr{SHIELD\_BLOCK} & Al bloquear, devolverle parte del daño al atacante. & Probablemente\\
+Placas Dorsales & \tr{SHIELD\_BLOCK} & Al bloquear una flecha, devolverla al que la tiró. & Dudoso\\
+Escudo Escamoso & \tr{SHIELD\_BLOCK} & Al bloquear, chance de que el escudo no pierda durabilidad. & Dudoso\\
+Guardián de la Manada & \tr{SHIELD\_BLOCK} & Mientras bloqueás, los aliados cerca reciben menos daño. & Difícil\\
+Muralla & --- & Menos empuje mientras bloqueás. & No (mecánica vanilla)\\
+Inquebrantable & --- & Que las hachas tarden más en desactivarte el escudo. & No (mecánica vanilla)\\
+\bottomrule
+\end{longtable}
+
+% =====================================================================================================
+\section{Ideas para armaduras}
+
+\subsection{Las que ya te había pasado}
+
+\begin{longtable}{L{3.3cm} L{1.8cm} L{3.4cm} L{6.8cm}}
+\toprule
+\textbf{Encantamiento} & \textbf{Pieza} & \textbf{Activador} & \textbf{Qué hace}\\
+\midrule
+\endhead
+Rugido \hecho & Casco & \tr{DEFENSE} & Con poca vida, lentitud y debilidad a los enemigos cerca.\\
+Instinto & Casco & \tr{DEFENSE} & Chance de esquivar un golpe por completo.\\
+Ojos de Cazador \hecho & Casco & \tr{EFFECT\_STATIC} & Visión nocturna (armado como \tr{visioncazador}).\\
+Placas Dorsales & Pechera & \tr{DEFENSE} & Chance de devolver parte del daño cuerpo a cuerpo.\\
+Caparazón & Pechera & \tr{DEFENSE\_PROJECTILE} & Menos daño de flechas y tridentes.\\
+Sangre Fría & Pechera & \tr{DEFENSE} & Con poca vida, regeneración unos segundos (cooldown largo).\\
+Escamas Venenosas & Pechera & \tr{DEFENSE} & Chance de envenenar al que te pega.\\
+Piel Escamosa \hecho & Pechera & \tr{DEFENSE\_MOB} & Menos daño de mobs y dinos.\\
+Alas de Pteranodon & Pechera & \tr{EFFECT\_STATIC} & Caída lenta.\\
+Cola de Ankylosaurus & Pantalones & \tr{DEFENSE} & Chance de empujar fuerte al que te pega de cerca.\\
+Zancada \hecho & Pantalones & \tr{EFFECT\_STATIC} & Velocidad I.\\
+Huida & Pantalones & \tr{DEFENSE} & Con poca vida, chance de un impulso de velocidad.\\
+Patas de Raptor \hecho & Botas & \tr{FALL\_DAMAGE} & Menos daño de caída.\\
+Salto de Gallimimus & Botas & \tr{EFFECT\_STATIC} & Salto extra.\\
+Aletas & Botas & \tr{EFFECT\_STATIC} & Nadar más rápido y respiración acuática.\\
+Pisotón & Botas & \tr{FALL\_DAMAGE} & Al caer sobre alguien, le hacés daño y lentitud.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Ideas nuevas}
+
+\begin{longtable}{L{3.3cm} L{1.8cm} L{3.4cm} L{6.8cm}}
+\toprule
+\textbf{Encantamiento} & \textbf{Pieza} & \textbf{Activador} & \textbf{Qué hace}\\
+\midrule
+\endhead
+Corazón Prehistórico & Pechera & \tr{EFFECT\_STATIC} & Más vida máxima (Aumento de vida I).\\
+Nido & Pechera & \tr{DEFENSE} & Con poca vida, chance de absorción (corazones dorados). Cooldown largo.\\
+Escamas Reflectantes & Pechera & \tr{DEFENSE\_PROJECTILE} & Chance de devolverle parte del daño de la flecha al tirador.\\
+Cuero de Saurópodo & Pechera & \tr{DEFENSE} & Chance de Resistencia I por unos segundos al recibir un golpe.\\
+Represalia & Pechera & \tr{DEFENSE} & Chance de darle marchitamiento corto al que te pega.\\
+Último Aliento & Pechera & \tr{DEATH} & Al morir, lentitud y ceguera al que te mató.\\
+Cuero Grueso & Pantalones & \tr{EXPLOSION} & Menos daño de explosiones (creepers, TNT, cristales).\\
+Sangre Caliente & Pantalones & \tr{FIRE} & Menos daño de fuego.\\
+Carrera de Escape & Botas & \tr{JUMP} & Chance de velocidad corta al saltar.\\
+Garras Firmes & Botas & \tr{DEFENSE} & Chance de no recibir empuje al recibir un golpe.\\
+Pulmón de Spinosaurus & Casco & \tr{EFFECT\_STATIC} & Respiración acuática puesta.\\
+Instinto de Supervivencia & Casco & \tr{DEFENSE} & Con poca vida, Velocidad II corta para escapar.\\
+Hambre Voraz & Casco & \tr{EAT} & Al comer, regeneración corta.\\
+Olfato & Casco & \tr{DEFENSE\_PROJECTILE} & Si te pega una flecha, velocidad corta para ir hacia el tirador.\\
+Sangre de Manada & Cualquiera & \tr{KILL\_PLAYER} & Al matar a alguien, regeneración corta.\\
+Camuflaje & Pechera & \tr{REPEATING} & Agachado y quieto, invisibilidad corta (cooldown largo; hay que confirmar que AE pueda saber si estás agachado).\\
+\bottomrule
+\end{longtable}
+
+% =====================================================================================================
+\section{Para que no rompa el PvP}
+\begin{itemize}[leftmargin=*]
+  \item Los golpes fuertes (Mordida, Ejecución, Rugido, Sangre Fría, Desarme) van con \textbf{chance baja y cooldown}.
+  \item Los efectos permanentes (Visión, Velocidad, Respiración, Corazón Prehistórico) en \textbf{nivel 1}: Velocidad II en PvP se siente mucho.
+  \item Que no se acumulen dos del mismo tipo: por ejemplo, devolver daño en la pechera \emph{y} en el escudo, o Ejecución con Rematador y Furia Primitiva al máximo.
+  \item Desgarro y Golpe Sísmico pegan mucho en peleas de clanes: dejarlos en nivel 1.
+  \item \textbf{Nunca usar brillo (\emph{glowing})} como efecto: con VulkanMod hace crashear el juego.
+\end{itemize}
+
+\end{document}

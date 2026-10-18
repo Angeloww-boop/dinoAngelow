@@ -107,6 +107,21 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
   repo extendedclip, scope provided; se registra solo si el plugin esta), Vault (`Money`, por reflexion). Tops:
   `stats/PlayerStats` (jugadores.yml; dinos y genes salen de `DinoRegistry`, que ahora guarda el puntaje de genes),
   `/dino top`.
+- Spawn natural (0.17, `spawn/NaturalSpawner` + `spawn/EarthMap`): el server es un **mapa de la Tierra a escala**
+  (equirectangular de 73728 x 36864 bloques, de -36864 -18431 a 36863 18431: 204.8 bloques por grado, centro en 0 0,
+  1 bloque ~ 543 m; en `natural-spawn.map`). Cada especie aparece en la region real de sus fosiles (cajas de latitud/longitud en
+  `natural-spawn.regions`, se suman si se superponen), el mosasaurus en agua honda de cualquier lado (`ocean`) y fuera
+  de las regiones unas comunes (`elsewhere`, menos seguido). Cerca de jugadores en survival, a sus espaldas, solo en
+  chunks cargados y en naturaleza (`Wilderness`), con topes por jugador y total. Marcados con `keys.natural`; si nadie
+  se acerca en `despawn-minutes` desaparecen (sweep cada 20 s, y al volver a cargar un chunk abandonado por
+  `EntitiesLoadEvent`, con `natural_seen` en el PDC). Nunca los domesticados, atados, prestados ni madres con nido.
+  `/dino mapa` (admin) dice latitud/longitud, region y que aparece. `MapCheck` prueba la cuenta con ciudades reales.
+  Para apagar una region: pesos en 0 (si se borra, el ConfigUpdater la vuelve a agregar).
+- Chunk que se desactiva (jugador que se aleja): Paper dispara `EntityRemoveFromWorldEvent` con el lobo VIVO y no deja
+  borrar las partes en ese momento (avisaba una vez por parte). `DinoListener.onRemove` ya no las borra si el lobo no
+  esta muerto (no se guardan: se van con el chunk), y `Dino.buildModel` saca las partes viejas que el lobo todavia
+  lleva encima si el chunk se reactiva sin descargarse; antes eso dejaba un modelo duplicado congelado (0.17,
+  probado en un Paper 1.21.11 local: 60 partes viejas borradas al reactivar, 0 avisos).
 - Resource pack: el plugin lo manda solo (`PackManager`, modo `url` o `host`). El zip es determinista y
   una copia va dentro del jar (`plugin/src/main/resources/pack/`).
 
@@ -198,5 +213,9 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   diseñado: dimorphodon ~60 % más grande que antes, los de 0.85 ~12 % más, mosasaurus/giga/spino/T-Rex algo más chicos),
   primera pose sin corrimiento (altura de montura por escala), misiones de avistar: los dinos ya contados se guardan en
   el PDC del jugador (`missions_seen`) y no vuelven a contar al salir/entrar o pasar por el lobby (`SeenCheck`).
-- Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; spawn natural por bioma respetando Towny/WorldGuard; más especies
+- v0.17.0: spawn natural por regiones reales del mapa de la Tierra (ver arriba) y arreglo de modelos duplicados al
+  reactivarse un chunk. Probado en un Paper 1.21.11 local sin jugadores (`spawnAround` desde un plugin de prueba): cada
+  region da solo sus especies, el oceano solo mosasaurus, desaparecen solos y al recargar un chunk abandonado.
+  Falta en el juego: `/dino mapa` y el spawn con jugadores de verdad.
+- Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

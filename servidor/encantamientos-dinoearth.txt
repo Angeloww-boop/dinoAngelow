@@ -1,0 +1,277 @@
+=====================================================================
+  DINOEARTH - ENCANTAMIENTOS PARA ADVANCEDENCHANTMENTS
+=====================================================================
+
+CÓMO LEER ESTE ARCHIVO
+- (HECHO)       = ya está armado en formato de AdvancedEnchantments.
+- (RECOMENDADO) = bueno para empezar.
+- Activador     = el "trigger" de AdvancedEnchantments con el que se haria.
+                  Todos salen de la lista oficial de la wiki:
+                  https://wiki.advancedplugins.net/abilities/triggers.md
+- Los nombres internos van en minúsculas, sin espacios ni tildes (ej: ejecucion).
+- Se pegan al final de plugins/AdvancedEnchantments/enchantments.yml,
+  después /ae reload, y se ponen con el item en la mano:
+  /ae enchant <nombre> <nivel>
+
+
+=====================================================================
+  1. ENCANTAMIENTOS YA ARMADOS
+=====================================================================
+
+---------------------------------------------------------------------
+EJECUCION (espadas)
+---------------------------------------------------------------------
+Remata a un rival que tiene 3 corazones o menos. Respeta el tótem:
+el golpe es un daño normal (DO_HARM), así que el tótem lo salva como
+a cualquier golpe.
+
+- Activador: ATTACK (solo al pegarle a un jugador)
+- Chance: 15 %
+- Cooldown: 90 segundos
+- Condición: el rival tiene 6 de vida o menos (3 corazones)
+
+ejecucion:
+  display: '%group-color%Ejecución'
+  description: |-
+    Chance de rematar a un rival
+    que tenga 3 corazones o menos.
+  applies-to: Espadas
+  type: ATTACK
+  group: UNIQUE
+  applies:
+    - ALL_SWORD
+  levels:
+    '1':
+      chance: 15
+      cooldown: 90
+      conditions:
+        - '%victim health% > 6 : %stop%'
+      effects:
+        - 'DO_HARM:100 @Victim'
+        - 'MESSAGE:&9&lDINOEARTH &8» &fEjecutaste a tu rival. @Attacker'
+        - 'MESSAGE:&9&lDINOEARTH &8» &fTe ejecutaron. @Victim'
+
+---------------------------------------------------------------------
+RUGIDO (cascos)
+---------------------------------------------------------------------
+Con poca vida, ruge y deja lentos y débiles a los enemigos cerca.
+Hace un sonido que escuchan todos los que están alrededor.
+
+- Activador: DEFENSE (cuando un jugador te pega)
+- Chance: 20 %
+- Cooldown: 60 segundos
+- Condición: te quedan 8 de vida o menos (4 corazones)
+- Efecto: Lentitud II y Debilidad I por 3 segundos a los enemigos en
+  5 bloques (DAMAGEABLE: no afecta a aliados ni a vos)
+- Sonido: PLAY_SOUND_OUTLOUD:<sonido>:<tono>:<volumen>
+  Primero va el TONO y después el VOLUMEN.
+  Más volumen = se escucha más lejos (1.0 = unos 16 bloques, 2.0 = unos 32).
+
+rugido:
+  display: '%group-color%Rugido'
+  description: |-
+    Con poca vida, chance de rugir y dejar
+    lentos y débiles a los enemigos cerca.
+  applies-to: Casco
+  type: DEFENSE
+  group: UNIQUE
+  applies:
+    - ALL_HELMET
+  levels:
+    '1':
+      chance: 20
+      cooldown: 60
+      conditions:
+        - '%victim health% > 8 : %stop%'
+      effects:
+        - 'PLAY_SOUND_OUTLOUD:ENTITY_RAVAGER_ROAR:0.6:2.0 @Victim'
+        - 'POTION:SLOW:1:60 @Aoe{radius=5,target=DAMAGEABLE}'
+        - 'POTION:WEAKNESS:0:60 @Aoe{radius=5,target=DAMAGEABLE}'
+        - 'ACTION_BAR:&8| &fRugiste y &#ff00d9asustaste&f a los que estaban cerca. @Victim'
+
+Para usar el rugido real del T-Rex del pack, cambiar el sonido por
+dinoearth:trex.roar (o dinoearth:giganotosaurus.roar). No está confirmado
+que AE acepte sonidos de un resource pack: si no suena, volver a
+ENTITY_RAVAGER_ROAR.
+
+---------------------------------------------------------------------
+OTROS 4 YA ARMADOS (armadura)
+---------------------------------------------------------------------
+Estan en servidor/advancedenchantments/enchantments-dinoearth.yml.
+Hoy solo se pueden poner en armadura de CUERO. Para cualquier armadura,
+cambiar en cada uno "applies" por ALL_HELMET, ALL_CHESTPLATE,
+ALL_LEGGINGS o ALL_BOOTS.
+
+- Visión de Cazador (visioncazador) - Casco - EFFECT_STATIC
+  Visión nocturna mientras está puesto.
+- Piel Escamosa (pielescamosa) - Pechera - DEFENSE_MOB
+  15 % menos daño de mobs y dinos (nivel 2: 25 %).
+- Zancada (zancada) - Pantalones - EFFECT_STATIC
+  Velocidad I (nivel 2: Velocidad II).
+- Patas de Raptor (patasderaptor) - Botas - FALL_DAMAGE
+  40 % menos daño de caída (nivel 2: 70 %).
+
+---------------------------------------------------------------------
+QUÉ REVISAR EN EL SERVER
+---------------------------------------------------------------------
+1. Tótem en Ejecución: que el tótem salve al rival. Si en tu versión
+   DO_HARM mata sin activarlo, hay que cambiar el efecto.
+2. Grupo: todos están en UNIQUE (el único confirmado en la wiki). Si
+   tenés un grupo más alto para los raros, cambialo.
+3. Pociones: se usaron los nombres viejos como en los ejemplos de la
+   wiki (SLOW). Si no aplica, probar SLOWNESS.
+4. @Self en los EFFECT_STATIC: comparar con algún encantamiento de
+   casco o botas que ya venga en tu enchantments.yml.
+5. Colores de los mensajes: si no salen, copiar el formato de color de
+   un mensaje que ya venga en AE.
+
+
+=====================================================================
+  2. IDEAS PARA ESPADAS (Y HACHAS)
+=====================================================================
+Formato: Nombre - Activador - Qué hace
+
+- Ejecución (HECHO) - ATTACK - Chance de rematar a un rival con 3 corazones o menos.
+- Mordida (RECOMENDADO) - ATTACK - Chance de un golpe extra fuerte y lentitud corta.
+- Garra de Raptor (sangrado) - ATTACK - Daño chico por unos segundos después del golpe.
+- Veneno de Dilophosaurus - ATTACK - Chance de veneno y ceguera corta.
+- Veneno Jurásico - ATTACK - Veneno más largo que el normal, pero de daño bajo.
+- Manada - ATTACK - Más daño cuantos más aliados tengas cerca.
+- Embestida - ATTACK - Chance de empujar al rival hacia atrás y arriba.
+- Rompecorazas (hacha) - ATTACK - Le saca más durabilidad a la armadura del rival.
+- Rematador - ATTACK - Más daño contra quien tenga poca vida.
+- Robo de Vida (RECOMENDADO) - ATTACK - Te curás una parte del daño que hacés.
+- Frenesí - ATTACK - Cada golpe seguido al mismo rival pega un poco más.
+- Aturdir - ATTACK - Chance de lentitud y ceguera de un segundo.
+- Desgarro - ATTACK - Chance de bajarle la vida máxima al rival por unos segundos.
+- Colmillo Helado - ATTACK - Chance de lentitud fuerte y fatiga minera (lo deja torpe).
+- Sed de Sangre - KILL_PLAYER - Al matar a alguien, te curás una parte de la vida.
+- Furia Primitiva - ATTACK - Cuanto menos vida tenés, más daño hacés.
+- Ataque en Emboscada - ATTACK - Más daño si le pegás por la espalda.
+- Primer Golpe - ATTACK - El primer golpe a un rival que no estaba peleando pega mucho más.
+- Hambre de Depredador - ATTACK - Cada golpe te recupera un poco de hambre.
+- Desarme - ATTACK - Chance muy baja de que el rival suelte lo que tiene en la mano.
+- Quebrantahuesos - ATTACK - Chance de debilidad al rival por unos segundos.
+- Contragolpe - DEFENSE + ATTACK - Si te pegan y respondés rápido, ese golpe pega más.
+- Marca del Cazador - ATTACK - El rival recibe más daño de todos los ataques por unos segundos (sin brillo).
+- Terror - ATTACK - Chance de náusea y ceguera corta.
+- Mandíbula de Hierro - ATTACK - Chance de que el rival no pueda comer ni usar pociones un par de segundos.
+- Golpe Sísmico - ATTACK - Chance de dañar y empujar a los enemigos alrededor del golpeado.
+- Instinto de Caza - KILL_PLAYER - Al matar, velocidad y fuerza por unos segundos.
+- Ancestral - ATTACK - Más daño contra jugadores con armadura de diamante o netherite.
+- Cazador Nocturno - ATTACK - Más daño de noche o en lugares oscuros.
+- Domador - ATTACK_MOB - Más daño contra dinos salvajes.
+- Carnicero - KILL_MOB - Chance de drop extra al matar dinos.
+
+
+=====================================================================
+  3. IDEAS PARA BALLESTAS (Y ARCOS)
+=====================================================================
+Formato: Nombre - Activador - Qué hace
+
+- Arpón (RECOMENDADO) - SHOOT - La flecha atrae al rival hacia vos. Combina con Ejecución.
+- Escupitajo (RECOMENDADO) - SHOOT - La flecha envenena y ciega un segundo.
+- Abanico de Púas (RECOMENDADO) - SHOOT - Chance de disparar 3 flechas en abanico.
+- Marca Mortal (RECOMENDADO) - SHOOT - El rival golpeado no puede regenerar vida por unos segundos.
+- Picada - SHOOT - Más daño si estás más alto que el rival.
+- Sedante - SHOOT - La flecha da lentitud fuerte.
+- Perforante - SHOOT - Chance de ignorar parte de la armadura del rival.
+- Rastro - SHOOT - El rival recibe un poco más de daño de tus flechas por unos segundos.
+- Trueno Jurásico - SHOOT - Chance muy baja de rayo donde pega (cooldown largo).
+- Recarga Rápida - SHOOT - Chance de recargar más rápido después de pegar.
+- Diente de Mosasaurus - SHOOT - Más daño contra jugadores dentro del agua.
+- Lanza Explosiva - ARROW_HIT - Explosión chica donde pega, sin romper bloques (cooldown largo).
+- Fuego Volcánico - SHOOT - Chance de prender fuego al rival.
+- Ancla - SHOOT - El rival no puede saltar por un par de segundos.
+- Ojo de Cazador - SHOOT - Más daño cuanto más lejos está el rival.
+- Flecha Gemela - SHOOT - Chance de que la flecha no se gaste.
+- Desequilibrio - SHOOT - La flecha da náusea corta.
+- Hueso Roto - SHOOT - Chance de debilidad al rival por unos segundos.
+- Pluma de Pteranodon - SHOOT - Chance de impulsarte hacia atrás al disparar, para escapar.
+- Domador - SHOOT_MOB - Más daño contra dinos salvajes.
+
+Ojo: Trueno Jurásico y Lanza Explosiva son vistosos, pero en PvP se
+sienten como suerte y pueden molestar con el grief.
+
+
+=====================================================================
+  4. IDEAS PARA ESCUDOS
+=====================================================================
+AdvancedEnchantments tiene un activador propio para escudos:
+SHIELD_BLOCK ("se activa cuando un jugador bloquea con un escudo").
+La wiki no aclara si en ese activador se puede usar @Attacker ni si
+cuenta las flechas bloqueadas: es lo primero que hay que probar.
+
+Formato: Nombre - Activador - Qué hace - ¿Se puede?
+
+- Contraataque (RECOMENDADO) - SHIELD_BLOCK - Después de bloquear, tu próximo golpe pega más (Fuerza corta). - SÍ, SEGURO
+- Rugido Defensivo (RECOMENDADO) - SHIELD_BLOCK - Al bloquear con poca vida, lentitud y debilidad a los enemigos cerca. - SÍ
+- Mazo de Cola (RECOMENDADO) - SHIELD_BLOCK - Al bloquear, chance de empujar fuerte al atacante. - PROBABLEMENTE
+- Aturdidor - SHIELD_BLOCK - Al bloquear, lentitud y debilidad corta al atacante. - SÍ
+- Espinas de Stegosaurus - SHIELD_BLOCK - Al bloquear cuerpo a cuerpo, veneno corto al atacante. - SÍ
+- Recuperación - SHIELD_BLOCK - Al bloquear con poca vida, regeneración unos segundos. - SÍ
+- Caparazón de Ankylosaurus - SHIELD_BLOCK - Al bloquear, devolverle parte del daño al atacante. - PROBABLEMENTE
+- Placas Dorsales - SHIELD_BLOCK - Al bloquear una flecha, devolverla al que la tiró. - DUDOSO
+- Escudo Escamoso - SHIELD_BLOCK - Al bloquear, chance de que el escudo no pierda durabilidad. - DUDOSO
+- Guardián de la Manada - SHIELD_BLOCK - Mientras bloqueás, los aliados cerca reciben menos daño. - DIFÍCIL
+- Muralla - (ninguno) - Menos empuje mientras bloqueás. - NO (mecánica vanilla)
+- Inquebrantable - (ninguno) - Que las hachas tarden más en desactivarte el escudo. - NO (mecánica vanilla)
+
+
+=====================================================================
+  5. IDEAS PARA ARMADURAS
+=====================================================================
+Formato: Nombre - Pieza - Activador - Qué hace
+
+--- Las que ya te había pasado ---
+- Rugido (HECHO) - Casco - DEFENSE - Con poca vida, lentitud y debilidad a los enemigos cerca.
+- Instinto - Casco - DEFENSE - Chance de esquivar un golpe por completo.
+- Ojos de Cazador (HECHO como visioncazador) - Casco - EFFECT_STATIC - Visión nocturna.
+- Placas Dorsales - Pechera - DEFENSE - Chance de devolver parte del daño cuerpo a cuerpo.
+- Caparazón - Pechera - DEFENSE_PROJECTILE - Menos daño de flechas y tridentes.
+- Sangre Fría - Pechera - DEFENSE - Con poca vida, regeneración unos segundos (cooldown largo).
+- Escamas Venenosas - Pechera - DEFENSE - Chance de envenenar al que te pega.
+- Piel Escamosa (HECHO) - Pechera - DEFENSE_MOB - Menos daño de mobs y dinos.
+- Alas de Pteranodon - Pechera - EFFECT_STATIC - Caída lenta.
+- Cola de Ankylosaurus - Pantalones - DEFENSE - Chance de empujar fuerte al que te pega de cerca.
+- Zancada (HECHO) - Pantalones - EFFECT_STATIC - Velocidad I.
+- Huida - Pantalones - DEFENSE - Con poca vida, chance de un impulso de velocidad.
+- Patas de Raptor (HECHO) - Botas - FALL_DAMAGE - Menos daño de caída.
+- Salto de Gallimimus - Botas - EFFECT_STATIC - Salto extra.
+- Aletas - Botas - EFFECT_STATIC - Nadar más rápido y respiración acuática.
+- Pisotón - Botas - FALL_DAMAGE - Al caer sobre alguien, le hacés daño y lentitud.
+
+--- Ideas nuevas ---
+- Corazón Prehistórico - Pechera - EFFECT_STATIC - Más vida máxima (Aumento de vida I).
+- Nido - Pechera - DEFENSE - Con poca vida, chance de absorción (corazones dorados). Cooldown largo.
+- Escamas Reflectantes - Pechera - DEFENSE_PROJECTILE - Chance de devolverle parte del daño de la flecha al tirador.
+- Cuero de Saurópodo - Pechera - DEFENSE - Chance de Resistencia I por unos segundos al recibir un golpe.
+- Represalia - Pechera - DEFENSE - Chance de darle marchitamiento corto al que te pega.
+- Último Aliento - Pechera - DEATH - Al morir, lentitud y ceguera al que te mató.
+- Cuero Grueso - Pantalones - EXPLOSION - Menos daño de explosiones (creepers, TNT, cristales).
+- Sangre Caliente - Pantalones - FIRE - Menos daño de fuego.
+- Carrera de Escape - Botas - JUMP - Chance de velocidad corta al saltar.
+- Garras Firmes - Botas - DEFENSE - Chance de no recibir empuje al recibir un golpe.
+- Pulmón de Spinosaurus - Casco - EFFECT_STATIC - Respiración acuática puesta.
+- Instinto de Supervivencia - Casco - DEFENSE - Con poca vida, Velocidad II corta para escapar.
+- Hambre Voraz - Casco - EAT - Al comer, regeneración corta.
+- Olfato - Casco - DEFENSE_PROJECTILE - Si te pega una flecha, velocidad corta para ir hacia el tirador.
+- Sangre de Manada - Cualquiera - KILL_PLAYER - Al matar a alguien, regeneración corta.
+- Camuflaje - Pechera - REPEATING - Agachado y quieto, invisibilidad corta (cooldown largo;
+  hay que confirmar que AE pueda saber si estás agachado).
+
+
+=====================================================================
+  6. PARA QUE NO ROMPA EL PVP
+=====================================================================
+- Los golpes fuertes (Mordida, Ejecución, Rugido, Sangre Fría, Desarme)
+  van con chance baja y cooldown.
+- Los efectos permanentes (Visión, Velocidad, Respiración, Corazón
+  Prehistórico) en nivel 1: Velocidad II en PvP se siente mucho.
+- Que no se acumulen dos del mismo tipo: por ejemplo, devolver daño en
+  la pechera Y en el escudo, o Ejecución con Rematador y Furia Primitiva
+  al máximo.
+- Desgarro y Golpe Sísmico pegan mucho en peleas de clanes: dejarlos en
+  nivel 1.
+- NUNCA usar brillo (glowing) como efecto: con VulkanMod hace crashear
+  el juego.

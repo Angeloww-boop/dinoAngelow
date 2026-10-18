@@ -1,0 +1,81 @@
+# Encantamientos del Set del Cazador Jurasico (DinoEarth) para AdvancedEnchantments.
+# Pegalos al final de plugins/AdvancedEnchantments/enchantments.yml y despues /ae reload.
+# Se ponen con la pieza en la mano: /ae enchant <nombre> <nivel>   (ej: /ae enchant zancada 1)
+#
+# Formato sacado de la wiki oficial (ae.advancedplugins.net, "Creating Enchantments"):
+#   - el nombre de cada uno va en minusculas a-z, sin espacios ni tildes
+#   - applies-to es solo el texto que se muestra; lo que limita a que pieza se le puede poner es "applies"
+#   - chance va de 0 a 100 (100 si no se pone), cooldown en segundos
+#   - triggers usados: EFFECT_STATIC (al ponerse/sacarse la armadura), DEFENSE_MOB (te pega un mob: los dinos son
+#     mobs), FALL_DAMAGE (daño de caida)
+# Lo unico NO confirmado en la wiki es el "@Self" de los EFFECT_STATIC: compara con algun encantamiento de botas o casco
+# que ya venga en tu enchantments.yml (busca "EFFECT_STATIC") y copia como escribe el objetivo.
+
+visioncazador:
+  display: '%group-color%Visión de Cazador'
+  description: |-
+    Visión nocturna mientras
+    tengas puesto el casco.
+  applies-to: Casco
+  type: EFFECT_STATIC
+  group: UNIQUE
+  applies:
+    - LEATHER_HELMET
+  levels:
+    '1':
+      effects:
+        - 'POTION:NIGHT_VISION:0 @Self'
+
+pielescamosa:
+  display: '%group-color%Piel Escamosa'
+  description: |-
+    Recibís menos daño de
+    dinosaurios y otros mobs.
+  applies-to: Peto
+  type: DEFENSE_MOB
+  group: UNIQUE
+  applies:
+    - LEATHER_CHESTPLATE
+  levels:
+    '1':
+      effects:
+        - 'DECREASE_DAMAGE:15'
+    '2':
+      effects:
+        - 'DECREASE_DAMAGE:25'
+
+zancada:
+  display: '%group-color%Zancada'
+  description: |-
+    Velocidad mientras tengas
+    puestas las grebas.
+  applies-to: Grebas
+  type: EFFECT_STATIC
+  group: UNIQUE
+  applies:
+    - LEATHER_LEGGINGS
+  levels:
+    '1':
+      effects:
+        - 'POTION:SPEED:0 @Self'
+    '2':
+      effects:
+        - 'POTION:SPEED:1 @Self'
+
+patasderaptor:
+  display: '%group-color%Patas de Raptor'
+  description: |-
+    Recibís menos daño
+    al caer de altura.
+  applies-to: Botas
+  type: FALL_DAMAGE
+  group: UNIQUE
+  applies:
+    - LEATHER_BOOTS
+  levels:
+    '1':
+      effects:
+        - 'DECREASE_DAMAGE:40'
+    '2':
+      effects:
+        - 'DECREASE_DAMAGE:70'

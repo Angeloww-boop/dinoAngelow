@@ -160,6 +160,99 @@ genetics:
 # Nidos salvajes: las hembras adultas salvajes de las especies con huevo arman un nido cada tanto y lo cuidan.
 # Se le puede sacar un huevo con click izquierdo (la cria nace domesticada por quien lo pone), pero la madre
 # ataca a quien se acerca o le roba. Es la forma de conseguir T-Rex y Giganotosaurus sin admins.
+# Spawn natural en el mapa de la Tierra a escala: cada especie aparece donde se encontraron sus fosiles de verdad.
+# Cada "interval-seconds", por cada jugador en survival/aventura hay "chance" de que aparezca un grupo a sus
+# espaldas, entre min-distance y max-distance bloques, solo en chunks ya cargados y (only-wilderness) fuera de pueblos
+# de Towny y regiones de WorldGuard. /dino mapa dice donde estas y que puede aparecer ahi.
+natural-spawn:
+  enabled: true
+  worlds: []                 # vacio = todos los mundos normales (overworld); si no, ej. [world]
+  interval-seconds: 30
+  chance: 0.4
+  min-distance: 40
+  max-distance: 80
+  behind-player: true        # que aparezcan a la espalda del jugador y no en su cara
+  near-radius: 128
+  max-near-player: 4         # salvajes naturales como maximo cerca de cada jugador
+  max-total: 120             # salvajes naturales cargados como maximo en todo el server
+  only-wilderness: true
+  # si nadie se les acerca a menos de despawn-radius bloques por despawn-minutes, desaparecen (los domesticados,
+  # atados, prestados y las madres con nido nunca)
+  despawn-minutes: 5
+  despawn-radius: 128
+  # Calibracion del mapa (equirectangular): x = blocks-per-degree-x * longitud + x-at-longitude-0,
+  # z = z-at-latitude-0 - blocks-per-degree-z * latitud. Sale de las esquinas del mapa: de -36864 -18431 (180 O, 90 N)
+  # a 36863 18431 (180 E, 90 S) son 73728 x 36864 bloques = 204.8 bloques por grado, con el centro en 0 0.
+  map:
+    blocks-per-degree-x: 204.8
+    x-at-longitude-0: 0
+    blocks-per-degree-z: 204.8
+    z-at-latitude-0: 0
+  # agua honda (en cualquier lado del mapa): especies acuaticas
+  ocean:
+    chance: 0.5
+    min-depth: 4
+    species:
+      mosasaurus: 1
+  # tierra fuera de todas las regiones: unas pocas especies comunes, menos seguido
+  elsewhere:
+    chance: 0.35
+    species:
+      compsognathus: 3
+      gallimimus: 1
+      parasaurolophus: 1
+      triceratops: 1
+      raptor: 1
+  # regiones del mundo real: latitud y longitud [desde, hasta] (sur y oeste en negativo). Si se superponen,
+  # se suman sus especies. El numero de cada especie es su peso (mas alto = mas seguido).
+  regions:
+    patagonia:                       # Neuquen y Chubut
+      latitude: [-56, -33]
+      longitude: [-76, -62]
+      species:
+        giganotosaurus: 1
+        carnotaurus: 3
+    oeste-norteamerica:              # Montana, Wyoming, Dakota, Colorado, Utah, Alberta
+      latitude: [34, 56]
+      longitude: [-122, -100]
+      species:
+        trex: 1
+        triceratops: 4
+        ankylosaurus: 2
+        parasaurolophus: 3
+        stegosaurus: 3
+    sudoeste-eeuu:                   # Arizona
+      latitude: [31, 37.5]
+      longitude: [-115, -107]
+      species:
+        dilophosaurus: 4
+    grandes-llanuras:                # Kansas
+      latitude: [36, 42]
+      longitude: [-102, -94]
+      species:
+        pteranodon: 3
+    gobi:                            # Mongolia
+      latitude: [38, 50]
+      longitude: [88, 118]
+      species:
+        raptor: 4
+        gallimimus: 4
+    norte-africa:                    # Marruecos y Egipto
+      latitude: [18, 36]
+      longitude: [-14, 34]
+      species:
+        spinosaurus: 2
+    europa-central:                  # Alemania y Francia
+      latitude: [43, 55]
+      longitude: [-2, 16]
+      species:
+        compsognathus: 4
+    inglaterra:
+      latitude: [49.5, 56]
+      longitude: [-7, 2]
+      species:
+        dimorphodon: 3
+
 nests:
   enabled: true
   chance: 0.15               # probabilidad por minuto de que una hembra salvaje sin nido arme uno

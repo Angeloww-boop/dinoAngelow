@@ -61,6 +61,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private RecallManager recall;
     private com.dinoearth.race.RaceManager races;
     private com.dinoearth.plus.PlusAbilities plusAbilities;
+    private com.dinoearth.spawn.NaturalSpawner natural;
     private MissionManager missions;
     private PlayerStats stats;
     private NestManager nests;
@@ -126,6 +127,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(missions, this);
         races = new com.dinoearth.race.RaceManager(this, dinos, keys);
         plusAbilities = new com.dinoearth.plus.PlusAbilities(this, dinos);
+        natural = new com.dinoearth.spawn.NaturalSpawner(this, dinos, keys);
+        getServer().getPluginManager().registerEvents(natural, this);
         getServer().getPluginManager().registerEvents(plusAbilities, this);
         getServer().getPluginManager().registerEvents(races, this);
         recall = new RecallManager(this, dinos, registry, keys, settings);
@@ -305,11 +308,16 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 chat(sender, nests.forceNest(d) ? "nido-hecho" : "nido-no", "especie", d.species().name);
             }
             case "stats", "estadisticas" -> stats(sender);
+            case "mapa", "region" -> {
+                if (!(sender instanceof Player player)) return chat(sender, "solo-jugadores");
+                natural.info(player);
+            }
             case "reload", "recargar" -> {
                 lang.reload();
                 reloadConfig();
                 races.loadConfig();
                 plusAbilities.loadConfig();
+                natural.loadConfig();
                 for (Species s : Species.ALL) s.applyTexts(lang);
                 chat(sender, "recargado");
             }
@@ -688,7 +696,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
             return filter(admin ? List.of("spawn", "egg", "grow", "tame", "nido", "item", "mis", "llamar", "misiones", "top", "carrera",
-                    "dar", "aceptar", "rechazar", "remove", "count", "stats", "comedero", "dinopedia", "hambre", "pack", "reload")
+                    "dar", "aceptar", "rechazar", "remove", "count", "stats", "mapa", "comedero", "dinopedia", "hambre", "pack", "reload")
                     : List.of("mis", "llamar", "misiones", "top", "carrera", "dar", "aceptar", "rechazar", "pack"), args[0]);
         }
         String sub = args[0].toLowerCase();

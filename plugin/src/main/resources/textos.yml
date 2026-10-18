@@ -438,3 +438,19 @@ plus:
     TURBO: 'Turbo'
     ARRANQUE: 'Arranque'
     TALA: 'Tala'
+
+# ---------------------------------------------------------------- spawn natural (/dino mapa)
+mapa:
+  norte: 'N'
+  sur: 'S'
+  este: 'E'
+  oeste: 'O'
+regiones:
+  patagonia: 'Patagonia'
+  oeste-norteamerica: 'Oeste de Norteamérica'
+  sudoeste-eeuu: 'Sudoeste de Estados Unidos'
+  grandes-llanuras: 'Grandes Llanuras'
+  gobi: 'Desierto de Gobi'
+  norte-africa: 'Norte de África'
+  europa-central: 'Europa central'
+  inglaterra: 'Inglaterra'

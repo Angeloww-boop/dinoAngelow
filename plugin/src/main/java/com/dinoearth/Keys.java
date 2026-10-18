@@ -62,6 +62,9 @@ public final class Keys {
     public final NamespacedKey nestBorn;
     /** Lobo: madre salvaje que cuida un nido (uuid de la Interaction del nido). */
     public final NamespacedKey guarding;
+    // spawn natural: aparecio solo, y la ultima vez que hubo un jugador cerca (para que desaparezca si queda solo)
+    public final NamespacedKey natural;
+    public final NamespacedKey naturalSeen;
     public final NamespacedKey nestCooldown;
 
     private final Plugin plugin;
@@ -114,6 +117,8 @@ public final class Keys {
         nestEggs = new NamespacedKey(plugin, "nest_eggs");
         nestBorn = new NamespacedKey(plugin, "nest_born");
         guarding = new NamespacedKey(plugin, "guarding");
+        natural = new NamespacedKey(plugin, "natural");
+        naturalSeen = new NamespacedKey(plugin, "natural_seen");
         nestCooldown = new NamespacedKey(plugin, "nest_cooldown");
         this.plugin = plugin;
     }
@@ -140,6 +145,11 @@ public final class Keys {
 
     public void tagPart(Display display) {
         display.getPersistentDataContainer().set(part, PersistentDataType.STRING, session);
+    }
+
+    /** Display de un modelo nuestro (de este arranque o de uno anterior). */
+    public boolean isPart(Entity e) {
+        return e instanceof Display && e.getPersistentDataContainer().has(part, PersistentDataType.STRING);
     }
 
     /** Display de un modelo nuestro que quedo de un arranque anterior. */

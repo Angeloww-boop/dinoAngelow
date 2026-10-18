@@ -257,7 +257,15 @@ public final class Dino {
 
     // ------------------------------------------------------------ modelo y tamaño
     private void buildModel() {
-        if (model != null) model.remove();
+        if (model != null) {
+            model.remove();
+        } else {
+            // primer modelo de este Dino: si el lobo vuelve de un chunk que se desactivo sin descargarse, todavia lleva
+            // encima las partes del modelo anterior (no se pudieron borrar); si no, quedaria un modelo duplicado congelado
+            for (org.bukkit.entity.Entity p : wolf.getPassengers()) {
+                if (keys.isPart(p)) p.remove();
+            }
+        }
         form = isBabyForm() ? rig.baby() : rig.adult();
         String modelName = isBabyForm() ? "baby" : (male ? "male" : "female");
         NamespacedKey[] items = rig.items(form, variant, modelName);
@@ -1154,12 +1162,18 @@ public final class Dino {
     }
 
     public void remove() {
+        remove(true);
+    }
+
+    /** @param parts false si su chunk dejo de estar activo: las partes y el cartel no se guardan y se van con el chunk */
+    public void remove(boolean parts) {
         // que no quede flotando si se descarga el chunk en pleno vuelo (o yendo en un hombro)
         if ((flying || swimming || escort != null) && wolf.isValid()) {
             wolf.setGravity(true);
             wolf.setCollidable(true);
         }
         save();
+        if (!parts) return;
         model.remove();
         removePlate();
     }

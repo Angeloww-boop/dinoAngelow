@@ -550,17 +550,37 @@ class DinoScene(Scene):
         self.ppx = min(target / (self.length * 0.9 + 8), H * 0.54 / (self.height + 4))
         if kind == "swim":
             self.ppx = min(target / (self.length * 0.85), H * 0.5 / (self.height + 4))
-        self.canvas = (int(W * 0.95), int(H * 0.95))
-        self.origin_row = int(self.canvas[1] * (0.5 if kind in ("flyer", "swim") else 0.86))
         self.screen_origin = (W * (0.62 if kind == "flyer" else 0.55),
                               GROUND + (int(H * 0.08) if env == "river" else 0)
                               if kind not in ("flyer", "swim") else H * (0.6 if kind == "flyer" else 0.55))
+        self.fit()
+
+    def fit(self):
+        """Encuadre: lienzo grande (nada se corta al renderizar), y se mide la silueta en varios momentos de la
+        escena; si en algun momento no entra en el cuadro (por ancho o por alto, debajo de los titulos), se achica.
+        Despues se centra a lo ancho."""
+        cw, ch = int(W * 1.8), int(H * 1.5)
+        self.canvas = (cw, ch)
+        self.origin_row = int(ch * (0.5 if self.kind in ("flyer", "swim") else 0.8))
         self.xfix = 0
-        img = self.layer(0.0)
-        bb = img.getbbox()
-        if bb:
-            center = (bb[0] + bb[2]) / 2
-            self.xfix = self.canvas[0] / 2 - center
+        box = None
+        for f in (0.0, 0.2, 0.4, 0.55, 0.7, 0.85, 0.97):
+            bb = self.layer(self.dur * f).getbbox()
+            if bb:
+                box = bb if box is None else (min(box[0], bb[0]), min(box[1], bb[1]), max(box[2], bb[2]),
+                                              max(box[3], bb[3]))
+        if not box:
+            return
+        cx0, cy0 = cw / 2, self.origin_row
+        k_w = W * 0.94 / max(1, box[2] - box[0])
+        if self.kind in ("flyer", "swim"):
+            k_h = H * 0.6 / max(1, box[3] - box[1])
+        else:
+            room = self.screen_origin[1] - H * 0.2           # del suelo hasta debajo de los titulos
+            k_h = room / max(1, cy0 - box[1])
+        k = min(1.0, k_w, k_h)
+        self.ppx *= k
+        self.xfix = -(((box[0] + box[2]) / 2 - cx0) * k)
 
     # ---------------- pose y movimiento en el tiempo
     def walk_amount(self, lt):
@@ -622,7 +642,8 @@ class DinoScene(Scene):
         return self.yaws[0] + (self.yaws[1] - self.yaws[0]) * ease(u)
 
     def layer(self, lt):
-        return dino_layer(self.instances(lt), self.yaw(lt), -6 if self.kind not in ("flyer",) else 4, self.ppx,
+        # camara un poco por arriba (como se ve en el juego): de abajo los nidos y los dinos de atras quedaban raros
+        return dino_layer(self.instances(lt), self.yaw(lt), 10 if self.kind not in ("flyer",) else 6, self.ppx,
                           self.canvas, self.origin_row, rim=RED if self.plus else PINK)
 
     def travel(self, lt):
@@ -1011,10 +1032,7 @@ class FeatureScene(DinoScene):
             self.ppx *= 0.9
         if feature == "race":
             self.ppx *= 0.8
-        self.xfix = 0
-        bb = self.layer(2.5 if feature in ("recall", "egg") else 0.0).getbbox()
-        if bb:
-            self.xfix = self.canvas[0] / 2 - (bb[0] + bb[2]) / 2
+        self.fit()
 
     def walk_amount(self, lt):
         f = self.feature

@@ -516,7 +516,8 @@ ITEMS = ["dinopedia", "carne", "silbato", "jaula", "montura_trex", "espada", "ma
 
 
 _ITEM3D = {}
-HELD = [0.56, -0.50, 0.86, -38, -8, 32, 0.66]   # x, y, z en la camara, giro y, giro x, giro z, escala
+HELD = [0.56, -0.50, 0.86, -22, -6, 30, 0.62]   # x, y, z en la camara, giro y, giro x, giro z, escala
+HELD_FAR = 5.0   # se dibuja 5 veces mas lejos y 5 veces mas grande: casi sin perspectiva, como la mano del juego
 
 
 def item_mesh(name):
@@ -563,9 +564,10 @@ def held3d(fr, name, swing=0.0, equip=0.0, walked=0.0):
     ph = walked * math.pi / 1.6
     # posicion en camara (x derecha, y arriba, z adelante), como la mano derecha del juego
     T = np.array([HELD[0] - 0.30 * s + math.sin(ph) * 0.012,
-                  HELD[1] + 0.06 * s - 0.10 * s * s - abs(math.cos(ph)) * 0.012 - 0.6 * equip, HELD[2] - 0.06 * s])
+                  HELD[1] + 0.06 * s - 0.10 * s * s - abs(math.cos(ph)) * 0.012 - 0.6 * equip,
+                  HELD[2] - 0.06 * s]) * HELD_FAR
     Rm = _rot(ry=HELD[3] + 18 * s, rx=HELD[4] - 22 * s) @ _rot(rz=HELD[5] + 38 * s)
-    sc = HELD[6]
+    sc = HELD[6] * HELD_FAR
     q = M.Quads()
     for (p0, u, v, st) in quads:
         P0 = T + Rm @ (np.array(p0) * sc)

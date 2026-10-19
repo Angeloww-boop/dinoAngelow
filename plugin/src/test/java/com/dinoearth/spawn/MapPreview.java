@@ -2,22 +2,19 @@ package com.dinoearth.spawn;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.map.MapFont;
 import org.bukkit.map.MapPalette;
-import org.bukkit.map.MinecraftFont;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Dibuja el Mapa del Paleontologo como lo ve el jugador, sin el juego: la Tierra, las regiones del config y los textos,
+ * Dibuja el Mapa del Paleontologo como lo ve el jugador, sin el juego: la Tierra y las huellas de las regiones del config,
  * pasado por la paleta de los mapas de Minecraft (MapPalette de Bukkit) y con una flecha de ejemplo.
  * Uso: java -cp ... com.dinoearth.spawn.MapPreview plugin/src/main/resources salida.png [lat lon]
  */
@@ -38,21 +35,7 @@ public final class MapPreview {
         }
 
         BufferedImage map = ImageIO.read(new File(res, "mapa/tierra.png"));
-        Color pink = new Color(242, 127, 165);
-        for (EarthMap.Region r : regions) {
-            int x0 = PaleoMap.px(r.lonMin()), x1 = Math.max(x0, PaleoMap.px(r.lonMax()) - 1);
-            int y0 = PaleoMap.py(r.latMax()), y1 = Math.max(y0, PaleoMap.py(r.latMin()) - 1);
-            for (int x = x0; x <= x1; x++) {
-                map.setRGB(x, y0, pink.getRGB());
-                map.setRGB(x, y1, pink.getRGB());
-            }
-            for (int y = y0; y <= y1; y++) {
-                map.setRGB(x0, y, pink.getRGB());
-                map.setRGB(x1, y, pink.getRGB());
-            }
-        }
-        text(map, textos.getString("mapa.titulo"), 12);
-        text(map, textos.getString("mapa.leyenda"), 128 - 32 + 12);
+        PaleoMap.drawRegions(regions, (x, y, col) -> map.setRGB(x, y, col.getRGB()));
 
         // paleta de los mapas de Minecraft, como hace el server al dibujar
         BufferedImage out = new BufferedImage(128 * 5, 128 * 5, BufferedImage.TYPE_INT_RGB);
@@ -65,7 +48,7 @@ public final class MapPreview {
         }
         if (args.length > 3) {   // jugador de ejemplo: un rombo blanco
             double lat = Double.parseDouble(args[2]), lon = Double.parseDouble(args[3]);
-            int cx = (int) ((lon + 180) / 360 * 128 * 5), cy = (int) ((32 + (90 - lat) / 180 * 64) * 5);
+            int cx = (int) (PaleoMap.fx(lon) * 5), cy = (int) (PaleoMap.fy(lat) * 5);
             for (int dy = -6; dy <= 6; dy++) for (int dx = -6; dx <= 6; dx++) {
                 if (Math.abs(dx) + Math.abs(dy) <= 6 && cx + dx >= 0 && cy + dy >= 0 && cx + dx < 640 && cy + dy < 640) {
                     out.setRGB(cx + dx, cy + dy, Math.abs(dx) + Math.abs(dy) >= 5 ? 0x000000 : 0xFFFFFF);
@@ -74,26 +57,5 @@ public final class MapPreview {
         }
         ImageIO.write(out, "png", new File(args[1]));
         System.out.println("listo: " + args[1]);
-    }
-
-    /** Igual que PaleoMap.text: centrado, sin tildes, con la fuente de los mapas (gris oscuro). */
-    private static void text(BufferedImage img, String raw, int y) {
-        String s = Normalizer.normalize(raw, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-        if (!MinecraftFont.Font.isValid(s)) {
-            System.out.println("texto con letras que la fuente no tiene: " + s);
-            return;
-        }
-        int w = MinecraftFont.Font.getWidth(s);
-        System.out.println("'" + s + "' mide " + w + " px de 124");
-        int x = (128 - w) / 2;
-        for (char ch : s.toCharArray()) {
-            MapFont.CharacterSprite sp = MinecraftFont.Font.getChar(ch);
-            for (int r = 0; r < MinecraftFont.Font.getHeight(); r++) {
-                for (int col = 0; col < sp.getWidth(); col++) {
-                    if (sp.get(r, col)) img.setRGB(x + col, y + r, new Color(80, 80, 80).getRGB());
-                }
-            }
-            x += sp.getWidth() + 1;
-        }
     }
 }

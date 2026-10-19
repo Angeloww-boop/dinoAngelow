@@ -442,9 +442,6 @@ plus:
 # ---------------------------------------------------------------- spawn natural (/dino mapa)
 mapa:
   nombre: 'Mapa del Paleontólogo'
-  # dibujados sobre el mapa (la fuente de los mapas no tiene tildes: se sacan solas)
-  titulo: 'Mapa del Paleontólogo'
-  leyenda: 'Rosa: zonas de fósiles'
   # rumbos de 8 puntas, en este orden: este, noreste, norte, noroeste, oeste, suroeste, sur, sureste
   rumbos:
     - 'este'
@@ -468,3 +465,25 @@ regiones:
   norte-africa: 'Norte de África'
   europa-central: 'Europa central'
   inglaterra: 'Inglaterra'
+  alaska: 'Alaska y Yukón'
+  canada-este: 'Este de Canadá'
+  eeuu-este: 'Este de Estados Unidos'
+  mexico: 'México y Centroamérica'
+  amazonia: 'Amazonia'
+  andes: 'Los Andes'
+  pampa: 'Pampa y sur de Brasil'
+  iberia: 'Península Ibérica'
+  escandinavia: 'Escandinavia'
+  europa-este: 'Europa del este'
+  africa-oeste: 'África occidental'
+  africa-este: 'África oriental'
+  africa-sur: 'Sur de África'
+  madagascar: 'Madagascar'
+  medio-oriente: 'Medio Oriente'
+  siberia: 'Siberia'
+  china: 'China'
+  india: 'India'
+  sudeste-asiatico: 'Sudeste asiático'
+  japon: 'Japón'
+  australia: 'Australia'
+  nueva-zelanda: 'Nueva Zelanda'

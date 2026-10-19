@@ -118,13 +118,24 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
   se acerca en `despawn-minutes` desaparecen (sweep cada 20 s, y al volver a cargar un chunk abandonado por
   `EntitiesLoadEvent`, con `natural_seen` en el PDC). Nunca los domesticados, atados, prestados ni madres con nido.
   `/dino mapa` (admin) dice latitud/longitud, region y que aparece. `MapCheck` prueba la cuenta con ciudades reales.
+  Regiones (0.19): 8 de fosiles reales + 22 "repartidas por continente" (pedido de Angeloww: que haya dinos en todo el
+  mapa; aprovechan parientes reales: tiranosaurio en Alaska/China, pariente del Giga en Africa oriental, del Carnotaurus
+  en India/Madagascar). `city-distance` (150): nada a menos de esos bloques de un pueblo de Towny o region de
+  WorldGuard; `Wilderness` copia cada minuto los terrenos de Towny (TownyAPI.getTownBlocks, por reflexion) y las cajas
+  de las regiones (RegionManager.getRegions, sin __global__) y cada consulta son ~400 busquedas en un HashSet
+  (`CityCheck` prueba las cuentas). /dino mapa dice cuantos terrenos/regiones conoce: si da 0 y hay pueblos, fallo la
+  reflexion. El menu de regiones del mapa tiene paginas y va de la mas cerca a la mas lejos.
   Para apagar una region: pesos en 0 (si se borra, el ConfigUpdater la vuelve a agregar).
 - Mapa del Paleontologo (0.18, `spawn/PaleoMap`): FILLED_MAP con un solo MapView compartido (id en `mapa.yml`, se
   reusa al reiniciar; renderers de vanilla sacados, locked) -> todos los items son iguales (Shopkeepers). Renderer
-  contextual: dibuja `mapa/tierra.png` + las regiones del config (rosa) + titulo/leyenda (MinecraftFont, sin tildes,
-  max 124 px) UNA vez por jugador (y otra vez tras /dino reload) y despues solo mueve la flecha (formula de vanilla).
+  contextual: dibuja `mapa/tierra.png` + una huella roja (5 x 3) en el centro de cada region del config UNA vez por
+  jugador (y otra vez tras /dino reload) y despues solo mueve la flecha (formula de vanilla). Estilo de la Dinopedia
+  (0.19, a pedido: los cuadrados rosas y los titulos con la fuente de los mapas quedaban feos): papel, sepia, costa en
+  tinta, cinta y borde de cuero cosido, rastro de huellas y rosa de los vientos; SOLO colores de la paleta de los
+  mapas (si no, el server los convierte y el papel sale manchado; paleta en MapPalette de Bukkit). El mundo va en
+  x 6..121, y 35..92 (116 x 58): mismas constantes en paleomap.py (WX..WH) y PaleoMap.java (WORLD_*).
   La imagen sale de `generator/mapa/tierra.webp` (render del mapa del server, 4 px de borde negro a los costados) con
-  `generator/.venv/Scripts/python generator/paleomap.py` (agua de un solo color, 128 x 64 en el medio de 128 x 128).
+  `generator/.venv/Scripts/python generator/paleomap.py`.
   En la mano: barra de accion cada 1 s (lat/lon, region o la mas cercana con distancia y rumbo). Click derecho: menu
   `menus/regiones.yml` (solo lectura, Holder). Se da con `/dino item mapa`. `MapPreview` (test) lo dibuja con la paleta
   de los mapas de Bukkit para revisarlo sin el juego.
@@ -234,5 +245,10 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.18.0: Mapa del Paleontologo (ver arriba). Probado en un Paper local: el mapa se crea, se reusa el mismo id al
   reiniciar, los items son iguales; la vista previa con la paleta real se reviso. Falta en el juego: verlo en la mano,
   la barra de accion y el menu con un jugador.
+- v0.19.0: 22 zonas nuevas por continente, distancia minima a pueblos/regiones (150), menu de regiones con paginas,
+  mapa con estilo de la Dinopedia, icono nuevo de la Dinopedia (libro de cuero con ambar, `icons.book`; tambien el
+  boton del libro del menu). Pack sha1 0a4549e6… (solo cambiaron dinopedia.png y gui/book.png).
+  Falta en el juego: que /dino mapa muestre los terrenos de Towny y regiones de WorldGuard (la reflexion no se pudo
+  probar: no estan en el server de prueba local).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

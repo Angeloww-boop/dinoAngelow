@@ -27,7 +27,6 @@ import org.bukkit.map.MapCursor;
 import org.bukkit.map.MapCursorCollection;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
-import org.bukkit.map.MinecraftFont;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -37,7 +36,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +43,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
- * Mapa del Paleontologo: un mapa de Minecraft con la Tierra (mapa/tierra.png, lo hace generator/paleomap.py), las
- * regiones de fosiles del config pintadas en rosa y una flecha donde esta cada jugador.
+ * Mapa del Paleontologo: un mapa de Minecraft con estilo de la Dinopedia (papel y cuero, mapa/tierra.png, lo hace
+ * generator/paleomap.py), una huella roja en el centro de cada region del config y una flecha donde esta cada jugador.
  *
  * Todos los items comparten un solo MapView (id guardado en mapa.yml), asi son iguales entre si (sirven para
  * Shopkeepers). El dibujo se arma una vez por jugador; despues solo se mueve la flecha, asi que casi no consume.
@@ -55,9 +53,14 @@ import java.util.WeakHashMap;
  */
 public final class PaleoMap implements Listener {
 
-    /** Mundo de 360 x 180 grados en 128 x 64 pixeles, en el medio del mapa (arriba y abajo, bandas para textos). */
-    private static final int SIZE = 128, TOP = 32, WORLD_H = 64;
-    private static final Color REGION = new Color(242, 127, 165);
+    /** Donde va el mundo (360 x 180 grados) dentro del mapa: lo mismo que generator/paleomap.py (WX, WY, WW, WH). */
+    private static final int SIZE = 128, WORLD_X = 6, WORLD_Y = 35, WORLD_W = 116, WORLD_H = 58;
+    /** Huella de tres dedos de cada region, en tinta roja con sombra oscura (colores de la paleta de los mapas). */
+    private static final Color TRACK = new Color(153, 51, 51), TRACK_EDGE = new Color(54, 40, 27);
+    private static final String[] TRACK_SPRITE = {
+            "#.#.#",
+            ".###.",
+            "..#.."};
 
     private final JavaPlugin plugin;
     private final Keys keys;
@@ -130,12 +133,31 @@ public final class PaleoMap implements Listener {
     }
 
     // ------------------------------------------------------------ dibujo
-    static int px(double lon) {
-        return (int) Math.floor((lon + 180) / 360 * SIZE);
+    static double fx(double lon) {
+        return WORLD_X + (lon + 180) / 360 * WORLD_W;
     }
 
-    static int py(double lat) {
-        return TOP + (int) Math.floor((90 - lat) / 180 * WORLD_H);
+    static double fy(double lat) {
+        return WORLD_Y + (90 - lat) / 180 * WORLD_H;
+    }
+
+    /** Algo que recibe pixeles: el MapCanvas en el juego, una imagen en MapPreview. */
+    interface Pixels {
+        void set(int x, int y, Color c);
+    }
+
+    /** Las huellas de las regiones (la misma cuenta en el juego y en la vista previa). */
+    static void drawRegions(List<EarthMap.Region> regions, Pixels out) {
+        for (EarthMap.Region r : regions) {
+            int cx = (int) Math.round(fx((r.lonMin() + r.lonMax()) / 2)) - 2;
+            int cy = (int) Math.round(fy((r.latMin() + r.latMax()) / 2)) - 1;
+            for (int y = 0; y < TRACK_SPRITE.length; y++) {
+                for (int x = 0; x < 5; x++) {
+                    if (TRACK_SPRITE[y].charAt(x) == '#') out.set(cx + x, cy + y, TRACK);
+                }
+            }
+            out.set(cx + 2, cy + TRACK_SPRITE.length, TRACK_EDGE);   // sombrita debajo del talon
+        }
     }
 
     private final class Renderer extends MapRenderer {
@@ -156,8 +178,8 @@ public final class PaleoMap implements Listener {
             if (natural.isMapWorld(player.getWorld())) {
                 Location at = player.getLocation();
                 EarthMap m = natural.map();
-                double x = (m.lon(at.getX()) + 180) / 360 * SIZE;
-                double y = TOP + (90 - m.lat(at.getZ())) / 180 * WORLD_H;
+                double x = fx(m.lon(at.getX()));
+                double y = fy(m.lat(at.getZ()));
                 float yaw = at.getYaw();
                 int rot = (int) ((yaw < 0 ? yaw - 8 : yaw + 8) * 16 / 360);   // igual que los mapas de vanilla
                 cursors.addCursor(new MapCursor(cursorCoord(x), cursorCoord(y), (byte) (rot & 15),
@@ -174,34 +196,9 @@ public final class PaleoMap implements Listener {
 
     private void drawBase(MapCanvas canvas) {
         if (earth != null) canvas.drawImage(0, 0, earth);
-        for (EarthMap.Region r : natural.map().regions()) {
-            int x0 = px(r.lonMin()), x1 = Math.max(x0, px(r.lonMax()) - 1);
-            int y0 = py(r.latMax()), y1 = Math.max(y0, py(r.latMin()) - 1);
-            for (int x = x0; x <= x1; x++) {
-                pixel(canvas, x, y0);
-                pixel(canvas, x, y1);
-            }
-            for (int y = y0; y <= y1; y++) {
-                pixel(canvas, x0, y);
-                pixel(canvas, x1, y);
-            }
-        }
-        Lang lang = Lang.get();
-        text(canvas, lang.plain("mapa.titulo"), 12);
-        text(canvas, lang.plain("mapa.leyenda"), SIZE - TOP + 12);
-    }
-
-    private static void pixel(MapCanvas canvas, int x, int y) {
-        if (x >= 0 && x < SIZE && y >= 0 && y < SIZE) canvas.setPixelColor(x, y, REGION);
-    }
-
-    /** Texto centrado en una banda; la fuente de los mapas no tiene tildes: se las saca. */
-    private static void text(MapCanvas canvas, String raw, int y) {
-        String s = Normalizer.normalize(raw, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-        if (s.isEmpty() || !MinecraftFont.Font.isValid(s)) return;
-        int w = MinecraftFont.Font.getWidth(s);
-        if (w > SIZE - 4) return;
-        canvas.drawText((SIZE - w) / 2, y, MinecraftFont.Font, s);
+        drawRegions(natural.map().regions(), (x, y, c) -> {
+            if (x >= WORLD_X && x < WORLD_X + WORLD_W && y >= WORLD_Y && y < WORLD_Y + WORLD_H) canvas.setPixelColor(x, y, c);
+        });
     }
 
     // ------------------------------------------------------------ barra de accion
@@ -268,6 +265,7 @@ public final class PaleoMap implements Listener {
     /** Menu de solo lectura (se reconoce por el holder, nunca por el titulo). */
     public static final class Holder implements InventoryHolder {
         private Inventory inventory;
+        private int page;
 
         @Override
         public Inventory getInventory() {
@@ -288,21 +286,34 @@ public final class PaleoMap implements Listener {
     }
 
     public void open(Player p) {
-        Lang lang = Lang.get();
-        Menu menu = lang.menu("regiones");
+        Menu menu = Lang.get().menu("regiones");
         Holder h = new Holder();
-        Inventory inv = Bukkit.createInventory(h, menu.size(), menu.title());
-        h.inventory = inv;
-        menu.fill(inv, Set.of("region", "posicion", "oceano", "resto", "cerrar"), null);
+        h.inventory = Bukkit.createInventory(h, menu.size(), menu.title());
+        draw(p, h);
+        p.openInventory(h.inventory);
+    }
+
+    /** Arma la pagina actual: las regiones de la mas cerca a la mas lejos (en la que estas, primero). */
+    private void draw(Player p, Holder h) {
+        Menu menu = Lang.get().menu("regiones");
+        Inventory inv = h.inventory;
+        inv.clear();
+        menu.fill(inv, Set.of("region", "posicion", "oceano", "resto", "cerrar", "anterior", "siguiente"), null);
         EarthMap m = natural.map();
         Location at = p.getLocation();
         boolean onMap = natural.isMapWorld(p.getWorld());
         java.util.Locale es = java.util.Locale.forLanguageTag("es-AR");
 
         List<Integer> slots = menu.slots("region");
-        List<EarthMap.Region> regions = m.regions();
-        for (int i = 0; i < regions.size() && i < slots.size(); i++) {
-            EarthMap.Region r = regions.get(i);
+        List<EarthMap.Region> regions = new ArrayList<>(m.regions());
+        if (onMap) regions.sort(java.util.Comparator.comparingDouble(r -> distance(m, r, at)));
+        int per = Math.max(1, slots.size());
+        int pages = Math.max(1, (regions.size() + per - 1) / per);
+        h.page = Math.max(0, Math.min(pages - 1, h.page));
+        for (int i = 0; i < per; i++) {
+            int idx = h.page * per + i;
+            if (idx >= regions.size()) break;
+            EarthMap.Region r = regions.get(idx);
             Species icon = r.species().isEmpty() ? null : Species.byId(r.species().keySet().iterator().next());
             String model = icon != null && icon.rig != null
                     ? "dinoearth:icon/" + icon.id + "/" + icon.rig.variants().keySet().iterator().next() : null;
@@ -324,7 +335,8 @@ public final class PaleoMap implements Listener {
         put(inv, menu, "oceano", menu.item("oceano", "lista", NaturalSpawner.names(natural.oceanSpecies())));
         put(inv, menu, "resto", menu.item("resto", "lista", NaturalSpawner.names(natural.elsewhereSpecies())));
         put(inv, menu, "cerrar", menu.item("cerrar"));
-        p.openInventory(inv);
+        if (h.page > 0) put(inv, menu, "anterior", menu.item("anterior", "pagina", h.page, "total", pages));
+        if (h.page < pages - 1) put(inv, menu, "siguiente", menu.item("siguiente", "pagina", h.page + 2, "total", pages));
     }
 
     private static void put(Inventory inv, Menu menu, String id, ItemStack item) {
@@ -343,7 +355,18 @@ public final class PaleoMap implements Listener {
         if (!(event.getInventory().getHolder() instanceof Holder)) return;
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player p) || event.getClickedInventory() != event.getInventory()) return;
-        if (event.getSlot() == Lang.get().menu("regiones").slot("cerrar")) p.closeInventory();
+        Holder h = (Holder) event.getInventory().getHolder();
+        Menu menu = Lang.get().menu("regiones");
+        int slot = event.getSlot();
+        if (slot == menu.slot("cerrar")) {
+            p.closeInventory();
+        } else if (slot == menu.slot("anterior") && event.getCurrentItem() != null && h.page > 0) {
+            h.page--;
+            draw(p, h);
+        } else if (slot == menu.slot("siguiente") && event.getCurrentItem() != null) {
+            h.page++;
+            draw(p, h);
+        }
     }
 
     @EventHandler

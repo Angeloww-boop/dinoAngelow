@@ -236,6 +236,10 @@ chat:
   mapa-protegido: '&9&lDINOEARTH &8» &fEsta zona es de un pueblo o una región protegida: acá no aparecen dinos.'
   mapa-apagado: '&9&lDINOEARTH &8» &fEl spawn natural está apagado en el config.'
   mapa-otro-mundo: '&9&lDINOEARTH &8» &fEn este mundo no aparecen dinos solos.'
+  mapa-ciudades: '&9&lDINOEARTH &8» &fCiudades conocidas: &#ff00d9%terrenos%&f terrenos de Towny y &#ff00d9%regiones%&f regiones de WorldGuard.'
+  mapa-ciudad: '&9&lDINOEARTH &8» &fLa ciudad más cerca está a &#ff00d9%distancia%&f bloques.'
+  mapa-ciudad-cerca: '&9&lDINOEARTH &8» &fHay una ciudad a &#ff00d9%distancia%&f bloques: acá no aparecen dinos (mínimo &#ff00d9%minimo%&f).'
+  mapa-sin-ciudad: '&9&lDINOEARTH &8» &fNo hay ciudades a menos de &#ff00d9%max%&f bloques.'
 
 actionbar:
   limite: '&8| &fYa tenés &#ff00d9%cantidad%&f dinos, el máximo es &#ff00d9%limite%&f.'

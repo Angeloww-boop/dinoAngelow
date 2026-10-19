@@ -52,7 +52,7 @@ public final class NaturalSpawner implements Listener {
 
     private boolean enabled, behind, onlyWild;
     private List<String> worlds = List.of();
-    private double chance, minDistance, maxDistance, nearRadius, despawnRadius;
+    private double chance, minDistance, maxDistance, nearRadius, despawnRadius, cityDistance;
     private int maxNear, maxTotal, oceanDepth;
     private long despawnMs;
     private double oceanChance, elsewhereChance;
@@ -81,6 +81,7 @@ public final class NaturalSpawner implements Listener {
         maxNear = Math.max(0, c.getInt("max-near-player", 4));
         maxTotal = Math.max(0, c.getInt("max-total", 120));
         onlyWild = c.getBoolean("only-wilderness", true);
+        cityDistance = Math.max(0, c.getDouble("city-distance", 150));
         despawnMs = (long) (Math.max(0.5, c.getDouble("despawn-minutes", 5)) * 60_000);
         despawnRadius = Math.max(16, c.getDouble("despawn-radius", 128));
         oceanChance = clamp(c.getDouble("ocean.chance", 0.5), 0, 1);
@@ -228,6 +229,8 @@ public final class NaturalSpawner implements Listener {
         if (s == null || s.rig == null || s.aquatic() != water) return List.of();
         Location spot = water ? waterSpot(top, s) : landSpot(top, s);
         if (spot == null || onlyWild && !Wilderness.isWild(spot)) return List.of();
+        // lejos de los pueblos de Towny y las regiones de WorldGuard (lo ultimo: es lo que mas cuesta)
+        if (cityDistance > 0 && !Wilderness.farFromCities(spot, cityDistance)) return List.of();
 
         int count = s.group > 1 ? r.nextInt(Math.max(1, s.group - 2), s.group + 1) : 1;
         count = Math.max(1, Math.min(count, room));
@@ -356,6 +359,18 @@ public final class NaturalSpawner implements Listener {
             return;
         }
         if (onlyWild && !Wilderness.isWild(at)) lang.chat(p, "mapa-protegido");
+        int[] cities = Wilderness.cityCounts();
+        lang.chat(p, "mapa-ciudades", "terrenos", cities[0], "regiones", cities[1]);
+        double city = Wilderness.nearestCity(at, 2000);
+        Locale es = Locale.forLanguageTag("es-AR");
+        if (city < 0) {
+            lang.chat(p, "mapa-sin-ciudad", "max", String.format(es, "%,d", 2000));
+        } else if (city < cityDistance) {
+            lang.chat(p, "mapa-ciudad-cerca", "distancia", String.format(es, "%,d", Math.round(city)),
+                    "minimo", String.format(es, "%,d", Math.round(cityDistance)));
+        } else {
+            lang.chat(p, "mapa-ciudad", "distancia", String.format(es, "%,d", Math.round(city)));
+        }
         List<EarthMap.Region> here = map.regionsAt(at.getX(), at.getZ());
         if (here.isEmpty()) {
             lang.chat(p, "mapa-sin-region", "lista", names(elsewhere));

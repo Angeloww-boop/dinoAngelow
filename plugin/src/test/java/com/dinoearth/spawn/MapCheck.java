@@ -45,7 +45,7 @@ public final class MapCheck {
         check("Japon (F3, aproximado): latitud dentro de Japon", map.lat(-7906) > 31 && map.lat(-7906) < 45);
 
         // ciudades -> region
-        region(map, "Buenos Aires", -34.60, -58.38);
+        region(map, "Buenos Aires", -34.60, -58.38, "pampa");
         region(map, "Neuquen", -38.95, -68.06, "patagonia");
         region(map, "Trelew (Chubut)", -43.25, -65.31, "patagonia");
         region(map, "Bozeman (Montana)", 45.68, -111.04, "oeste-norteamerica");
@@ -58,8 +58,32 @@ public final class MapCheck {
         region(map, "Berlin", 52.52, 13.40, "europa-central");
         region(map, "Londres", 51.51, -0.13, "europa-central", "inglaterra");
         region(map, "Lyme Regis (Inglaterra)", 50.72, -2.94, "inglaterra");
-        region(map, "Tokio", 35.68, 139.69);
-        region(map, "Sidney", -33.87, 151.21);
+        // zonas repartidas por continente
+        region(map, "Tokio", 35.68, 139.69, "japon");
+        region(map, "Sidney", -33.87, 151.21, "australia");
+        region(map, "Pensilvania (F3 de Angeloww)", 40.8, -78.6, "eeuu-este");
+        region(map, "Lisboa", 38.72, -9.14, "iberia");
+        region(map, "Pekin", 39.90, 116.40, "gobi", "china");
+        region(map, "Nairobi", -1.29, 36.82, "africa-este");
+        region(map, "Bombay", 19.08, 72.88, "india");
+        region(map, "Moscu", 55.75, 37.62, "europa-este");
+        region(map, "Anchorage", 61.22, -149.90, "alaska");
+        region(map, "Ciudad de Mexico", 19.43, -99.13, "mexico");
+        region(map, "Manaos", -3.10, -60.02, "amazonia");
+        region(map, "Lima", -12.05, -77.04, "amazonia", "andes");
+        region(map, "Antananarivo", -18.88, 47.51, "madagascar");
+        region(map, "Bangkok", 13.75, 100.50, "sudeste-asiatico");
+        region(map, "Wellington", -41.29, 174.78, "nueva-zelanda");
+        region(map, "Mitad del Pacifico", -20, -130);
+
+        // todas las especies del config existen y ninguna region queda vacia
+        for (EarthMap.Region r : map.regions()) {
+            check(r.id() + " tiene especies", !r.species().isEmpty());
+            for (String id : r.species().keySet()) check(r.id() + ": especie " + id, com.dinoearth.species.Species.byId(id) != null);
+        }
+        java.util.Set<String> everywhere = new java.util.HashSet<>();
+        for (EarthMap.Region r : map.regions()) everywhere.addAll(r.species().keySet());
+        System.out.println(map.regions().size() + " regiones, especies en alguna: " + everywhere.size());
 
         // ida y vuelta bloques <-> grados
         check("ida y vuelta", Math.abs(map.lon(map.x(-58.38)) + 58.38) < 1e-9 && Math.abs(map.lat(map.z(-34.6)) + 34.6) < 1e-9);

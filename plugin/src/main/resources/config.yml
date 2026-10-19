@@ -176,6 +176,9 @@ natural-spawn:
   max-near-player: 4         # salvajes naturales como maximo cerca de cada jugador
   max-total: 120             # salvajes naturales cargados como maximo en todo el server
   only-wilderness: true
+  # bloques minimos a cualquier pueblo de Towny o region de WorldGuard (0 = solo fuera de ellos). Los pueblos y
+  # regiones se leen una vez por minuto; /dino mapa dice cuantos conoce y a cuanto esta el mas cerca.
+  city-distance: 150
   # si nadie se les acerca a menos de despawn-radius bloques por despawn-minutes, desaparecen (los domesticados,
   # atados, prestados y las madres con nido nunca)
   despawn-minutes: 5
@@ -252,6 +255,170 @@ natural-spawn:
       longitude: [-7, 2]
       species:
         dimorphodon: 3
+    # ---- zonas repartidas por continente (para que haya dinos en todo el mapa, no son fosiles reales)
+    alaska:
+      latitude: [58, 70]
+      longitude: [-165, -130]
+      species:
+        trex: 1
+        triceratops: 2
+        parasaurolophus: 3
+        raptor: 2
+        pteranodon: 2
+    canada-este:
+      latitude: [45, 58]
+      longitude: [-95, -60]
+      species:
+        parasaurolophus: 3
+        ankylosaurus: 2
+        gallimimus: 2
+        triceratops: 1
+    eeuu-este:
+      latitude: [30, 45]
+      longitude: [-92, -70]
+      species:
+        stegosaurus: 2
+        triceratops: 2
+        dilophosaurus: 2
+        compsognathus: 2
+    mexico:
+      latitude: [8, 30]
+      longitude: [-118, -80]
+      species:
+        raptor: 2
+        dilophosaurus: 2
+        gallimimus: 3
+        spinosaurus: 1
+    amazonia:
+      latitude: [-15, 8]
+      longitude: [-78, -45]
+      species:
+        spinosaurus: 2
+        dilophosaurus: 2
+        compsognathus: 3
+        pteranodon: 1
+    andes:
+      latitude: [-33, 5]
+      longitude: [-80, -66]
+      species:
+        raptor: 2
+        ankylosaurus: 2
+        pteranodon: 2
+    pampa:
+      latitude: [-40, -15]
+      longitude: [-62, -38]
+      species:
+        carnotaurus: 2
+        triceratops: 2
+        parasaurolophus: 2
+        gallimimus: 2
+    iberia:
+      latitude: [36, 44]
+      longitude: [-10, 3]
+      species:
+        stegosaurus: 3
+        compsognathus: 2
+        raptor: 1
+    escandinavia:
+      latitude: [55, 71]
+      longitude: [4, 32]
+      species:
+        pteranodon: 2
+        dimorphodon: 2
+        parasaurolophus: 1
+    europa-este:
+      latitude: [44, 56]
+      longitude: [16, 45]
+      species:
+        ankylosaurus: 2
+        gallimimus: 2
+        triceratops: 1
+    africa-oeste:
+      latitude: [4, 18]
+      longitude: [-18, 20]
+      species:
+        spinosaurus: 2
+        carnotaurus: 2
+        compsognathus: 2
+    africa-este:
+      latitude: [-12, 10]
+      longitude: [28, 52]
+      species:
+        stegosaurus: 3
+        giganotosaurus: 1
+        parasaurolophus: 2
+    africa-sur:
+      latitude: [-35, -12]
+      longitude: [12, 40]
+      species:
+        dilophosaurus: 2
+        gallimimus: 2
+        triceratops: 1
+        raptor: 1
+    madagascar:
+      latitude: [-26, -12]
+      longitude: [43, 51]
+      species:
+        carnotaurus: 3
+        compsognathus: 2
+    medio-oriente:
+      latitude: [15, 38]
+      longitude: [35, 62]
+      species:
+        gallimimus: 2
+        raptor: 2
+        spinosaurus: 1
+    siberia:
+      latitude: [50, 72]
+      longitude: [60, 140]
+      species:
+        pteranodon: 2
+        ankylosaurus: 2
+        triceratops: 1
+    china:
+      latitude: [22, 42]
+      longitude: [98, 123]
+      species:
+        dilophosaurus: 3
+        raptor: 2
+        stegosaurus: 2
+        parasaurolophus: 2
+        trex: 1
+    india:
+      latitude: [8, 30]
+      longitude: [68, 90]
+      species:
+        carnotaurus: 2
+        compsognathus: 2
+        triceratops: 1
+    sudeste-asiatico:
+      latitude: [-8, 22]
+      longitude: [92, 125]
+      species:
+        spinosaurus: 2
+        gallimimus: 2
+        dimorphodon: 1
+    japon:
+      latitude: [30, 45]
+      longitude: [129, 146]
+      species:
+        parasaurolophus: 2
+        raptor: 1
+        pteranodon: 1
+    australia:
+      latitude: [-40, -10]
+      longitude: [113, 154]
+      species:
+        ankylosaurus: 2
+        raptor: 2
+        dilophosaurus: 1
+        compsognathus: 2
+    nueva-zelanda:
+      latitude: [-47, -34]
+      longitude: [166, 179]
+      species:
+        pteranodon: 2
+        dimorphodon: 2
 
 nests:
   enabled: true

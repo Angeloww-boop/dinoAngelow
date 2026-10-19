@@ -71,23 +71,36 @@ def silhouette(pix):
 
 
 def book():
-    """Libro de cuero con una huella de dinosaurio dorada (16x16)."""
-    pix = [[(0, 0, 0, 0)] * 16 for _ in range(16)]
-    leather, dark, pages, gold = (112, 66, 36), (70, 40, 22), (234, 224, 196), (226, 182, 70)
-    for y in range(1, 15):
-        for x in range(2, 14):
-            col = leather
-            if x == 2 or y in (1, 14):
-                col = dark
-            elif x == 13:
-                col = pages if y % 2 else (210, 198, 168)
-            elif x == 3:
-                col = (92, 54, 30)        # lomo
-            pix[y][x] = col + (255,)
-    for x, y in ((6, 9), (7, 9), (8, 9), (9, 9), (7, 10), (8, 10), (7, 8), (8, 8),   # talon
-                 (5, 7), (5, 6), (4, 5), (7, 6), (7, 5), (7, 4), (9, 6), (10, 5), (10, 4)):  # tres dedos
-        pix[y][x] = gold + (255,)
-    return pix
+    """Dinopedia: libro de cuero cosido con esquinas doradas y una piedra de ambar (con su mosquito) en la tapa (16x16)."""
+    T = (0, 0, 0, 0)
+    pal = {
+        ".": T,
+        "D": (58, 33, 18), "L": (112, 66, 36), "l": (134, 82, 46), "S": (84, 48, 26),   # cuero, borde y lomo
+        "s": (186, 146, 92),                                                               # costura
+        "P": (234, 224, 196), "p": (204, 190, 156),                                        # hojas
+        "G": (232, 188, 76), "g": (168, 124, 40),                                          # dorado
+        "A": (226, 136, 28), "a": (176, 88, 18), "B": (252, 196, 80), "W": (255, 240, 184),  # ambar
+        "m": (70, 34, 12),                                                                 # mosquito
+    }
+    rows = [
+        "................",
+        "..DDDDDDDDDDDD..",
+        "..GgLLLLLLLLgGP.",
+        "..gSsLsLsLsLLgP.",
+        "..DSLLLLLLLLsLp.",
+        "..DSsLLggggLLLP.",
+        "..DSLLgaBWAgsLp.",
+        "..DSsLgAAmAgLLP.",
+        "..DSLLgaAAagsLp.",
+        "..DSsLLgaagLLLP.",
+        "..DSLLLLggLLsLp.",
+        "..DSsLLLLLLLLLP.",
+        "..gSLsLsLsLsLgp.",
+        "..GgLLLLLLLLgGp.",
+        "..DDDDDDDDDDDD..",
+        "................",
+    ]
+    return [[pal[c] if len(pal[c]) == 4 else pal[c] + (255,) for c in row] for row in rows]
 
 
 def put(files, path, pix):

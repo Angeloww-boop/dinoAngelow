@@ -53,6 +53,24 @@ items:
       - '&8| &fDinos &8» &#ff00d9%lista%'
       - '&8| &fFuera de las regiones aparecen menos seguido.'
       - '&f'
+  'anterior':
+    material: arrow
+    slot: 45
+    display_name: '&#ff00d9Página anterior'
+    lore:
+      - '&f'
+      - '&8| &fPágina &#ff00d9%pagina%&f de &#ff00d9%total%'
+      - '&f'
+      - '&#41FF00✔ Click para ver'
+  'siguiente':
+    material: arrow
+    slot: 53
+    display_name: '&#ff00d9Página siguiente'
+    lore:
+      - '&f'
+      - '&8| &fPágina &#ff00d9%pagina%&f de &#ff00d9%total%'
+      - '&f'
+      - '&#41FF00✔ Click para ver'
   'cerrar':
     material: barrier
     slot: 49

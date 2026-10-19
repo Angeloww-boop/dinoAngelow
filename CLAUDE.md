@@ -256,5 +256,8 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   cuentan como protegidas ni como ciudad (servers de Earth con una region que cubre todo el mapa). Angeloww no vio
   aparecer ninguno con interval 1 y chance 100: la causa todavia no esta confirmada (sospechas: modo creativo o una
   region de WorldGuard en todo el mapa).
+- v0.19.2: misiones sin especies en un server nuevo (solo salian de las vistas hace poco): ahora tambien salen de
+  las que pueden aparecer cerca (`NaturalSpawner.speciesNear`: zonas a menos de `missions.region-radius` bloques,
+  comunes y del agua), y un dia que quedo sin misiones se vuelve a armar solo (como mucho una vez por minuto).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

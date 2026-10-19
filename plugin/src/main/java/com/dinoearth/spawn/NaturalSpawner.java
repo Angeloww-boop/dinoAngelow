@@ -182,6 +182,21 @@ public final class NaturalSpawner implements Listener {
         return Bukkit.getWorlds().get(0);
     }
 
+    /**
+     * Especies que pueden aparecer cerca de este lugar: las de las regiones a menos de {@code radius} bloques, las
+     * comunes de fuera de las regiones y las del agua. Vacio si el spawn natural esta apagado o es otro mundo.
+     */
+    public java.util.Set<String> speciesNear(Location at, double radius) {
+        java.util.Set<String> out = new java.util.LinkedHashSet<>();
+        if (!enabled || !allowedWorld(at.getWorld())) return out;
+        for (EarthMap.Region r : map.regions()) {
+            if (map.distance(r, at.getX(), at.getZ()) <= radius) out.addAll(r.species().keySet());
+        }
+        out.addAll(elsewhere.keySet());
+        out.addAll(ocean.keySet());
+        return out;
+    }
+
     public Map<String, Integer> oceanSpecies() {
         return ocean;
     }

@@ -55,6 +55,9 @@ missions:
   reset-hour: 0
   rerolls-per-day: 1
   recent-days: 3
+  # ademas de las especies vistas hace poco, las que pueden aparecer cerca del jugador: las de las zonas del spawn
+  # natural a menos de estos bloques, las comunes y las del agua (asi nunca quedan sin misiones)
+  region-radius: 3000
   reward-xp: 100
   reward-money: 0           # plata con Vault (0 = nada)
   reward-commands: []

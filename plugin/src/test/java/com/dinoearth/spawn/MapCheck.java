@@ -85,6 +85,18 @@ public final class MapCheck {
         for (EarthMap.Region r : map.regions()) everywhere.addAll(r.species().keySet());
         System.out.println(map.regions().size() + " regiones, especies en alguna: " + everywhere.size());
 
+        // distancia a las zonas (las misiones usan las que quedan a menos de region-radius)
+        double pax = map.x(-78.6), paz = map.z(40.8);
+        java.util.List<String> close = new java.util.ArrayList<>();
+        for (EarthMap.Region r : map.regions()) {
+            double d = map.distance(r, pax, paz);
+            if (r.id().equals("eeuu-este")) check("Pensilvania esta adentro de eeuu-este", d == 0);
+            if (r.id().equals("grandes-llanuras")) check("grandes llanuras a ~3200 bloques (" + Math.round(d) + ")", d > 2800 && d < 3600);
+            if (d <= 3000) close.add(r.id() + "=" + Math.round(d));
+        }
+        System.out.println("zonas a menos de 3000 bloques de Pensilvania: " + close);
+        check("cerca de Pensilvania hay al menos 2 zonas", close.size() >= 2);
+
         // ida y vuelta bloques <-> grados
         check("ida y vuelta", Math.abs(map.lon(map.x(-58.38)) + 58.38) < 1e-9 && Math.abs(map.lat(map.z(-34.6)) + 34.6) < 1e-9);
 

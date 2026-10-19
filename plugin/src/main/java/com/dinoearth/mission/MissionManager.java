@@ -99,6 +99,7 @@ public final class MissionManager implements Listener {
         final Mission[] list = new Mission[PER_DAY];
         final Set<UUID> sighted = new HashSet<>();     // dinos distintos vistos hoy (para AVISTAR)
         boolean fresh;
+        long emptyRetry;
 
         public Mission get(int i) {
             return list[i];
@@ -129,6 +130,9 @@ public final class MissionManager implements Listener {
     private final List<String> commandsEach;
     private final List<String> commandsAll;
     private final long recentMs;
+    private final double regionRadius;
+    /** Spawn natural: las misiones tambien salen de los dinos que pueden aparecer cerca del jugador. */
+    private com.dinoearth.spawn.NaturalSpawner natural;
     private final double moneyEach, moneyAll;
 
     public MissionManager(JavaPlugin plugin, DinoManager dinos, DinoRegistry registry, Settings settings) {
@@ -155,6 +159,7 @@ public final class MissionManager implements Listener {
         moneyAll = c != null ? Math.max(0, c.getDouble("all-done-money", 0)) : 0;
         commandsAll = c != null ? c.getStringList("all-done-commands") : List.of();
         recentMs = (long) (c != null ? Math.max(1, c.getDouble("recent-days", 3)) : 3) * 86_400_000L;
+        regionRadius = c != null ? Math.max(0, c.getDouble("region-radius", 3000)) : 3000;
 
         dataFile = new File(plugin.getDataFolder(), "misiones.yml");
         if (dataFile.exists()) {
@@ -218,6 +223,15 @@ public final class MissionManager implements Listener {
             for (int i = 0; i < PER_DAY && i < made.size(); i++) st.list[i] = made.get(i);
             st.fresh = true;
             store(p, st);
+        } else if (empty(st) && System.currentTimeMillis() - st.emptyRetry > 60_000) {
+            // el dia arranco sin misiones (no habia dinos para elegir): se vuelve a probar, como mucho una vez por minuto
+            st.emptyRetry = System.currentTimeMillis();
+            List<Mission> made = generate(p, List.of());
+            for (int i = 0; i < PER_DAY && i < made.size(); i++) st.list[i] = made.get(i);
+            if (!made.isEmpty()) {
+                st.fresh = true;
+                store(p, st);
+            }
         }
         return st;
     }
@@ -315,6 +329,29 @@ public final class MissionManager implements Listener {
 
     // ------------------------------------------------------------ armar misiones
     /** Especies que hay en el server: vistas por alguien hace poco o cargadas ahora. */
+    private static boolean empty(State st) {
+        for (Mission m : st.list) if (m != null) return false;
+        return true;
+    }
+
+    public void setNatural(com.dinoearth.spawn.NaturalSpawner natural) {
+        this.natural = natural;
+    }
+
+    /** Las especies vistas hace poco en el server y las que pueden aparecer cerca del jugador (spawn natural). */
+    private List<Species> candidates(Player p) {
+        Set<Species> out = new HashSet<>(present());
+        if (natural != null) {
+            for (String id : natural.speciesNear(p.getLocation(), regionRadius)) {
+                Species s = Species.byId(id);
+                if (s != null && s.rig != null) out.add(s);
+            }
+        }
+        List<Species> list = new ArrayList<>(out);
+        list.sort((a, b) -> a.id.compareTo(b.id));
+        return list;
+    }
+
     private List<Species> present() {
         long now = System.currentTimeMillis();
         Set<Species> out = new HashSet<>();
@@ -333,7 +370,7 @@ public final class MissionManager implements Listener {
 
     private List<Mission> generate(Player p, List<Mission> avoid) {
         ThreadLocalRandom r = ThreadLocalRandom.current();
-        List<Species> present = present();
+        List<Species> present = candidates(p);
         List<DinoRegistry.Entry> mine = registry.ownedBy(p.getUniqueId());
         List<Option> options = new ArrayList<>();
         for (Species s : present) {

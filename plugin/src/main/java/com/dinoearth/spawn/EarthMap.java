@@ -71,6 +71,14 @@ public final class EarthMap {
         return out;
     }
 
+    /** Distancia en bloques (horizontal) del bloque x, z a la region (0 si esta adentro). */
+    public double distance(Region r, double x, double z) {
+        double x0 = this.x(r.lonMin()), x1 = this.x(r.lonMax());
+        double z0 = Math.min(this.z(r.latMin()), this.z(r.latMax())), z1 = Math.max(this.z(r.latMin()), this.z(r.latMax()));
+        double dx = Math.max(Math.max(x0 - x, 0), x - x1), dz = Math.max(Math.max(z0 - z, 0), z - z1);
+        return Math.hypot(dx, dz);
+    }
+
     /** Elige una especie segun los pesos; {@code roll} entre 0 (incluido) y 1. null si no hay ninguna. */
     public static String pick(Map<String, Integer> weights, double roll) {
         int total = 0;

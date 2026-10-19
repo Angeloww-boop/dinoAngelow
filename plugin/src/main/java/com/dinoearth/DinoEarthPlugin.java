@@ -130,6 +130,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         plusAbilities = new com.dinoearth.plus.PlusAbilities(this, dinos);
         natural = new com.dinoearth.spawn.NaturalSpawner(this, dinos, keys);
         getServer().getPluginManager().registerEvents(natural, this);
+        missions.setNatural(natural);
         paleoMap = new com.dinoearth.spawn.PaleoMap(this, keys, natural);
         getServer().getPluginManager().registerEvents(paleoMap, this);
         getServer().getPluginManager().registerEvents(plusAbilities, this);

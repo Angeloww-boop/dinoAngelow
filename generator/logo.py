@@ -51,6 +51,17 @@ FONT = {
     "Y": ["#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.."],
     "Z": ["#####", "....#", "...#.", "..#..", ".#...", "#....", "#####"],
     " ": ["...", "...", "...", "...", "...", "...", "..."],
+    # con tilde: 9 renglones (los 2 de arriba van sobre la letra)
+    "Á": ["...#.", "..#..", ".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#"],
+    "É": ["...#.", "..#..", "#####", "#....", "#....", "####.", "#....", "#....", "#####"],
+    "Í": ["..#", ".#.", "###", ".#.", ".#.", ".#.", ".#.", ".#.", "###"],
+    "Ó": ["...#.", "..#..", ".###.", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."],
+    "Ú": ["...#.", "..#..", "#...#", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."],
+    "Ñ": [".##.#", "#.##.", "#...#", "##..#", "#.#.#", "#.#.#", "#..##", "#...#", "#...#"],
+    ",": ["..", "..", "..", "..", "..", ".#", "#."],
+    ":": [".", "#", ".", ".", ".", "#", "."],
+    "-": ["....", "....", "....", "####", "....", "....", "...."],
+    "+": [".....", "..#..", "..#..", "#####", "..#..", "..#..", "....."],
     ".": [".", ".", ".", ".", ".", ".", "#"],
     "0": [".###.", "#...#", "#..##", "#.#.#", "##..#", "#...#", ".###."],
     "1": [".#.", "##.", ".#.", ".#.", ".#.", ".#.", "###"],
@@ -66,14 +77,18 @@ FONT = {
 
 
 def text_mask(text, block, gap=1):
-    """Mascara (L) del texto en bloques de block x block px, con gap bloques entre letras."""
+    """Mascara (L) del texto en bloques de block x block px, con gap bloques entre letras. Si alguna letra tiene
+    tilde, la mascara tiene 2 renglones mas arriba (las demas letras quedan alineadas abajo)."""
     w = sum((len(FONT[c][0]) + gap) for c in text) - gap
-    img = Image.new("L", (w * block, 7 * block), 0)
+    rows = max(len(FONT[c]) for c in text)
+    img = Image.new("L", (w * block, rows * block), 0)
     d = ImageDraw.Draw(img)
     x0 = 0
     for c in text:
         g = FONT[c]
+        top = rows - len(g)
         for y, row in enumerate(g):
+            y += top
             for x, ch in enumerate(row):
                 if ch == "#":
                     d.rectangle(((x0 + x) * block, y * block, (x0 + x + 1) * block - 1, (y + 1) * block - 1), 255)

@@ -1,6 +1,7 @@
 """Render iluminado de un modelo (para el logo y el video): luz principal, relleno y borde de color por cara,
 en vez del sombreado plano de preview.py."""
 import math
+from array import array
 
 from build import faces_of, rotate, to_local
 from preview import apply, mat_mul, mat_r
@@ -13,10 +14,12 @@ def _norm(v):
 
 def render_lit(parts, yaw, pitch, ppx, canvas, cy_frac=0.5, key=(0.55, 0.75, -0.45), key_col=(255, 244, 228),
                fill=(-0.7, -0.2, -0.4), fill_col=(120, 140, 255), rim=(-0.85, 0.5, 0.0), rim_col=(255, 0, 217),
-               ambient=0.42, diffuse=0.78, fill_k=0.22, rim_k=0.75):
+               ambient=0.42, diffuse=0.78, fill_k=0.22, rim_k=0.75, buf=None):
+    """buf: bytearray de CW*CH*4 (RGBA) para escribir directo ahi (mucho mas rapido que la lista de filas, para el
+    video); sin buf devuelve la lista de filas con None donde no hay nada."""
     CW, CH = canvas
-    img = [[None] * CW for _ in range(CH)]
-    zbuf = [[1e9] * CW for _ in range(CH)]
+    img = None if buf is not None else [[None] * CW for _ in range(CH)]
+    zbuf = array("d", [1e9]) * (CW * CH)
     view = mat_mul(mat_r(rx=-pitch), mat_r(ry=yaw))
     cx, cy = CW / 2, CH * cy_frac
     key, fill, rim = _norm(key), _norm(fill), _norm(rim)
@@ -62,6 +65,9 @@ def render_lit(parts, yaw, pitch, ppx, canvas, cy_frac=0.5, key=(0.55, 0.75, -0.
                     dr = edge * (0.35 + 0.65 * side)
                     light = [ambient + diffuse * dk * key_col[i] / 255 + fill_k * df * fill_col[i] / 255 for i in range(3)]
                     add = [rim_k * dr * rim_col[i] for i in range(3)]
+                    l0, l1, l2 = light
+                    a0, a1, a2 = (add[i] / 255 * 0.6 for i in range(3))
+                    b0, b1, b2 = (add[i] * 0.25 for i in range(3))
                     xs = [p0[0], pu[0], pv[0], pu[0] + vx]
                     ys = [p0[1], pu[1], pv[1], pu[1] + vy]
                     x0, x1 = max(0, int(min(xs))), min(CW - 1, int(max(xs)) + 1)
@@ -75,10 +81,16 @@ def render_lit(parts, yaw, pitch, ppx, canvas, cy_frac=0.5, key=(0.55, 0.75, -0.
                             if a < 0 or a > 1 or b < 0 or b > 1:
                                 continue
                             z = p0[2] + a * dzu + b * dzv
-                            if z >= zbuf[py][px]:
+                            zi = py * CW + px
+                            if z >= zbuf[zi]:
                                 continue
                             c = pix[oy + min(H - 1, int(b * H))][ox + min(W - 1, int(a * W))]
-                            zbuf[py][px] = z
-                            img[py][px] = tuple(min(255, int(c[i] * light[i] + add[i] * c[i] / 255 * 0.6 + add[i] * 0.25))
-                                                for i in range(3))
+                            zbuf[zi] = z
+                            col = (min(255, int(c[0] * l0 + a0 * c[0] + b0)), min(255, int(c[1] * l1 + a1 * c[1] + b1)),
+                                   min(255, int(c[2] * l2 + a2 * c[2] + b2)))
+                            if buf is not None:
+                                k4 = zi * 4
+                                buf[k4:k4 + 4] = bytes((col[0], col[1], col[2], 255))
+                            else:
+                                img[py][px] = col
     return img

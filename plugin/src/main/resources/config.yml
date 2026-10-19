@@ -179,6 +179,9 @@ natural-spawn:
   # bloques minimos a cualquier pueblo de Towny o region de WorldGuard (0 = solo fuera de ellos). Los pueblos y
   # regiones se leen una vez por minuto; /dino mapa dice cuantos conoce y a cuanto esta el mas cerca.
   city-distance: 150
+  # regiones de WorldGuard que NO cuentan como zona protegida ni como ciudad (por ejemplo una que cubre todo el mapa
+  # para que no se construya afuera de los pueblos). /dino mapa probar dice que regiones hay donde se descarta.
+  ignored-regions: []
   # si nadie se les acerca a menos de despawn-radius bloques por despawn-minutes, desaparecen (los domesticados,
   # atados, prestados y las madres con nido nunca)
   despawn-minutes: 5

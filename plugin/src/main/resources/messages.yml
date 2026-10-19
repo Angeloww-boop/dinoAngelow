@@ -29,7 +29,7 @@ chat:
     - '&8| &#ff00d9/dino remove &8[&fradio&8] [&fespecie&8] &8- &fBorra dinos cercanos.'
     - '&8| &#ff00d9/dino count &8- &fDinos cargados por especie.'
     - '&8| &#ff00d9/dino stats &8- &fCuánto consume el plugin.'
-    - '&8| &#ff00d9/dino mapa &8- &fDónde estás en el mundo real y qué dinos aparecen ahí.'
+    - '&8| &#ff00d9/dino mapa &8[&fprobar&8] &8- &fDónde estás, qué dinos aparecen y por qué no aparecen.'
     - '&8| &#ff00d9/dino comedero &8<&fdieta&8> [&fcantidad&8] &8- &fTe da comederos.'
     - '&8| &#ff00d9/dino dinopedia &8[&fjugador&8] &8- &fEntrega una Dinopedia.'
     - '&8| &#ff00d9/dino hambre &8[&f%&8] &8- &fPone el hambre de los dinos cercanos.'
@@ -240,6 +240,13 @@ chat:
   mapa-ciudad: '&9&lDINOEARTH &8» &fLa ciudad más cerca está a &#ff00d9%distancia%&f bloques.'
   mapa-ciudad-cerca: '&9&lDINOEARTH &8» &fHay una ciudad a &#ff00d9%distancia%&f bloques: acá no aparecen dinos (mínimo &#ff00d9%minimo%&f).'
   mapa-sin-ciudad: '&9&lDINOEARTH &8» &fNo hay ciudades a menos de &#ff00d9%max%&f bloques.'
+  mapa-prueba: '&9&lDINOEARTH &8» &fProbé &#ff00d9%intentos%&f lugares a tu espalda, sin spawnear nada.'
+  mapa-prueba-ok: '&9&lDINOEARTH &8» &fEn &#ff00d9%ok%&f podría aparecer &#ff00d9%lista%&f.'
+  mapa-prueba-motivos: '&9&lDINOEARTH &8» &fDescartados &8» &fchunk sin cargar &#ff00d9%chunk%&f, suelo que no sirve &#ff00d9%suelo%&f, zona protegida &#ff00d9%protegido%&f, ciudad cerca &#ff00d9%ciudad%&f, sin especies &#ff00d9%especies%&f.'
+  mapa-prueba-modo: '&9&lDINOEARTH &8» &fEstás en &#ff00d9%modo%&f: los dinos solo aparecen solos a jugadores en survival o aventura.'
+  mapa-prueba-tope: '&9&lDINOEARTH &8» &fYa hay &#ff00d9%cerca%&f salvajes cerca tuyo y el tope es &#ff00d9%tope%&f.'
+  mapa-prueba-total: '&9&lDINOEARTH &8» &fHay &#ff00d9%total%&f salvajes cargados en el server y el tope es &#ff00d9%tope%&f.'
+  mapa-regiones-wg: '&9&lDINOEARTH &8» &fRegiones de WorldGuard ahí &8» &#ff00d9%lista%&f. Si alguna cubre todo el mapa, ponela en &#ff00d9ignored-regions&f.'
 
 actionbar:
   limite: '&8| &fYa tenés &#ff00d9%cantidad%&f dinos, el máximo es &#ff00d9%limite%&f.'

@@ -452,6 +452,11 @@ mapa:
     - 'suroeste'
     - 'sur'
     - 'sureste'
+  modos:
+    SURVIVAL: 'survival'
+    CREATIVE: 'creativo'
+    ADVENTURE: 'aventura'
+    SPECTATOR: 'espectador'
   norte: 'N'
   sur: 'S'
   este: 'E'

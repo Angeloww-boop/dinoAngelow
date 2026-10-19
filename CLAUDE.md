@@ -250,5 +250,11 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   boton del libro del menu). Pack sha1 0a4549e6… (solo cambiaron dinopedia.png y gui/book.png).
   Falta en el juego: que /dino mapa muestre los terrenos de Towny y regiones de WorldGuard (la reflexion no se pudo
   probar: no estan en el server de prueba local).
+- v0.19.1: `/dino mapa probar` (prueba 30 lugares a la espalda sin spawnear y cuenta por que se descarta cada uno:
+  chunk, suelo, protegido, ciudad, especies; avisa si el jugador no esta en survival/aventura o si se llego al tope, y
+  nombra las regiones de WorldGuard donde se descarto). `natural-spawn.ignored-regions`: regiones de WorldGuard que no
+  cuentan como protegidas ni como ciudad (servers de Earth con una region que cubre todo el mapa). Angeloww no vio
+  aparecer ninguno con interval 1 y chance 100: la causa todavia no esta confirmada (sospechas: modo creativo o una
+  region de WorldGuard en todo el mapa).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

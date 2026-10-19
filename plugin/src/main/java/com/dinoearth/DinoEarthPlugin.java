@@ -313,7 +313,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
             case "stats", "estadisticas" -> stats(sender);
             case "mapa", "region" -> {
                 if (!(sender instanceof Player player)) return chat(sender, "solo-jugadores");
-                natural.info(player);
+                if (args.length > 1 && args[1].equalsIgnoreCase("probar")) natural.probe(player, 30);
+                else natural.info(player);
             }
             case "reload", "recargar" -> {
                 lang.reload();
@@ -728,6 +729,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
             return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[1]);
         }
         if (args.length == 2 && sub.equals("pack") && admin) return filter(List.of("reload", "info"), args[1]);
+        if (args.length == 2 && sub.equals("mapa") && admin) return filter(List.of("probar"), args[1]);
         if (args.length == 2 && (sub.equals("top") || sub.equals("tops"))) return filter(PlayerStats.CATEGORIES, args[1]);
         if (sub.equals("carrera") || sub.equals("carreras")) {
             if (args.length == 2) {

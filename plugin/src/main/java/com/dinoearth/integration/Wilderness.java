@@ -41,6 +41,8 @@ public final class Wilderness {
     private static int townBlockSize = 16;
     private static Map<String, List<double[]>> wgBoxes = new HashMap<>();
     private static long refreshed;
+    /** Regiones de WorldGuard que no cuentan (por ejemplo una que protege todo el mapa), en minusculas. */
+    private static Set<String> ignored = Set.of();
 
     private Wilderness() {
     }
@@ -83,12 +85,20 @@ public final class Wilderness {
         }
     }
 
+    /** Regiones de WorldGuard que no cuentan como ciudad ni como zona protegida (natural-spawn.ignored-regions). */
+    public static void setIgnored(Collection<String> ids) {
+        Set<String> s = new HashSet<>();
+        for (String id : ids) s.add(id.toLowerCase(java.util.Locale.ROOT));
+        ignored = s;
+        refreshed = 0;
+    }
+
     public static boolean isWild(Location at) {
         try {
             if (towny != null && !(Boolean) townyWild.invoke(towny, at)) return false;
             if (wgQuery != null) {
                 Object set = wgRegions.invoke(wgQuery, wgAdapt.invoke(null, at));
-                if ((Integer) wgSize.invoke(set) > 0) return false;
+                if ((Integer) wgSize.invoke(set) > 0 && !regionIds(set).isEmpty()) return false;
             }
         } catch (ReflectiveOperationException | RuntimeException e) {
             if (!warned && log != null) {
@@ -97,6 +107,26 @@ public final class Wilderness {
             }
         }
         return true;
+    }
+
+    /** Ids de las regiones de WorldGuard que hay en este lugar (sin las ignoradas), para /dino mapa. */
+    public static List<String> regionsAt(Location at) {
+        if (wgQuery == null) return List.of();
+        try {
+            return regionIds(wgRegions.invoke(wgQuery, wgAdapt.invoke(null, at)));
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return List.of();
+        }
+    }
+
+    private static List<String> regionIds(Object set) throws ReflectiveOperationException {
+        List<String> out = new ArrayList<>();
+        for (Object r : (Iterable<?>) set) {
+            String id = String.valueOf(r.getClass().getMethod("getId").invoke(r));
+            String low = id.toLowerCase(java.util.Locale.ROOT);
+            if (!low.equals("__global__") && !ignored.contains(low)) out.add(id);
+        }
+        return out;
     }
 
     // ------------------------------------------------------------ distancia a las ciudades
@@ -181,7 +211,8 @@ public final class Wilderness {
             if (manager == null) continue;
             Map<?, ?> regions = (Map<?, ?>) manager.getClass().getMethod("getRegions").invoke(manager);
             for (Map.Entry<?, ?> e : regions.entrySet()) {
-                if ("__global__".equalsIgnoreCase(String.valueOf(e.getKey()))) continue;
+                String id = String.valueOf(e.getKey()).toLowerCase(java.util.Locale.ROOT);
+                if (id.equals("__global__") || ignored.contains(id)) continue;
                 Object r = e.getValue();
                 Object min = r.getClass().getMethod("getMinimumPoint").invoke(r);
                 Object max = r.getClass().getMethod("getMaximumPoint").invoke(r);

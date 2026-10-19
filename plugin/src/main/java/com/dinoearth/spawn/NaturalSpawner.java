@@ -82,6 +82,7 @@ public final class NaturalSpawner implements Listener {
         maxTotal = Math.max(0, c.getInt("max-total", 120));
         onlyWild = c.getBoolean("only-wilderness", true);
         cityDistance = Math.max(0, c.getDouble("city-distance", 150));
+        Wilderness.setIgnored(c.getStringList("ignored-regions"));
         despawnMs = (long) (Math.max(0.5, c.getDouble("despawn-minutes", 5)) * 60_000);
         despawnRadius = Math.max(16, c.getDouble("despawn-radius", 128));
         oceanChance = clamp(c.getDouble("ocean.chance", 0.5), 0, 1);
@@ -195,11 +196,17 @@ public final class NaturalSpawner implements Listener {
         return lang.has("textos.yml", "regiones." + id) ? lang.plain("regiones." + id) : id;
     }
 
+    /** Por que se descarto un lugar (o que salio bien): /dino mapa probar los cuenta. */
+    public enum Reason { OK, CHUNK, NO_SPECIES, GROUND, PROTECTED, CITY }
+
+    private record Attempt(Reason reason, Species species, Location spot, boolean water) {
+    }
+
     /**
-     * Intenta un grupo cerca de {@code base} (la posicion del jugador; "a sus espaldas" segun su yaw). Devuelve los que
-     * aparecieron (vacio si no se pudo). Publico para poder probarlo en un server sin jugadores.
+     * Elige un lugar a la espalda de {@code base} y revisa todo lo que tiene que cumplir. {@code dry}: para probar (no
+     * tira las chances de las zonas comunes y el oceano, solo dice si se podria).
      */
-    public List<Dino> spawnAround(Location base, int room) {
+    private Attempt attempt(Location base, boolean dry) {
         ThreadLocalRandom r = ThreadLocalRandom.current();
         World w = base.getWorld();
         double yaw = behind ? base.getYaw() + 180 + r.nextDouble(-75, 75) : r.nextDouble(360);
@@ -207,7 +214,7 @@ public final class NaturalSpawner implements Listener {
         double rad = Math.toRadians(yaw);
         int x = (int) Math.floor(base.getX() - Math.sin(rad) * dist);
         int z = (int) Math.floor(base.getZ() + Math.cos(rad) * dist);
-        if (!w.isChunkLoaded(x >> 4, z >> 4)) return List.of();
+        if (!w.isChunkLoaded(x >> 4, z >> 4)) return new Attempt(Reason.CHUNK, null, null, false);
 
         Block top = w.getHighestBlockAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES);
         boolean water = top.getType() == Material.WATER;
@@ -224,13 +231,29 @@ public final class NaturalSpawner implements Listener {
                 roll = elsewhereChance;
             }
         }
-        if (pool.isEmpty() || r.nextDouble() >= roll) return List.of();
+        if (pool.isEmpty() || !dry && r.nextDouble() >= roll) return new Attempt(Reason.NO_SPECIES, null, null, water);
         Species s = Species.byId(EarthMap.pick(pool, r.nextDouble()));
-        if (s == null || s.rig == null || s.aquatic() != water) return List.of();
+        if (s == null || s.rig == null || s.aquatic() != water) return new Attempt(Reason.NO_SPECIES, null, null, water);
         Location spot = water ? waterSpot(top, s) : landSpot(top, s);
-        if (spot == null || onlyWild && !Wilderness.isWild(spot)) return List.of();
+        if (spot == null) return new Attempt(Reason.GROUND, s, null, water);
+        if (onlyWild && !Wilderness.isWild(spot)) return new Attempt(Reason.PROTECTED, s, spot, water);
         // lejos de los pueblos de Towny y las regiones de WorldGuard (lo ultimo: es lo que mas cuesta)
-        if (cityDistance > 0 && !Wilderness.farFromCities(spot, cityDistance)) return List.of();
+        if (cityDistance > 0 && !Wilderness.farFromCities(spot, cityDistance)) return new Attempt(Reason.CITY, s, spot, water);
+        return new Attempt(Reason.OK, s, spot, water);
+    }
+
+    /**
+     * Intenta un grupo cerca de {@code base} (la posicion del jugador; "a sus espaldas" segun su yaw). Devuelve los que
+     * aparecieron (vacio si no se pudo). Publico para poder probarlo en un server sin jugadores.
+     */
+    public List<Dino> spawnAround(Location base, int room) {
+        Attempt a = attempt(base, false);
+        if (a.reason() != Reason.OK) return List.of();
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        World w = base.getWorld();
+        Species s = a.species();
+        Location spot = a.spot();
+        boolean water = a.water();
 
         int count = s.group > 1 ? r.nextInt(Math.max(1, s.group - 2), s.group + 1) : 1;
         count = Math.max(1, Math.min(count, room));
@@ -343,6 +366,48 @@ public final class NaturalSpawner implements Listener {
         });
     }
 
+    // ------------------------------------------------------------ /dino mapa probar
+    /** Prueba {@code tries} lugares a la espalda del jugador sin spawnear nada y dice por que se descarta cada uno. */
+    public void probe(Player p, int tries) {
+        Lang lang = Lang.get();
+        if (!enabled) {
+            lang.chat(p, "mapa-apagado");
+            return;
+        }
+        if (!allowedWorld(p.getWorld())) {
+            lang.chat(p, "mapa-otro-mundo");
+            return;
+        }
+        if (p.getGameMode() != GameMode.SURVIVAL && p.getGameMode() != GameMode.ADVENTURE) {
+            lang.chat(p, "mapa-prueba-modo", "modo", lang.plain("mapa.modos." + p.getGameMode().name()));
+        }
+        Location at = p.getLocation();
+        int near = 0, total = 0;
+        for (Dino d : dinos.all()) {
+            if (!isNatural(d.wolf()) || d.wolf().isTamed()) continue;
+            total++;
+            Location l = d.wolf().getLocation();
+            if (l.getWorld() == at.getWorld() && l.distanceSquared(at) < nearRadius * nearRadius) near++;
+        }
+        if (near >= maxNear) lang.chat(p, "mapa-prueba-tope", "cerca", near, "tope", maxNear);
+        if (total >= maxTotal) lang.chat(p, "mapa-prueba-total", "total", total, "tope", maxTotal);
+        Map<Reason, Integer> count = new java.util.EnumMap<>(Reason.class);
+        Map<String, Integer> could = new LinkedHashMap<>();
+        java.util.Set<String> wg = new java.util.TreeSet<>();
+        for (int i = 0; i < tries; i++) {
+            Attempt a = attempt(at, true);
+            count.merge(a.reason(), 1, Integer::sum);
+            if (a.reason() == Reason.OK) could.merge(a.species().id, 1, Integer::sum);
+            if (a.reason() == Reason.PROTECTED) wg.addAll(Wilderness.regionsAt(a.spot()));
+        }
+        lang.chat(p, "mapa-prueba", "intentos", tries);
+        lang.chat(p, "mapa-prueba-ok", "ok", count.getOrDefault(Reason.OK, 0), "lista", names(could));
+        lang.chat(p, "mapa-prueba-motivos", "chunk", count.getOrDefault(Reason.CHUNK, 0),
+                "suelo", count.getOrDefault(Reason.GROUND, 0), "protegido", count.getOrDefault(Reason.PROTECTED, 0),
+                "ciudad", count.getOrDefault(Reason.CITY, 0), "especies", count.getOrDefault(Reason.NO_SPECIES, 0));
+        if (!wg.isEmpty()) lang.chat(p, "mapa-regiones-wg", "lista", String.join(", ", wg));
+    }
+
     // ------------------------------------------------------------ /dino mapa
     /** Donde estas en el mundo real y que dinos aparecen ahi. */
     public void info(Player p) {
@@ -358,7 +423,11 @@ public final class NaturalSpawner implements Listener {
             lang.chat(p, "mapa-otro-mundo");
             return;
         }
-        if (onlyWild && !Wilderness.isWild(at)) lang.chat(p, "mapa-protegido");
+        if (onlyWild && !Wilderness.isWild(at)) {
+            lang.chat(p, "mapa-protegido");
+            List<String> ids = Wilderness.regionsAt(at);
+            if (!ids.isEmpty()) lang.chat(p, "mapa-regiones-wg", "lista", String.join(", ", ids));
+        }
         int[] cities = Wilderness.cityCounts();
         lang.chat(p, "mapa-ciudades", "terrenos", cities[0], "regiones", cities[1]);
         double city = Wilderness.nearestCity(at, 2000);

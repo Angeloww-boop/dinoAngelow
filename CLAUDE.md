@@ -161,6 +161,9 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
 | `generator/preview.py` | Render propio a `preview.png` (`python generator/preview.py <especie>`) — usarlo para revisar modelos |
 | `generator/sounds.py`, `sounds_species.py`, `synth.py` | Sonidos sintetizados a `.ogg` |
+| `generator/logo.py`, `rexlit.py` | Logo, banner e icono de DinoEarth (`docs/logo/`) con el T-Rex iluminado |
+| `generator/video.py` | Trailer de renders (todas las especies + Plus + items), horizontal y vertical (`docs/video/`) |
+| `generator/ingame.py`, `mc3d.py`, `mchud.py` | Video "como si fuera in game" (`docs/video/dinoearth-ingame.mp4`): motor 3D numpy en perspectiva con mundo de bloques y los modelos reales, HUD/chat/menus de Minecraft con los textos reales del plugin. Simulado: sin cliente en la nube. `python generator/ingame.py preview`, `frame <seg>`, `audio` (rearma solo el sonido) |
 | `plugin/` | Plugin Maven: `species/Species.java` (stats y especies), `dino/Dino.java` (lógica + animación), `dino/DinoListener.java`, `egg/EggManager.java`, `pack/PackManager.java` |
 | `DinoEarth-*.jar`, `DinoEarth-ResourcePack.zip` | Último build, para descargar directo desde GitHub |
 

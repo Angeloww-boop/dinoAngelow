@@ -11,7 +11,8 @@ import random
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 from build import ROOT, build_species
-from preview import bone_matrices, mat_t, render
+from preview import bone_matrices, mat_t
+from rexlit import render_lit
 import species_trex
 
 OUT = os.path.join(ROOT, "docs", "logo")
@@ -210,18 +211,19 @@ def globe(size, lon0=-58.0, lat0=-8.0, cells=72):
 
 
 # ---------------------------------------------------------------- el T-Rex
-ROAR = {"head": (-38, -8, 0, 0), "jaw": (42, 0, 0, 0), "tail1": (-6, 12, 0, 0), "tail2": (-4, 16, 0, 0),
-        "leg_r": (-22, 0, 0, 0), "shin_r": (18, 0, 0, 0), "leg_l": (16, 0, 0, 0), "shin_l": (8, 0, 0, 0),
-        "body": (-6, 0, 0, 0)}
+# rugido bien plantado: la pata de atras adelantada y la de adelante apenas atras (asi se ven las dos), cabeza
+# levantada con la boca bien abierta, cola estirada con una curva
+ROAR = {"body": (-6, 0, 0, 0), "head": (-14, 8, 0, 0), "jaw": (40, 0, 0, 0), "tail1": (6, 10, 0, 0),
+        "tail2": (4, -14, 0, 0), "leg_l": (-24, 0, 0, 0), "shin_l": (16, 0, 0, 0), "leg_r": (12, 0, 0, 0),
+        "shin_r": (4, 0, 0, 0)}
 
 
-def trex(px_per, variant="pardo", yaw=125, pitch=-2, ss=2):
+def trex(px_per, variant="verde", yaw=120, pitch=-8, ss=2):
     """Render del T-Rex rugiendo, fondo transparente, recortado. ss = supersampling (bordes suaves)."""
     sets = build_species(species_trex.SPECIES, {})
     s = sets[f"{variant}/male"]
-    W, H = int(70 * px_per * ss), int(60 * px_per * ss)
-    img = render([(s, bone_matrices(s[0], ROAR, mat_t(0, -25, 0)))], yaw, pitch, ppx=px_per * ss, cy_frac=0.5,
-                 canvas=(W, H), bg=None)
+    W, H = int(130 * px_per * ss), int(90 * px_per * ss)
+    img = render_lit([(s, bone_matrices(s[0], ROAR, mat_t(0, -25, 0)))], yaw, pitch, px_per * ss, (W, H))
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     p = im.load()
     for y, row in enumerate(img):
@@ -232,7 +234,7 @@ def trex(px_per, variant="pardo", yaw=125, pitch=-2, ss=2):
     if ss > 1:
         im = im.resize((im.size[0] // ss, im.size[1] // ss), Image.LANCZOS)
     a = im.split()[3]
-    im = ImageEnhance.Contrast(ImageEnhance.Brightness(im.convert("RGB")).enhance(1.25)).enhance(1.15).convert("RGBA")
+    im = ImageEnhance.Color(ImageEnhance.Contrast(im.convert("RGB")).enhance(1.1)).enhance(1.15).convert("RGBA")
     im.putalpha(a)
     return im
 
@@ -263,25 +265,23 @@ def logo(scale=1.0):
     gap = S(26)
     word_w = dino.size[0] + gap + earth.size[0]
     word_h = max(dino.size[1], earth.size[1])
-    sub = pixel_text("LLEGAN LOS DINOSAURIOS", S(8), (255, 255, 255))
 
     g = globe(S(640))
-    rex = outlined(trex(S(11)), S(5), INK, glow=(PINK, S(14)))
+    rex = outlined(trex(S(9.5)), S(5), INK, glow=(PINK, S(14)))
 
     W = max(word_w, g.size[0]) + S(80)
-    H = S(80) + int(g.size[0] * 0.78) + word_h + sub.size[1] + S(40)
+    H = S(80) + int(g.size[0] * 0.78) + word_h + S(40)
     out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     gx, gy = (W - g.size[0]) // 2, S(-40)
     out.alpha_composite(g, (gx, gy))
     words_y = gy + int(g.size[1] * 0.7)
     # el T-Rex parado sobre el texto, rugiendo hacia la izquierda, encima del globo
     rx = (W - rex.size[0]) // 2 + S(40)
-    ry = words_y + S(40) - rex.size[1]
+    ry = words_y + S(62) - rex.size[1]
     out.alpha_composite(rex, (rx, ry))
     wx = (W - word_w) // 2
     out.alpha_composite(dino, (wx, words_y))
     out.alpha_composite(earth, (wx + dino.size[0] + gap, words_y))
-    out.alpha_composite(sub, ((W - sub.size[0]) // 2, words_y + word_h + S(4)))
     return out.crop(out.getbbox())
 
 

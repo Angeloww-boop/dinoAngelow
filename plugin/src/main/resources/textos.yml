@@ -441,6 +441,20 @@ plus:
 
 # ---------------------------------------------------------------- spawn natural (/dino mapa)
 mapa:
+  nombre: 'Mapa del Paleontólogo'
+  # dibujados sobre el mapa (la fuente de los mapas no tiene tildes: se sacan solas)
+  titulo: 'Mapa del Paleontólogo'
+  leyenda: 'Rosa: zonas de fósiles'
+  # rumbos de 8 puntas, en este orden: este, noreste, norte, noroeste, oeste, suroeste, sur, sureste
+  rumbos:
+    - 'este'
+    - 'noreste'
+    - 'norte'
+    - 'noroeste'
+    - 'oeste'
+    - 'suroeste'
+    - 'sur'
+    - 'sureste'
   norte: 'N'
   sur: 'S'
   este: 'E'

@@ -301,6 +301,11 @@ actionbar:
   plus-sin-arbol: '&8| &fNo hay ningún árbol adelante.'
   plus-sin-permiso: '&8| &fNo podés talar acá.'
   plus-tala: '&8| &fTalaste &#ff00d9%cantidad%&f tronco(s).'
+  mapa-mano-region: '&8| &#ff00d9%lat%&f, &#ff00d9%lon%&f. Estás en &#ff00d9%region%&f.'
+  mapa-mano-cerca: '&8| &#ff00d9%lat%&f, &#ff00d9%lon%&f. La región más cerca es &#ff00d9%region%&f, a &#ff00d9%distancia%&f bloques hacia el &#ff00d9%rumbo%&f.'
+  mapa-mano-posicion: '&8| &#ff00d9%lat%&f, &#ff00d9%lon%&f.'
+  mapa-mano-otro-mundo: '&8| &fEl mapa solo funciona en el mundo de la Tierra.'
+
 bossbar:
   mision: '&#ff00d9%mision% &fprogreso &8- &f%progreso% de &#ff00d9%total%'
   carrera-cuenta: '&#ff00d9%pista% &flarga en &8- &f%segundos% &#ff00d9segundos'

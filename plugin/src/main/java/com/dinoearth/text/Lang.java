@@ -41,7 +41,7 @@ public final class Lang {
     public static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.builder()
             .character('&').hexCharacter('#').hexColors().build();
     private static final String[] FILES = {"messages.yml", "textos.yml", "items.yml",
-            "menus/silbato.yml", "menus/llamar.yml", "menus/dinopedia.yml"};
+            "menus/silbato.yml", "menus/llamar.yml", "menus/dinopedia.yml", "menus/regiones.yml"};
 
     private final JavaPlugin plugin;
     private final Map<String, YamlConfiguration> files = new HashMap<>();

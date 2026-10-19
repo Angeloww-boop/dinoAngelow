@@ -65,6 +65,8 @@ public final class Keys {
     // spawn natural: aparecio solo, y la ultima vez que hubo un jugador cerca (para que desaparezca si queda solo)
     public final NamespacedKey natural;
     public final NamespacedKey naturalSeen;
+    // Mapa del Paleontologo
+    public final NamespacedKey paleoMap;
     public final NamespacedKey nestCooldown;
 
     private final Plugin plugin;
@@ -119,6 +121,7 @@ public final class Keys {
         guarding = new NamespacedKey(plugin, "guarding");
         natural = new NamespacedKey(plugin, "natural");
         naturalSeen = new NamespacedKey(plugin, "natural_seen");
+        paleoMap = new NamespacedKey(plugin, "paleo_map");
         nestCooldown = new NamespacedKey(plugin, "nest_cooldown");
         this.plugin = plugin;
     }

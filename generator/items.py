@@ -357,4 +357,12 @@ jaula-llena:
     - '&8| &fQuien lo suelta queda como dueño.'
     - '&f'
 jaula-con-montura: '&8| &fTiene &#ff00d9montura&f.'
+mapa:
+  display_name: '&#ff00d9Mapa del Paleontólogo'
+  lore:
+    - '&f'
+    - '&8| &fEn la mano &8» &#ff00d9tus coordenadas reales&f y la región.'
+    - '&8| &fClick derecho &8» &#ff00d9regiones de fósiles&f, qué dinos'
+    - '&8| &fhay en cada una y hacia dónde quedan.'
+    - '&f'
 """

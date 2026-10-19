@@ -20,7 +20,7 @@ public final class TextCheck {
     public static void main(String[] args) throws Exception {
         String base = args[0];
         String[] files = {"messages.yml", "textos.yml", "items.yml", "menus/silbato.yml", "menus/llamar.yml",
-                "menus/dinopedia.yml"};
+                "menus/dinopedia.yml", "menus/regiones.yml"};
         int checked = 0;
         List<String> bad = new ArrayList<>();
         for (String f : files) {

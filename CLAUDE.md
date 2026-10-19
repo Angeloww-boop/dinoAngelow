@@ -119,6 +119,15 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
   `EntitiesLoadEvent`, con `natural_seen` en el PDC). Nunca los domesticados, atados, prestados ni madres con nido.
   `/dino mapa` (admin) dice latitud/longitud, region y que aparece. `MapCheck` prueba la cuenta con ciudades reales.
   Para apagar una region: pesos en 0 (si se borra, el ConfigUpdater la vuelve a agregar).
+- Mapa del Paleontologo (0.18, `spawn/PaleoMap`): FILLED_MAP con un solo MapView compartido (id en `mapa.yml`, se
+  reusa al reiniciar; renderers de vanilla sacados, locked) -> todos los items son iguales (Shopkeepers). Renderer
+  contextual: dibuja `mapa/tierra.png` + las regiones del config (rosa) + titulo/leyenda (MinecraftFont, sin tildes,
+  max 124 px) UNA vez por jugador (y otra vez tras /dino reload) y despues solo mueve la flecha (formula de vanilla).
+  La imagen sale de `generator/mapa/tierra.webp` (render del mapa del server, 4 px de borde negro a los costados) con
+  `generator/.venv/Scripts/python generator/paleomap.py` (agua de un solo color, 128 x 64 en el medio de 128 x 128).
+  En la mano: barra de accion cada 1 s (lat/lon, region o la mas cercana con distancia y rumbo). Click derecho: menu
+  `menus/regiones.yml` (solo lectura, Holder). Se da con `/dino item mapa`. `MapPreview` (test) lo dibuja con la paleta
+  de los mapas de Bukkit para revisarlo sin el juego.
 - Chunk que se desactiva (jugador que se aleja): Paper dispara `EntityRemoveFromWorldEvent` con el lobo VIVO y no deja
   borrar las partes en ese momento (avisaba una vez por parte). `DinoListener.onRemove` ya no las borra si el lobo no
   esta muerto (no se guardan: se van con el chunk), y `Dino.buildModel` saca las partes viejas que el lobo todavia
@@ -135,6 +144,7 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 | `generator/geometry.py` | Cube/Bone/Rig, huevo y materiales de montura (`SADDLE_COLORS`, cada especie los pisa con `saddle_colors`) |
 | `generator/feeder.py`, `generator/nest.py`, `generator/icons.py` | Modelo del comedero y del nido; iconos de la Dinopedia (los llama build.py) |
 | `generator/gui.py`, `gui_preview.py`, `font_widths.py` | Menus dibujados de la Dinopedia (ver arriba) |
+| `generator/paleomap.py` | Imagen de la Tierra del Mapa del Paleontologo (`plugin/src/main/resources/mapa/tierra.png`, necesita Pillow de .venv) |
 | `generator/items.py` | Items propios: drops por especie, monturas como item, silbato, jaula. Dibuja sus iconos y escribe `plugin/src/main/resources/items.json` (el plugin lee todo de ahí) |
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
 | `generator/preview.py` | Render propio a `preview.png` (`python generator/preview.py <especie>`) — usarlo para revisar modelos |
@@ -221,5 +231,8 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   Falta en el juego: el spawn con jugadores de verdad.
 - v0.17.1: los textos de `/dino mapa` estaban en la sección actionbar de messages.yml (salía "chat.mapa"); pasan a chat.
   Al actualizar, Lang los agrega solos al messages.yml del server (los `actionbar.mapa*` viejos sobran, se pueden borrar).
+- v0.18.0: Mapa del Paleontologo (ver arriba). Probado en un Paper local: el mapa se crea, se reusa el mismo id al
+  reiniciar, los items son iguales; la vista previa con la paleta real se reviso. Falta en el juego: verlo en la mano,
+  la barra de accion y el menu con un jugador.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

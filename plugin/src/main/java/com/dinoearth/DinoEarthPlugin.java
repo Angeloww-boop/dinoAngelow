@@ -62,6 +62,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private com.dinoearth.race.RaceManager races;
     private com.dinoearth.plus.PlusAbilities plusAbilities;
     private com.dinoearth.spawn.NaturalSpawner natural;
+    private com.dinoearth.spawn.PaleoMap paleoMap;
     private MissionManager missions;
     private PlayerStats stats;
     private NestManager nests;
@@ -129,6 +130,8 @@ public final class DinoEarthPlugin extends JavaPlugin {
         plusAbilities = new com.dinoearth.plus.PlusAbilities(this, dinos);
         natural = new com.dinoearth.spawn.NaturalSpawner(this, dinos, keys);
         getServer().getPluginManager().registerEvents(natural, this);
+        paleoMap = new com.dinoearth.spawn.PaleoMap(this, keys, natural);
+        getServer().getPluginManager().registerEvents(paleoMap, this);
         getServer().getPluginManager().registerEvents(plusAbilities, this);
         getServer().getPluginManager().registerEvents(races, this);
         recall = new RecallManager(this, dinos, registry, keys, settings);
@@ -318,6 +321,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 races.loadConfig();
                 plusAbilities.loadConfig();
                 natural.loadConfig();
+                paleoMap.reload();
                 for (Species s : Species.ALL) s.applyTexts(lang);
                 chat(sender, "recargado");
             }
@@ -391,8 +395,9 @@ public final class DinoEarthPlugin extends JavaPlugin {
 
     // ------------------------------------------------------------ items propios
     private void giveItem(CommandSender sender, String[] args) {
-        if (args.length < 2 || items.def(args[1].toLowerCase()) == null) {
-            chat(sender, "items-lista", "lista", String.join(", ", items.ids()));
+        boolean map = args.length > 1 && com.dinoearth.spawn.PaleoMap.isMapId(args[1]);
+        if (args.length < 2 || !map && items.def(args[1].toLowerCase()) == null) {
+            chat(sender, "items-lista", "lista", String.join(", ", itemIds()));
             return;
         }
         String id = args[1].toLowerCase();
@@ -400,6 +405,15 @@ public final class DinoEarthPlugin extends JavaPlugin {
         Player target = args.length > 3 ? getServer().getPlayerExact(args[3]) : sender instanceof Player p ? p : null;
         if (target == null) {
             chat(sender, "item-uso");
+            return;
+        }
+        if (map) {
+            for (int i = 0; i < amount; i++) {
+                for (var rest : target.getInventory().addItem(paleoMap.createItem(1)).values()) {
+                    target.getWorld().dropItemNaturally(target.getLocation(), rest);
+                }
+            }
+            chat(sender, "item-entregado", "cantidad", amount, "item", lang.plain("mapa.nombre"), "player", target.getName());
             return;
         }
         int max = items.def(id).maxStack();
@@ -687,6 +701,12 @@ public final class DinoEarthPlugin extends JavaPlugin {
         return Species.ALL.stream().map(s -> s.id).toList();
     }
 
+    private List<String> itemIds() {
+        List<String> ids = new ArrayList<>(items.ids());
+        ids.add("mapa");
+        return ids;
+    }
+
     private static List<String> eggSpecies() {
         return Species.ALL.stream().filter(s -> s.rig != null && s.rig.hasEgg()).map(s -> s.id).toList();
     }
@@ -728,7 +748,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         }
         if (!admin) return List.of();
         if (sub.equals("item") || sub.equals("items")) {
-            if (args.length == 2) return filter(items.ids(), args[1]);
+            if (args.length == 2) return filter(itemIds(), args[1]);
             if (args.length == 3) return filter(List.of("1", "16", "64"), args[2]);
             if (args.length == 4) return filter(getServer().getOnlinePlayers().stream().map(Player::getName).toList(), args[3]);
         }

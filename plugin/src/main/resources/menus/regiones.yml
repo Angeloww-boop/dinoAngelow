@@ -1,0 +1,64 @@
+# Mapa del Paleontologo, click derecho: regiones de fosiles del mapa de la Tierra (solo para mirar).
+menu_title: '&8| &9Regiones de fósiles'
+size: 54
+items:
+  'relleno':
+    material: black_stained_glass_pane
+    slots:
+      - 0-9
+      - 17
+      - 18
+      - 26
+      - 27
+      - 35
+      - 36-44
+      - 45-53
+    display_name: ' '
+  # una por region del config (natural-spawn.regions), con el icono de su primera especie
+  'region':
+    slots:
+      - 10-16
+      - 19-25
+      - 28-34
+    display_name: '&#ff00d9%region%'
+    lore:
+      - '&f'
+      - '&8| &fDinos &8» &#ff00d9%lista%'
+      - '&8| &fCentro &8» &#ff00d9X %x% Z %z%'
+      - '&f'
+      - '%estado%'
+  'posicion':
+    material: compass
+    slot: 47
+    display_name: '&#ff00d9Dónde estás'
+    lore:
+      - '&f'
+      - '&8| &fCoordenadas reales &8» &#ff00d9%donde%'
+      - '&f'
+  'oceano':
+    material: heart_of_the_sea
+    slot: 48
+    display_name: '&#ff00d9Agua honda'
+    lore:
+      - '&f'
+      - '&8| &fDinos &8» &#ff00d9%lista%'
+      - '&8| &fEn cualquier océano del mapa.'
+      - '&f'
+  'resto':
+    material: grass_block
+    slot: 50
+    display_name: '&#ff00d9Resto del mundo'
+    lore:
+      - '&f'
+      - '&8| &fDinos &8» &#ff00d9%lista%'
+      - '&8| &fFuera de las regiones aparecen menos seguido.'
+      - '&f'
+  'cerrar':
+    material: barrier
+    slot: 49
+    display_name: '&#EE193BCerrar'
+textos:
+  estado-aca: '&#41FF00✔ Estás en esta región'
+  estado-lejos: '&8| &fA &#ff00d9%distancia%&f bloques hacia el &#ff00d9%rumbo%'
+  estado-otro-mundo: '&8| &fSolo en el mundo de la Tierra'
+  fuera: 'fuera del mapa de la Tierra'

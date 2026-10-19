@@ -163,6 +163,37 @@ public final class NaturalSpawner implements Listener {
         return worlds.contains(w.getName());
     }
 
+    /** Si este mundo es el mapa de la Tierra (donde valen las coordenadas reales). */
+    public boolean isMapWorld(World w) {
+        return allowedWorld(w);
+    }
+
+    /** El mundo del mapa de la Tierra: el primero de "worlds", o el primer mundo normal. */
+    public World mapWorld() {
+        for (String name : worlds) {
+            World w = Bukkit.getWorld(name);
+            if (w != null) return w;
+        }
+        for (World w : Bukkit.getWorlds()) {
+            if (w.getEnvironment() == World.Environment.NORMAL) return w;
+        }
+        return Bukkit.getWorlds().get(0);
+    }
+
+    public Map<String, Integer> oceanSpecies() {
+        return ocean;
+    }
+
+    public Map<String, Integer> elsewhereSpecies() {
+        return elsewhere;
+    }
+
+    /** Nombre de una region para mostrar (textos.yml regiones.<id>, o el id si no tiene). */
+    public static String regionName(String id) {
+        Lang lang = Lang.get();
+        return lang.has("textos.yml", "regiones." + id) ? lang.plain("regiones." + id) : id;
+    }
+
     /**
      * Intenta un grupo cerca de {@code base} (la posicion del jugador; "a sus espaldas" segun su yaw). Devuelve los que
      * aparecieron (vacio si no se pudo). Publico para poder probarlo en un server sin jugadores.
@@ -330,15 +361,14 @@ public final class NaturalSpawner implements Listener {
             lang.chat(p, "mapa-sin-region", "lista", names(elsewhere));
         } else {
             List<String> regionNames = new ArrayList<>();
-            for (EarthMap.Region r : here) {
-                regionNames.add(lang.has("textos.yml", "regiones." + r.id()) ? lang.plain("regiones." + r.id()) : r.id());
-            }
+            for (EarthMap.Region r : here) regionNames.add(regionName(r.id()));
             lang.chat(p, "mapa-region", "region", String.join(", ", regionNames), "lista", names(map.speciesAt(at.getX(), at.getZ())));
         }
         if (!ocean.isEmpty()) lang.chat(p, "mapa-oceano", "lista", names(ocean));
     }
 
-    private static String names(Map<String, Integer> pool) {
+    /** Nombres de las especies (para listas en el chat o los menus). */
+    public static String names(Map<String, Integer> pool) {
         List<String> out = new ArrayList<>();
         for (String id : pool.keySet()) {
             Species s = Species.byId(id);
@@ -347,7 +377,8 @@ public final class NaturalSpawner implements Listener {
         return out.isEmpty() ? "-" : String.join(", ", out);
     }
 
-    private static String coord(double v, String positive, String negative) {
+    /** "34,6° S": la latitud o longitud con su punto cardinal (textos.yml mapa.*). */
+    public static String coord(double v, String positive, String negative) {
         return String.format(Locale.forLanguageTag("es-AR"), "%.1f° %s", Math.abs(v),
                 Lang.get().plain(v >= 0 ? positive : negative));
     }

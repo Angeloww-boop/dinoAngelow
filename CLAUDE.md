@@ -260,5 +260,7 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.19.2: misiones sin especies en un server nuevo (solo salian de las vistas hace poco): ahora tambien salen de
   las que pueden aparecer cerca (`NaturalSpawner.speciesNear`: zonas a menos de `missions.region-radius` bloques,
   comunes y del agua), y un dia que quedo sin misiones se vuelve a armar solo (como mucho una vez por minuto).
+- 2026-10-19: Angeloww confirmo que el spawn natural ya funciona en el server de prueba. Pendiente para la apertura:
+  medir con spark con jugadores reales (rendimiento del spawn, las poses y los nidos con gente).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

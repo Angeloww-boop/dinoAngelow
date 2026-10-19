@@ -33,7 +33,9 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
   `'&#EE193B✘ Click para remover'`. La Dinopedia es la excepción acordada (fondo dibujado, sin titulo de texto ni
   relleno) pero sus items siguen el formato.
 - Claves YAML: nunca `no`, `si`, `yes`, `on`, `off`, `y`, `n` sin comillas (SnakeYAML las lee como booleanos).
-- Para revisar: `TextCheck` (plugin/src/test) parsea todos los textos con Lang.parse y avisa códigos sin entender o ¡/!.
+- Para revisar: `TextCheck` (plugin/src/test) parsea todos los textos con Lang.parse y avisa códigos sin entender o ¡/!,
+  y revisa que cada `chat/action/bossbar("clave")` del código tenga su texto en ESA sección de messages.yml (en 0.17.0
+  los de /dino mapa quedaron en actionbar y en el juego salía "chat.mapa").
 
 ## Cómo funciona
 
@@ -216,6 +218,8 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - v0.17.0: spawn natural por regiones reales del mapa de la Tierra (ver arriba) y arreglo de modelos duplicados al
   reactivarse un chunk. Probado en un Paper 1.21.11 local sin jugadores (`spawnAround` desde un plugin de prueba): cada
   region da solo sus especies, el oceano solo mosasaurus, desaparecen solos y al recargar un chunk abandonado.
-  Falta en el juego: `/dino mapa` y el spawn con jugadores de verdad.
+  Falta en el juego: el spawn con jugadores de verdad.
+- v0.17.1: los textos de `/dino mapa` estaban en la sección actionbar de messages.yml (salía "chat.mapa"); pasan a chat.
+  Al actualizar, Lang los agrega solos al messages.yml del server (los `actionbar.mapa*` viejos sobran, se pueden borrar).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

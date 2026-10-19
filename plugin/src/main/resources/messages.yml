@@ -229,6 +229,13 @@ chat:
     - '&8| &fLargadas &8» &#ff00d9%largadas% &8• &fpuertas &#ff00d9%puertas% &8• &fvueltas &#ff00d9%vueltas%'
     - '&8| &fPresta &8» &#ff00d9%especie%'
     - '&8| &fRécord &8» &#ff00d9%record%'
+  mapa: '&9&lDINOEARTH &8» &fEstás en &#ff00d9%lat%&f, &#ff00d9%lon%&f.'
+  mapa-region: '&9&lDINOEARTH &8» &fRegión &#ff00d9%region%&f: pueden aparecer &#ff00d9%lista%&f.'
+  mapa-sin-region: '&9&lDINOEARTH &8» &fNo es una región de fósiles: aparecen menos seguido &#ff00d9%lista%&f.'
+  mapa-oceano: '&9&lDINOEARTH &8» &fEn el agua honda puede aparecer &#ff00d9%lista%&f.'
+  mapa-protegido: '&9&lDINOEARTH &8» &fEsta zona es de un pueblo o una región protegida: acá no aparecen dinos.'
+  mapa-apagado: '&9&lDINOEARTH &8» &fEl spawn natural está apagado en el config.'
+  mapa-otro-mundo: '&9&lDINOEARTH &8» &fEn este mundo no aparecen dinos solos.'
 
 actionbar:
   limite: '&8| &fYa tenés &#ff00d9%cantidad%&f dinos, el máximo es &#ff00d9%limite%&f.'
@@ -294,13 +301,6 @@ actionbar:
   plus-sin-arbol: '&8| &fNo hay ningún árbol adelante.'
   plus-sin-permiso: '&8| &fNo podés talar acá.'
   plus-tala: '&8| &fTalaste &#ff00d9%cantidad%&f tronco(s).'
-  mapa: '&9&lDINOEARTH &8» &fEstás en &#ff00d9%lat%&f, &#ff00d9%lon%&f.'
-  mapa-region: '&9&lDINOEARTH &8» &fRegión &#ff00d9%region%&f: pueden aparecer &#ff00d9%lista%&f.'
-  mapa-sin-region: '&9&lDINOEARTH &8» &fNo es una región de fósiles: aparecen menos seguido &#ff00d9%lista%&f.'
-  mapa-oceano: '&9&lDINOEARTH &8» &fEn el agua honda puede aparecer &#ff00d9%lista%&f.'
-  mapa-protegido: '&9&lDINOEARTH &8» &fEsta zona es de un pueblo o una región protegida: acá no aparecen dinos.'
-  mapa-apagado: '&9&lDINOEARTH &8» &fEl spawn natural está apagado en el config.'
-  mapa-otro-mundo: '&9&lDINOEARTH &8» &fEn este mundo no aparecen dinos solos.'
 bossbar:
   mision: '&#ff00d9%mision% &fprogreso &8- &f%progreso% de &#ff00d9%total%'
   carrera-cuenta: '&#ff00d9%pista% &flarga en &8- &f%segundos% &#ff00d9segundos'

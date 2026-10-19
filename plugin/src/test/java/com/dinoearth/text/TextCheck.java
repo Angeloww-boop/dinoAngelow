@@ -51,8 +51,32 @@ public final class TextCheck {
         Component boss = Lang.parse(m.getString("bossbar.mision"), "mision", "Avistá 3 Triceratops", "progreso", 2, "total", 3);
         System.out.println("bossbar:   " + PlainTextComponentSerializer.plainText().serialize(boss));
         System.out.println("textos revisados: " + checked);
+        checkKeys(new File(base).getParentFile().toPath().resolve("java"), m, bad);
         bad.forEach(b -> System.out.println("MAL: " + b));
         if (!bad.isEmpty()) System.exit(1);
+    }
+
+    /**
+     * Cada lang.chat/action/bossbar("clave") del codigo tiene que tener su texto en la seccion que corresponde de
+     * messages.yml (en 0.17.0 los de /dino mapa quedaron en actionbar y en el juego salia "chat.mapa").
+     */
+    private static void checkKeys(java.nio.file.Path src, YamlConfiguration m, List<String> bad) throws java.io.IOException {
+        java.util.Map<String, String> section = java.util.Map.of("chat", "chat", "chatLines", "chat", "chatMsg", "chat",
+                "action", "actionbar", "actionMsg", "actionbar", "bossbar", "bossbar");
+        java.util.regex.Pattern call = java.util.regex.Pattern.compile(
+                "\\b(chat|chatLines|chatMsg|action|actionMsg|bossbar)\\(\\s*(?:[\\w.()]+\\s*,\\s*)?\"([a-z0-9-]+)\"");
+        int[] used = {0};
+        try (var files = java.nio.file.Files.walk(src)) {
+            for (var f : files.filter(x -> x.toString().endsWith(".java")).toList()) {
+                var matcher = call.matcher(java.nio.file.Files.readString(f));
+                while (matcher.find()) {
+                    used[0]++;
+                    String key = section.get(matcher.group(1)) + "." + matcher.group(2);
+                    if (!m.isString(key) && !m.isList(key)) bad.add(f.getFileName() + " usa " + key + " y no esta en messages.yml");
+                }
+            }
+        }
+        System.out.println("claves usadas en el codigo revisadas: " + used[0]);
     }
 
     private static boolean hasColor(Component c, TextColor color) {

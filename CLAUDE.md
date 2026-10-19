@@ -136,7 +136,8 @@ Proyecto de varios d√≠as: se van agregando especies y mejoras. **Hablar en espa√
   x 6..121, y 35..92 (116 x 58): mismas constantes en paleomap.py (WX..WH) y PaleoMap.java (WORLD_*).
   La imagen sale de `generator/mapa/tierra.webp` (render del mapa del server, 4 px de borde negro a los costados) con
   `generator/.venv/Scripts/python generator/paleomap.py`.
-  En la mano: barra de accion cada 1 s (lat/lon, region o la mas cercana con distancia y rumbo). Click derecho: menu
+  En la mano: barra de JEFE propia del mapa cada 0,5 s (lat/lon, region o la mas cercana con distancia y rumbo; se
+  llena al acercarse a la zona). No usar la barra de accion: Towny la usa ("~ Exterior - PVP") y se pisaban (0.19.3). Click derecho: menu
   `menus/regiones.yml` (solo lectura, Holder). Se da con `/dino item mapa`. `MapPreview` (test) lo dibuja con la paleta
   de los mapas de Bukkit para revisarlo sin el juego.
 - Chunk que se desactiva (jugador que se aleja): Paper dispara `EntityRemoveFromWorldEvent` con el lobo VIVO y no deja

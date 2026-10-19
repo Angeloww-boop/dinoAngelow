@@ -128,6 +128,11 @@ public final class Lang {
     }
 
     /** Bossbar que se ve unos segundos y se va (si llega otra, reemplaza a la anterior). */
+    /** Texto de la seccion bossbar (para barras que maneja otra clase, como la del Mapa del Paleontologo). */
+    public Component bossbarMsg(String key, Object... kv) {
+        return parse(raw("messages.yml", "bossbar." + key), kv);
+    }
+
     public void bossbar(Player p, String key, float progress, int ticks, Object... kv) {
         Component text = parse(raw("messages.yml", "bossbar." + key), kv);
         BossBar bar = bars.get(p.getUniqueId());

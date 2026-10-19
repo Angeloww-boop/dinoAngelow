@@ -48,8 +48,8 @@ import java.util.WeakHashMap;
  *
  * Todos los items comparten un solo MapView (id guardado en mapa.yml), asi son iguales entre si (sirven para
  * Shopkeepers). El dibujo se arma una vez por jugador; despues solo se mueve la flecha, asi que casi no consume.
- * En la mano muestra en la barra de accion la latitud/longitud y la region (cada segundo, solo a quien lo tiene en la
- * mano) y con click derecho abre el menu de regiones (distancia y rumbo a cada una).
+ * En la mano muestra en una barra de jefe propia la latitud/longitud y la region (cada medio segundo, solo a quien lo
+ * tiene en la mano; la barra de accion la usa Towny) y con click derecho abre el menu de regiones (distancia y rumbo a cada una).
  */
 public final class PaleoMap implements Listener {
 
@@ -81,7 +81,7 @@ public final class PaleoMap implements Listener {
             plugin.getLogger().warning("No se pudo leer mapa/tierra.png: " + e.getMessage());
         }
         setupView();
-        Bukkit.getScheduler().runTaskTimer(plugin, this::actionTick, 20L, 20L);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::barTick, 10L, 10L);
     }
 
     /** /dino reload: vuelve a dibujar los mapas (por si cambiaron las regiones o los textos). */
@@ -201,43 +201,71 @@ public final class PaleoMap implements Listener {
         });
     }
 
-    // ------------------------------------------------------------ barra de accion
-    private void actionTick() {
+    // ------------------------------------------------------------ barra de arriba (mientras lo tenes en la mano)
+    /**
+     * Barra de jefe propia del mapa (no la de las misiones ni la de accion: esa la usa Towny para "~ Exterior - PVP" y
+     * se pisaban). Dice donde estas y la zona mas cerca; se va llenando a medida que te acercas y esta llena adentro.
+     */
+    private final Map<java.util.UUID, net.kyori.adventure.bossbar.BossBar> bars = new java.util.HashMap<>();
+    private static final double FILL_BLOCKS = 4000;   // a esta distancia de la zona mas cerca la barra arranca vacia
+
+    private void barTick() {
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!holds(p)) continue;
-            Lang lang = Lang.get();
-            if (!natural.isMapWorld(p.getWorld())) {
-                lang.action(p, "mapa-mano-otro-mundo");
-                continue;
-            }
-            Location at = p.getLocation();
-            EarthMap m = natural.map();
-            String lat = NaturalSpawner.coord(m.lat(at.getZ()), "mapa.norte", "mapa.sur");
-            String lon = NaturalSpawner.coord(m.lon(at.getX()), "mapa.este", "mapa.oeste");
-            List<EarthMap.Region> here = m.regionsAt(at.getX(), at.getZ());
-            if (!here.isEmpty()) {
-                List<String> names = new ArrayList<>();
-                for (EarthMap.Region r : here) names.add(NaturalSpawner.regionName(r.id()));
-                lang.action(p, "mapa-mano-region", "lat", lat, "lon", lon, "region", String.join(", ", names));
-                continue;
-            }
-            EarthMap.Region best = null;
-            double bestD = Double.MAX_VALUE;
-            for (EarthMap.Region r : m.regions()) {
-                double d = distance(m, r, at);
-                if (d < bestD) {
-                    bestD = d;
-                    best = r;
+            net.kyori.adventure.bossbar.BossBar bar = bars.get(p.getUniqueId());
+            if (!holds(p)) {
+                if (bar != null) {
+                    p.hideBossBar(bar);
+                    bars.remove(p.getUniqueId());
                 }
+                continue;
             }
-            if (best == null) {
-                lang.action(p, "mapa-mano-posicion", "lat", lat, "lon", lon);
+            Object[] state = barState(p);
+            net.kyori.adventure.text.Component text = Lang.get().bossbarMsg((String) state[0], (Object[]) state[2]);
+            float progress = (float) state[1];
+            if (bar == null) {
+                bar = net.kyori.adventure.bossbar.BossBar.bossBar(text, progress, net.kyori.adventure.bossbar.BossBar.Color.YELLOW,
+                        net.kyori.adventure.bossbar.BossBar.Overlay.PROGRESS);
+                bars.put(p.getUniqueId(), bar);
+                p.showBossBar(bar);
             } else {
-                lang.action(p, "mapa-mano-cerca", "lat", lat, "lon", lon, "region", NaturalSpawner.regionName(best.id()),
-                        "distancia", String.format(java.util.Locale.forLanguageTag("es-AR"), "%,d", Math.round(bestD)),
-                        "rumbo", heading(m, best, at));
+                bar.name(text).progress(progress);
             }
         }
+    }
+
+    /** {clave del texto, progreso 0..1, placeholders}. */
+    private Object[] barState(Player p) {
+        if (!natural.isMapWorld(p.getWorld())) return new Object[]{"mapa-mano-otro-mundo", 0f, new Object[0]};
+        Location at = p.getLocation();
+        EarthMap m = natural.map();
+        String lat = NaturalSpawner.coord(m.lat(at.getZ()), "mapa.norte", "mapa.sur");
+        String lon = NaturalSpawner.coord(m.lon(at.getX()), "mapa.este", "mapa.oeste");
+        List<EarthMap.Region> here = m.regionsAt(at.getX(), at.getZ());
+        if (!here.isEmpty()) {
+            List<String> names = new ArrayList<>();
+            for (EarthMap.Region r : here) names.add(NaturalSpawner.regionName(r.id()));
+            return new Object[]{"mapa-mano-region", 1f, new Object[]{"lat", lat, "lon", lon, "region", String.join(", ", names)}};
+        }
+        EarthMap.Region best = null;
+        double bestD = Double.MAX_VALUE;
+        for (EarthMap.Region r : m.regions()) {
+            double d = distance(m, r, at);
+            if (d < bestD) {
+                bestD = d;
+                best = r;
+            }
+        }
+        if (best == null) return new Object[]{"mapa-mano-posicion", 0f, new Object[]{"lat", lat, "lon", lon}};
+        float progress = (float) Math.max(0, Math.min(1, 1 - bestD / FILL_BLOCKS));
+        return new Object[]{"mapa-mano-cerca", progress, new Object[]{"lat", lat, "lon", lon,
+                "region", NaturalSpawner.regionName(best.id()),
+                "distancia", String.format(java.util.Locale.forLanguageTag("es-AR"), "%,d", Math.round(bestD)),
+                "rumbo", heading(m, best, at)}};
+    }
+
+    @EventHandler
+    public void onQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        bars.remove(event.getPlayer().getUniqueId());
     }
 
     /** El punto de la region mas cerca del jugador, en bloques. */

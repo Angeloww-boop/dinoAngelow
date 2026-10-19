@@ -62,9 +62,9 @@ public final class TextCheck {
      */
     private static void checkKeys(java.nio.file.Path src, YamlConfiguration m, List<String> bad) throws java.io.IOException {
         java.util.Map<String, String> section = java.util.Map.of("chat", "chat", "chatLines", "chat", "chatMsg", "chat",
-                "action", "actionbar", "actionMsg", "actionbar", "bossbar", "bossbar");
+                "action", "actionbar", "actionMsg", "actionbar", "bossbar", "bossbar", "bossbarMsg", "bossbar");
         java.util.regex.Pattern call = java.util.regex.Pattern.compile(
-                "\\b(chat|chatLines|chatMsg|action|actionMsg|bossbar)\\(\\s*(?:[\\w.()]+\\s*,\\s*)?\"([a-z0-9-]+)\"");
+                "\\b(chat|chatLines|chatMsg|action|actionMsg|bossbar|bossbarMsg)\\(\\s*(?:[\\w.()]+\\s*,\\s*)?\"([a-z0-9-]+)\"");
         int[] used = {0};
         try (var files = java.nio.file.Files.walk(src)) {
             for (var f : files.filter(x -> x.toString().endsWith(".java")).toList()) {

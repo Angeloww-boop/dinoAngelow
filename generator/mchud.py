@@ -383,11 +383,19 @@ class Hud:
                 paste(frame, self.drum, fx, hy, alpha)
 
     def crosshair(self, frame):
+        """Mira de Minecraft: invierte los colores de lo que tiene abajo."""
         G = self.G
         cx, cy = self.W // 2, self.H // 2
-        d = ImageDraw.Draw(frame)
-        d.rectangle([cx - 4 * G, cy - G // 2, cx + 4 * G + G - 1, cy - G // 2 + G - 1], fill=(235, 235, 235, 255))
-        d.rectangle([cx - G // 2, cy - 4 * G, cx - G // 2 + G - 1, cy + 4 * G + G - 1], fill=(235, 235, 235, 255))
+        r = 4 * G + G
+        box = (cx - r, cy - r, cx + r, cy + r)
+        reg = frame.crop(box)
+        inv = Image.eval(reg.convert("RGB"), lambda v: 255 - v).convert("RGBA")
+        m = Image.new("L", reg.size, 0)
+        d = ImageDraw.Draw(m)
+        d.rectangle([r - 4 * G - G // 2, r - G // 2 - G // 2, r + 4 * G + G // 2, r + G // 2], fill=255)
+        d.rectangle([r - G // 2 - G // 2, r - 4 * G - G // 2, r + G // 2, r + 4 * G + G // 2], fill=255)
+        reg.paste(inv, (0, 0), m)
+        frame.paste(reg, box[:2])
 
     def actionbar(self, frame, text, alpha=1.0, shift=0):
         G = self.G

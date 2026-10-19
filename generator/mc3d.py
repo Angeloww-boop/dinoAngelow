@@ -60,6 +60,7 @@ def add_tex(name, arr):
 
 
 MIPS = []
+LIGHT = []   # [mapa de luz del terreno, muestras por bloque]
 
 
 def mips(tid):
@@ -104,10 +105,19 @@ def make_textures():
     """Texturas de 16x16 al estilo de vanilla (dibujadas por programa)."""
     rng = np.random.RandomState(7)
     # pasto (tono de llanura)
-    g = _noise16(1, (110, 168, 72), (14, 18, 12))
-    spots = rng.rand(16, 16)
-    g[spots > 0.86, :3] *= 0.82
-    g[spots < 0.08, :3] *= 1.12
+    # pasto como el de vanilla: textura gris con manchitas de 1-2 px, teñida con el verde de llanura
+    gray = 0.86 + (rng.rand(16, 16) - 0.5) * 0.12
+    for _ in range(22):
+        y, x = rng.randint(0, 16, 2)
+        gray[y, x] *= 0.86
+        if rng.rand() < 0.5:
+            gray[y, (x + 1) % 16] *= 0.9
+    for _ in range(14):
+        y, x = rng.randint(0, 16, 2)
+        gray[y, x] *= 1.09
+    g = np.zeros((16, 16, 4))
+    g[..., :3] = gray[..., None] * np.array([124, 186, 70])
+    g[..., 3] = 255
     add_tex("grass_top", _clip(g))
     d = _noise16(2, (134, 96, 67), (14, 10, 8))
     sp = rng.rand(16, 16)
@@ -214,8 +224,12 @@ class Quads:
 
     def __init__(self):
         self.p0, self.u, self.v, self.tex, self.st, self.tint, self.wrap, self.cull = [], [], [], [], [], [], [], []
+        self.lm = []
 
-    def add(self, p0, u, v, tex, st, tint=(1, 1, 1), wrap=True, cull=True):
+    def add(self, p0, u, v, tex, st, tint=(1, 1, 1), wrap=True, cull=True, lm=(0, 0, 0)):
+        """lm: luz suave del terreno. (1, x0, z1) = cara de arriba (busca en el mapa de luz por x, z del mundo);
+        (2, T, 0) = costado que toca el piso (oscurece abajo, T = alto en texeles)."""
+        self.lm.append(lm)
         self.p0.append(p0)
         self.u.append(u)
         self.v.append(v)
@@ -226,7 +240,7 @@ class Quads:
         self.cull.append(cull)
 
     def extend(self, other):
-        for k in ("p0", "u", "v", "tex", "st", "tint", "wrap", "cull"):
+        for k in ("p0", "u", "v", "tex", "st", "tint", "wrap", "cull", "lm"):
             getattr(self, k).extend(getattr(other, k))
 
     def arrays(self):
@@ -235,7 +249,8 @@ class Quads:
         return {"p0": np.array(self.p0, dtype=np.float64), "u": np.array(self.u, dtype=np.float64),
                 "v": np.array(self.v, dtype=np.float64), "tex": np.array(self.tex, dtype=np.int32),
                 "st": np.array(self.st, dtype=np.float64), "tint": np.array(self.tint, dtype=np.float64),
-                "wrap": np.array(self.wrap, dtype=bool), "cull": np.array(self.cull, dtype=bool)}
+                "wrap": np.array(self.wrap, dtype=bool), "cull": np.array(self.cull, dtype=bool),
+                "lm": np.array(self.lm, dtype=np.float64)}
 
 
 def face_shade(n):
@@ -319,6 +334,7 @@ class Raster:
         tint = q["tint"][idx] * shade[:, None]
         tex = q["tex"][idx]
         wrap = q["wrap"][idx]
+        lms = q["lm"][idx] if "lm" in q else np.zeros((len(idx), 3))
         order = idx2
         if blend:   # de atras para adelante
             order = idx2[np.argsort(-cc[idx2, :, 2].mean(1))]
@@ -331,9 +347,9 @@ class Raster:
                 if len(poly) < 3:
                     continue
             self._poly(poly, tex[i], tint[i], wrap[i], (min(s0, s1), min(t0, t1), max(s0, s1), max(t0, t1)),
-                       blend, fog_now, alpha)
+                       blend, fog_now, alpha, lms[i])
 
-    def _poly(self, poly, tid, tint, wrap, rect, blend, fog_now, alpha):
+    def _poly(self, poly, tid, tint, wrap, rect, blend, fog_now, alpha, lm=(0, 0, 0)):
         tex = TEX[tid]
         W, H, F = self.w, self.h, self.foc
         hw, hh = W / 2, H / 2
@@ -417,10 +433,17 @@ class Raster:
         al = texel[:, 3]
         ok = al > 40
         if not ok.all():
-            ry, rx, texel, al, izm = ry[ok], rx[ok], texel[ok], al[ok], izm[ok]
+            ry, rx, texel, al, izm, s, t = ry[ok], rx[ok], texel[ok], al[ok], izm[ok], s[ok], t[ok]
         if not len(ry):
             return
         col = texel[:, :3].astype(np.float32) * np.asarray(tint, dtype=np.float32)
+        if lm[0] == 1 and LIGHT:   # luz suave: mapa de oclusion del terreno por x, z del mundo
+            L, R = LIGHT
+            xi = np.clip(((lm[1] + s / 16) * R).astype(np.int32), 0, L.shape[1] - 1)
+            zi = np.clip(((lm[2] - t / 16) * R).astype(np.int32), 0, L.shape[0] - 1)
+            col *= L[zi, xi][:, None]
+        elif lm[0] == 2:           # costado: mas oscuro donde toca el piso
+            col *= (0.8 + 0.2 * np.clip((lm[1] - t) / 16.0, 0, 1))[:, None]
         zz = 1.0 / izm
         if fog_now:
             f0, f1 = self.fog_range
@@ -507,7 +530,7 @@ FACES = {  # (p0, u, v) de cada cara de la caja [0,1]^3: u = derecha y v = arrib
 DIRS = {(1, 0): "east", (-1, 0): "west", (0, 1): "south", (0, -1): "north"}
 
 
-def box_face(q, lo, hi, name, tex, tint=(1, 1, 1), cull=True, tile=16.0):
+def box_face(q, lo, hi, name, tex, tint=(1, 1, 1), cull=True, tile=16.0, lm=None):
     lo, hi = np.asarray(lo, dtype=np.float64), np.asarray(hi, dtype=np.float64)
     size = hi - lo
     p0, u, v = (np.asarray(a, float) for a in FACES[name])
@@ -518,7 +541,9 @@ def box_face(q, lo, hi, name, tex, tint=(1, 1, 1), cull=True, tile=16.0):
         st = (0, 0, lu * tile, lv * tile)
     else:   # la t arranca en 0 arriba (el borde de pasto del costado queda arriba)
         st = (0, lv * tile, lu * tile, 0)
-    q.add(P0, U, V, tex, st, tint, True, cull)
+    if lm == "floor":   # costado que toca el piso abajo
+        lm = (2, lv * tile, 0)
+    q.add(P0, U, V, tex, st, tint, True, cull, lm or (0, 0, 0))
 
 
 def box(q, lo, hi, tex, tint=(1, 1, 1), cull=True, tile=16.0, skip=()):
@@ -624,7 +649,7 @@ class World:
                 done[z:z2 + 1, x:x2 + 1] = True
                 y = hh + 1
                 q.add((x, y, z2 + 1), (x2 + 1 - x, 0, 0), (0, 0, -(z2 + 1 - z)), tops[tt],
-                      (0, 0, (x2 + 1 - x) * 16, (z2 + 1 - z) * 16))
+                      (0, 0, (x2 + 1 - x) * 16, (z2 + 1 - z) * 16), lm=(1, x, z2 + 1))
         # costados: para cada borde entre columnas, del piso del vecino al propio
         for z in range(S):
             for x in range(S):
@@ -637,10 +662,11 @@ class World:
                     if hi <= lo:
                         continue
                     t = top[z, x]
-                    box_face(q, (x, hi, z), (x + 1, hi + 1, z + 1), name, "grass_side" if t == "grass" else tops[t])
+                    box_face(q, (x, hi, z), (x + 1, hi + 1, z + 1), name, "grass_side" if t == "grass" else tops[t],
+                             lm="floor" if hi - lo == 1 else None)
                     if hi - lo > 1:
                         under = ("dirt" if t == "grass" else tops[t]) if hi - lo < 4 else "stone"
-                        box_face(q, (x, lo + 1, z), (x + 1, hi, z + 1), name, under)
+                        box_face(q, (x, lo + 1, z), (x + 1, hi, z + 1), name, under, lm="floor")
         for (x, y, z, ht) in self.trees:
             box(q, (x, y, z), (x + 1, y + ht, z + 1), {"up": "log_top", "down": "log_top", "side": "log"})
             leaves = Quads()
@@ -650,6 +676,7 @@ class World:
         for (x, y, z), tex in self.solid.items():
             box(q, (x, y, z), (x + 1, y + 1, z + 1), tex)
         self.terrain = q.arrays()
+        LIGHT[:] = [self.lightmap(), 4]
         # plantas: dos caras cruzadas, sin culling
         p = Quads()
         for (x, y, z, tex) in self.plants:
@@ -680,16 +707,57 @@ class World:
                       (0, 0, (x2 + 1 - x) * 16, (z2 + 1 - z) * 16), cull=False)
         self.water_q = w.arrays()
 
-    def clouds(self, t, y=110.0, seed=4):
-        n = value_noise(64, 64, 5, seed)
+    def lightmap(self, R=4):
+        """Oclusion ambiental de la luz suave de Minecraft en las caras de arriba: cada esquina de bloque se oscurece
+        segun cuantos de sus 3 vecinos (dos costados y la diagonal) son mas altos; adentro se interpola. Debajo de las
+        copas de los arboles queda un poco mas oscuro (las hojas tapan cielo)."""
+        S = self.size
+        occ = self.h.astype(np.int32).copy()
+        for (x, y, z, ht) in self.trees:
+            occ[z, x] = y - 1 + ht
+        pad = np.pad(occ, 1, mode="edge")
+        h = self.h
+        B = np.array([1.0, 0.8, 0.66, 0.52], dtype=np.float32)
+
+        def nb(dx, dz):
+            return pad[1 + dz:1 + dz + S, 1 + dx:1 + dx + S] > h
+        corners = {}
+        for dx in (-1, 1):
+            for dz in (-1, 1):
+                s1, s2, c = nb(dx, 0), nb(0, dz), nb(dx, dz)
+                ao = np.where(s1 & s2, 3, s1.astype(int) + s2.astype(int) + c.astype(int))
+                corners[(dx, dz)] = B[ao]
+        f = (np.arange(R) + 0.5) / R
+        fx = f[None, None, None, :]
+        fz = f[None, :, None, None]
+        c = {k: v[:, None, :, None] for k, v in corners.items()}
+        L = (c[(-1, -1)] * (1 - fx) * (1 - fz) + c[(1, -1)] * fx * (1 - fz) + c[(-1, 1)] * (1 - fx) * fz
+             + c[(1, 1)] * fx * fz).reshape(S * R, S * R)
+        shade = np.ones((S, S), dtype=np.float32)
+        for (x, y, z, ht) in self.trees:
+            shade[max(0, z - 2):z + 3, max(0, x - 2):x + 3] = 0.86
+        return (L * np.repeat(np.repeat(shade, R, 0), R, 1)).astype(np.float32)
+
+    def clouds(self, t, y=118.0, seed=4):
+        """Nubes de las de graficos "fancy": bloques de 12 x 4 x 12, solo las caras de afuera, que se mueven."""
+        n = value_noise(64, 64, 5, seed) > 0.62
         q = Quads()
         off = t * 0.6
+        tints = {"up": (1, 1, 1), "down": (1.4, 1.4, 1.4), "north": (1.12, 1.12, 1.12), "south": (1.12, 1.12, 1.12),
+                 "east": (1.4, 1.4, 1.4), "west": (1.4, 1.4, 1.4)}
+        nbr = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
         for zi in range(64):
             for xi in range(64):
-                if n[zi, xi] > 0.62:
-                    x = xi * 12 - 128 + off
-                    z = zi * 12 - 128
-                    q.add((x, y, z + 12), (12, 0, 0), (0, 0, -12), "cloud", (0, 0, 16, 16), cull=False)
+                if not n[zi, xi]:
+                    continue
+                x = xi * 12 - 128 + off
+                z = zi * 12 - 128
+                for name in ("up", "down", "north", "south", "east", "west"):
+                    if name in nbr:
+                        dx, dz = nbr[name]
+                        if 0 <= xi + dx < 64 and 0 <= zi + dz < 64 and n[zi + dz, xi + dx]:
+                            continue
+                    box_face(q, (x, y, z), (x + 12, y + 4, z + 12), name, "cloud", tints[name])
         return q.arrays()
 
 

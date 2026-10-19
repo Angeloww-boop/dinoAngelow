@@ -207,64 +207,51 @@ def dino(sid, var, form="male", scale=1.0, saddle=False):
 
 
 # ================================================================ jugador (modelo de Minecraft, 32 px de alto)
-def _skin():
-    """Texturas de cada cara de cada parte: explorador (pelo castaño, camisa caqui, pantalon oscuro, botas)."""
-    rng = np.random.RandomState(5)
+SKIN = os.path.join(ROOT, "generator", "assets", "skin_angeloww.png")   # la skin de Angeloww_
+STEVE = True   # modelo Steve (brazos de 4 px) aunque la skin venga en formato Alex (3 px)
 
-    def tex(w, h, base, var=6):
-        a = np.zeros((h, w, 4))
-        a[..., :3] = np.array(base) + (rng.rand(h, w, 1) - 0.5) * var
-        a[..., 3] = 255
-        return a
 
-    skin, hair, shirt, shirt_d = (214, 160, 120), (92, 58, 32), (58, 104, 150), (44, 80, 118)
-    pants, boots, belt = (58, 64, 74), (82, 54, 32), (60, 40, 24)
-    T = {}
-    # cabeza
-    face = tex(8, 8, skin)
-    face[0:2, :, :3] = hair
-    face[2, 0, :3] = face[2, 7, :3] = hair
-    face[4, 1:3, :3] = (255, 255, 255)
-    face[4, 5:7, :3] = (255, 255, 255)
-    face[4, 2, :3] = (60, 90, 160)
-    face[4, 5, :3] = (60, 90, 160)
-    face[6, 3:5, :3] = (150, 90, 70)
-    face[3, 1:3, :3] = face[3, 5:7, :3] = (70, 44, 24)
-    T["head_f"] = face
-    side = tex(8, 8, skin)
-    side[0:3, :, :3] = hair
-    side[3:6, 4:8, :3] = hair
-    T["head_s"] = side
-    T["head_b"] = tex(8, 8, hair)
-    T["head_t"] = tex(8, 8, hair, 10)
-    T["head_d"] = tex(8, 8, skin)
-    body = tex(8, 12, shirt)
-    body[0:2, 2:6, :3] = skin
-    body[9, :, :3] = belt
-    body[9, 3:5, :3] = (200, 170, 60)
-    body[2:9, 3:5, :3] = shirt_d
-    T["body_f"] = body
-    bb = tex(8, 12, shirt)
-    bb[9, :, :3] = belt
-    T["body_b"] = bb
-    bs = tex(4, 12, shirt)
-    bs[9, :, :3] = belt
-    T["body_s"] = bs
-    T["body_t"] = tex(8, 4, shirt)
-    T["body_d"] = tex(8, 4, pants)
-    arm = tex(4, 12, skin)
-    arm[0:4, :, :3] = shirt
-    arm[4, :, :3] = shirt_d
-    T["arm"] = arm
-    T["arm_t"] = tex(4, 4, shirt)
-    T["arm_d"] = tex(4, 4, skin)
-    leg = tex(4, 12, pants)
-    leg[9:12, :, :3] = boots
-    T["leg"] = leg
-    T["leg_t"] = tex(4, 4, pants)
-    T["leg_d"] = tex(4, 4, boots)
-    for k, a in T.items():
-        M.add_tex("skin_" + k, np.clip(a, 0, 255).astype(np.uint8))
+def _skin_parts():
+    """Recorta la skin de 64x64 como el juego: cada cara de cada parte (y la capa de afuera) es su textura."""
+    sk = np.array(Image.open(SKIN).convert("RGBA"))
+    slim = sk[20:32, 54:56, 3].max() == 0
+    aw = 3 if slim and not STEVE else 4
+
+    def faces(name, u, v, w, h, d, outer=False):
+        if w == 4 and slim:   # brazo de una skin Alex
+            if not STEVE:
+                return faces(name, u, v, 3, h, d, outer)
+            out = faces(name, u, v, 3, h, d, outer)
+            for k in ("f", "b", "t", "d"):   # caras de 3 px estiradas a 4 (como los conversores Alex -> Steve)
+                tid = M.TEX_ID[out[k]]
+                a = M.TEX[tid]
+                M.TEX[tid] = np.ascontiguousarray(np.concatenate([a[:, :2], a[:, 1:]], axis=1))
+                M.MIPS[tid] = None
+            return out
+        regions = {"t": (u + d, v, w, d), "d": (u + d + w, v, w, d), "r": (u, v + d, d, h), "f": (u + d, v + d, w, h),
+                   "l": (u + d + w, v + d, d, h), "b": (u + 2 * d + w, v + d, w, h)}
+        out = {}
+        for k, (x, y, ww, hh) in regions.items():
+            a = sk[y:y + hh, x:x + ww].copy()
+            if not outer:
+                a[..., 3] = 255   # la capa de adentro es opaca
+            if k == "d":
+                a = a[::-1]
+            M.add_tex("skin_%s_%s" % (name, k), a)
+            out[k] = "skin_%s_%s" % (name, k)
+        return out
+    P = {
+        "head": faces("head", 0, 0, 8, 8, 8), "hat": faces("hat", 32, 0, 8, 8, 8, True),
+        "body": faces("body", 16, 16, 8, 12, 4), "jacket": faces("jacket", 16, 32, 8, 12, 4, True),
+        "arm_r": faces("arm_r", 40, 16, 4, 12, 4), "sleeve_r": faces("sleeve_r", 40, 32, 4, 12, 4, True),
+        "arm_l": faces("arm_l", 32, 48, 4, 12, 4), "sleeve_l": faces("sleeve_l", 48, 48, 4, 12, 4, True),
+        "leg_r": faces("leg_r", 0, 16, 4, 12, 4), "pants_r": faces("pants_r", 0, 32, 4, 12, 4, True),
+        "leg_l": faces("leg_l", 16, 48, 4, 12, 4), "pants_l": faces("pants_l", 0, 48, 4, 12, 4, True),
+    }
+    return P, aw
+
+
+_SKIN = []
 
 
 def _rot(rx=0.0, ry=0.0, rz=0.0):
@@ -275,47 +262,56 @@ def _rot(rx=0.0, ry=0.0, rz=0.0):
     return Ry @ Rx @ Rz
 
 
-def _obox(q, lo, hi, pivot, R, f, tex):
-    """Caja de lo a hi (px), girada R alrededor de pivot, al mundo con f. tex: cara -> nombre (front = +Z)."""
+def _obox(q, lo, hi, pivot, R, f, tex, grow=0.0):
+    """Caja de lo a hi (px), girada R alrededor de pivot, al mundo con f. tex: cara -> textura (front = +Z, el
+    costado derecho del jugador es -X). grow: la capa de afuera es un poco mas grande (como el juego)."""
     lo, hi, pivot = (np.asarray(v, float) for v in (lo, hi, pivot))
+    lo, hi = lo - grow, hi + grow
     size = hi - lo
 
     def tw(p):
         return np.array(f(tuple(R @ (p - pivot) + pivot)))
-    names = {"south": "f", "north": "b", "east": "s", "west": "s", "up": "t", "down": "d"}
+    names = {"south": "f", "north": "b", "west": "r", "east": "l", "up": "t", "down": "d"}
     for name, (p0, u, v) in M.FACES.items():
         p0, u, v = (np.asarray(a, float) for a in (p0, u, v))
         A = lo + p0 * size
         P0, PU, PV = tw(A), tw(A + u * size), tw(A + v * size)
         t = tex[names[name]]
         arr = M.TEX[M.TEX_ID[t]]
-        q.add(tuple(P0), tuple(PU - P0), tuple(PV - P0), t, (0, arr.shape[0], arr.shape[1], 0))
+        q.add(tuple(P0), tuple(PU - P0), tuple(PV - P0), t, (0, arr.shape[0], arr.shape[1], 0), cull=not grow)
 
 
 def player_quads(q, pos, yaw, head_pitch=0.0, walk=0.0, t=0.0, sit=False, swing=0.0, arms_up=0.0):
-    if "skin_head_f" not in M.TEX_ID:
-        _skin()
+    if not _SKIN:
+        _SKIN.append(_skin_parts())
+    P, aw = _SKIN[0]
     f = M.placer(pos, yaw, 0.9375)
     ph = math.sin(t * 2 * math.pi * 1.6) * walk
     leg = ph * 40
     I = np.eye(3)
-    head = {"f": "skin_head_f", "b": "skin_head_b", "s": "skin_head_s", "t": "skin_head_t", "d": "skin_head_d"}
-    body = {"f": "skin_body_f", "b": "skin_body_b", "s": "skin_body_s", "t": "skin_body_t", "d": "skin_body_d"}
-    arm = {"f": "skin_arm", "b": "skin_arm", "s": "skin_arm", "t": "skin_arm_t", "d": "skin_arm_d"}
-    legt = {"f": "skin_leg", "b": "skin_leg", "s": "skin_leg", "t": "skin_leg_t", "d": "skin_leg_d"}
-    _obox(q, (-4, 24, -4), (4, 32, 4), (0, 24, 0), _rot(rx=head_pitch), f, head)
-    _obox(q, (-4, 12, -2), (4, 24, 2), (0, 12, 0), I, f, body)
+    hr = _rot(rx=head_pitch)
+    _obox(q, (-4, 24, -4), (4, 32, 4), (0, 24, 0), hr, f, P["head"])
+    _obox(q, (-4, 24, -4), (4, 32, 4), (0, 24, 0), hr, f, P["hat"], 0.5)
+    _obox(q, (-4, 12, -2), (4, 24, 2), (0, 12, 0), I, f, P["body"])
+    _obox(q, (-4, 12, -2), (4, 24, 2), (0, 12, 0), I, f, P["jacket"], 0.25)
     # angulos hacia adelante (rx negativo = el brazo o la pierna va para adelante)
     ar = -leg + 70 * swing + 150 * arms_up + (30 if sit else 0)
     al = leg + 150 * arms_up + (30 if sit else 0)
-    _obox(q, (-8, 12, -2), (-4, 24, 2), (-6, 22, 0), _rot(rx=-ar, rz=5 if not sit else 0), f, arm)
-    _obox(q, (4, 12, -2), (8, 24, 2), (6, 22, 0), _rot(rx=-al, rz=-5 if not sit else 0), f, arm)
+    rr = _rot(rx=-ar, rz=5 if not sit else 0)
+    rl = _rot(rx=-al, rz=-5 if not sit else 0)
+    # el derecho del jugador es -X
+    _obox(q, (-4 - aw, 12, -2), (-4, 24, 2), (-5, 22, 0), rr, f, P["arm_r"])
+    _obox(q, (-4 - aw, 12, -2), (-4, 24, 2), (-5, 22, 0), rr, f, P["sleeve_r"], 0.25)
+    _obox(q, (4, 12, -2), (4 + aw, 24, 2), (5, 22, 0), rl, f, P["arm_l"])
+    _obox(q, (4, 12, -2), (4 + aw, 24, 2), (5, 22, 0), rl, f, P["sleeve_l"], 0.25)
     if sit:
-        _obox(q, (-4, 0, -2), (0, 12, 2), (-2, 12, 0), _rot(rx=-80, ry=-12), f, legt)
-        _obox(q, (0, 0, -2), (4, 12, 2), (2, 12, 0), _rot(rx=-80, ry=12), f, legt)
+        lr, ll = _rot(rx=-80, ry=-12), _rot(rx=-80, ry=12)
     else:
-        _obox(q, (-4, 0, -2), (0, 12, 2), (-2, 12, 0), _rot(rx=-leg), f, legt)
-        _obox(q, (0, 0, -2), (4, 12, 2), (2, 12, 0), _rot(rx=leg), f, legt)
+        lr, ll = _rot(rx=-leg), _rot(rx=leg)
+    _obox(q, (-4, 0, -2), (0, 12, 2), (-2, 12, 0), lr, f, P["leg_r"])
+    _obox(q, (-4, 0, -2), (0, 12, 2), (-2, 12, 0), lr, f, P["pants_r"], 0.25)
+    _obox(q, (0, 0, -2), (4, 12, 2), (2, 12, 0), ll, f, P["leg_l"])
+    _obox(q, (0, 0, -2), (4, 12, 2), (2, 12, 0), ll, f, P["pants_l"], 0.25)
 
 
 # ================================================================ particulas
@@ -365,6 +361,7 @@ class Scene3D:
         self.blend = M.Quads()
         self.sprites = []   # (pos, alto, img, alpha)
         self.tags = []      # (pos, texto)
+        self.outline = False   # primera persona: contorno negro del bloque que apunta la mira (como el juego)
 
     def render(self):
         w = world()
@@ -391,10 +388,12 @@ class Scene3D:
             wq["st"] = st
         R.draw(wq, blend=True, fog_now=True)
         if not self.under:
-            R.draw(w.clouds(self.t), blend=True, fog_now=True, alpha=0.8, flat=True)
+            R.draw(w.clouds(self.t), blend=True, fog_now=True, alpha=0.8)
         R.draw(self.blend.arrays(), blend=True, fog_now=True)
         self.R = R
         img = Image.fromarray(R.image()).convert("RGBA")
+        if self.outline or getattr(self.cam, "first_person", False):
+            block_outline(img, R, self.cam)
         for p, text in self.tags:
             pr = R.project(p)
             if pr and pr[2] < 40 and R.depth[min(H - 1, max(0, int(pr[1]))), min(W - 1, max(0, int(pr[0])))] > pr[2] - 1:
@@ -468,6 +467,7 @@ def fp_cam(feet, yaw, pitch, walked=0.0, sneak=False, shake=0.0, t=0.0, fov=70.0
     if shake:
         off = off + np.array([math.sin(t * 61), math.sin(t * 47 + 1), math.sin(t * 53 + 2)]) * shake
     c.pos = c.pos + off
+    c.first_person = True
     return c
 
 
@@ -515,17 +515,84 @@ HUD = U.Hud(W, H, G)
 ITEMS = ["dinopedia", "carne", "silbato", "jaula", "montura_trex", "espada", "mapa", ("pan", 16), None]
 
 
+_ITEM3D = {}
+HELD = [0.56, -0.50, 0.86, -38, -8, 32, 0.66]   # x, y, z en la camara, giro y, giro x, giro z, escala
+
+
+def item_mesh(name):
+    """Item "generado" como el juego: la textura adelante y atras, y un borde de 1 px por cada pixel del contorno."""
+    if name in _ITEM3D:
+        return _ITEM3D[name]
+    im = U.icon(name, 64)
+    n = 32 if (os.path.exists(os.path.join(U.IMG, "item_%s.png" % name)) or "/" in name) else 16
+    a = np.array(im.resize((n, n), Image.NEAREST))
+    key = "held_" + name
+    M.add_tex(key, a)
+    t = 1.0 / 16
+    k = 1.0 / n
+    quads = [((-0.5, -0.5, t / 2), (1, 0, 0), (0, 1, 0), (0, n, n, 0)),
+             ((0.5, -0.5, -t / 2), (-1, 0, 0), (0, 1, 0), (n, n, 0, 0))]
+    op = a[..., 3] > 40
+    for j in range(n):
+        for i in range(n):
+            if not op[j, i]:
+                continue
+            x0, x1 = -0.5 + i * k, -0.5 + (i + 1) * k
+            yt, yb = 0.5 - j * k, 0.5 - (j + 1) * k
+            st = (i + 0.2, j + 0.2, i + 0.8, j + 0.8)
+            if j == 0 or not op[j - 1, i]:
+                quads.append(((x0, yt, t / 2), (k, 0, 0), (0, 0, -t), st))
+            if j == n - 1 or not op[j + 1, i]:
+                quads.append(((x0, yb, -t / 2), (k, 0, 0), (0, 0, t), st))
+            if i == 0 or not op[j, i - 1]:
+                quads.append(((x0, yb, t / 2), (0, k, 0), (0, 0, -t), st))
+            if i == n - 1 or not op[j, i + 1]:
+                quads.append(((x1, yb, -t / 2), (0, k, 0), (0, 0, t), st))
+    _ITEM3D[name] = (key, quads)
+    return _ITEM3D[name]
+
+
+def held3d(fr, name, swing=0.0, equip=0.0, walked=0.0):
+    """Item en la mano derecha en primera persona, en 3D (con grosor y luz por cara) encima de la escena."""
+    key, quads = item_mesh(name)
+    cam = M.Cam((0, 0, 0), 0, 0, 70)
+    R = M.Raster(W, H)
+    R.begin(cam, sun=False)
+    R.color[:] = 0
+    s = math.sin(math.pi * min(1.0, max(0.0, swing)))
+    ph = walked * math.pi / 1.6
+    # posicion en camara (x derecha, y arriba, z adelante), como la mano derecha del juego
+    T = np.array([HELD[0] - 0.30 * s + math.sin(ph) * 0.012,
+                  HELD[1] + 0.06 * s - 0.10 * s * s - abs(math.cos(ph)) * 0.012 - 0.6 * equip, HELD[2] - 0.06 * s])
+    Rm = _rot(ry=HELD[3] + 18 * s, rx=HELD[4] - 22 * s) @ _rot(rz=HELD[5] + 38 * s)
+    sc = HELD[6]
+    q = M.Quads()
+    for (p0, u, v, st) in quads:
+        P0 = T + Rm @ (np.array(p0) * sc)
+        U_ = Rm @ (np.array(u) * sc)
+        V_ = Rm @ (np.array(v) * sc)
+        # camara -> mundo
+        w0 = cam.r * P0[0] + cam.u * P0[1] + cam.f * P0[2]
+        wu = cam.r * U_[0] + cam.u * U_[1] + cam.f * U_[2]
+        wv = cam.r * V_[0] + cam.u * V_[1] + cam.f * V_[2]
+        q.add(tuple(w0), tuple(wu), tuple(wv), key, st, (1.3, 1.3, 1.3), False, True)
+    R.draw(q.arrays())
+    mask = np.isfinite(R.depth)
+    if not mask.any():
+        return
+    ys, xs = np.nonzero(mask)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    rgba = np.zeros((y1 - y0, x1 - x0, 4), dtype=np.uint8)
+    rgba[..., :3] = np.clip(R.color[y0:y1, x0:x1], 0, 255)
+    rgba[..., 3] = mask[y0:y1, x0:x1] * 255
+    fr.alpha_composite(Image.fromarray(rgba), (int(x0), int(y0)))
+
+
 def hud(fr, now, sel=0, items=None, held=None, swing=0.0, equip=0.0, walked=0.0, chat=(), action=None,
         action_a=1.0, boss=None, cross=True, hearts=20, food=20, mount=0, xp=0.35, level=12):
     items = items or ITEMS
     if held:
-        size = int(H * 0.30)
-        s = math.sin(math.pi * min(1.0, max(0.0, swing)))
-        im = U.held_item(held, size, swing=s * 0.9)
-        ph = walked * math.pi / 1.6
-        x = W - size * 1.08 - W * 0.10 * s + math.sin(ph) * 14
-        y = H - size * 0.80 - H * 0.05 * s + abs(math.cos(ph)) * 10 + equip * size * 1.2
-        U.paste(fr, im, x, y)
+        held3d(fr, held, swing, equip, walked)
     if cross:
         HUD.crosshair(fr)
     HUD.hotbar(fr, items, sel, hearts=hearts, food=0 if mount else food, xp=xp, level=level)
@@ -626,6 +693,45 @@ def draw_menu(fr, name, cur=None, tip=None, alpha=1.0):
             U.paste(fr, t, cx + 18 * G // 2 + 6, cy - 16 * G // 2 - 4, alpha)
         U.paste(fr, cursor_img(), cx, cy, alpha)
     return fr
+
+
+def block_outline(img, R, cam, reach=4.5):
+    """Si la mira apunta a un bloque del piso a menos de 4,5 bloques (y no hay un dino adelante), dibuja sus
+    aristas en negro transparente, con prueba de profundidad."""
+    w = world()
+    hit = None
+    for k in range(1, int(reach / 0.02)):
+        p = cam.pos + cam.f * (k * 0.02)
+        if p[1] <= w.height(p[0], p[2]):
+            hit = (math.floor(p[0]), w.height(p[0], p[2]) - 1, math.floor(p[2]), k * 0.02)
+            break
+    if hit is None:
+        return
+    bx, by, bz, dist = hit
+    if R.depth[H // 2, W // 2] < dist * float(cam.f @ cam.f) - 0.08:
+        return   # hay una entidad entre la mira y el bloque
+    e = 0.004
+    lo = np.array([bx - e, by - e, bz - e])
+    hi = np.array([bx + 1 + e, by + 1 + e, bz + 1 + e])
+    corners = [np.array([(lo, hi)[i >> 2 & 1][0], (lo, hi)[i >> 1 & 1][1], (lo, hi)[i & 1][2]]) for i in range(8)]
+    edges = [(a, b) for a in range(8) for b in range(a + 1, 8) if bin(a ^ b).count("1") == 1]
+    ov = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
+    for a, b in edges:
+        pts = []
+        for u in np.linspace(0, 1, 30):
+            pp = corners[a] + (corners[b] - corners[a]) * u
+            pr = R.project(pp)
+            if pr is None:
+                pts.append(None)
+                continue
+            xi, yi = int(pr[0]), int(pr[1])
+            vis = 0 <= xi < W and 0 <= yi < H and R.depth[yi, xi] >= pr[2] - 0.06
+            pts.append((pr[0], pr[1]) if vis else None)
+        for p1, p2 in zip(pts, pts[1:]):
+            if p1 and p2:
+                d.line([p1, p2], fill=(0, 0, 0, 105), width=2)
+    img.alpha_composite(ov)
 
 
 # ================================================================ tomas

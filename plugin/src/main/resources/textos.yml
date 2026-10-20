@@ -138,13 +138,13 @@ crias:
   ninguna: 'No pone huevos.'
 habilidad:
   plus-DASH: 'Línea Plus. Montado, click derecho con cualquier ítem en la mano (o F): dash hacia adelante.'
-  plus-COSECHA: 'Línea Plus. Quieto o patrullando cosecha y replanta los cultivos maduros y los guarda en un cofre cercano. Montado, click derecho: cosecha alrededor.'
+  plus-COSECHA: 'Línea Plus. Es un tractor: montado o siguiéndote cosecha y replanta en 3x3 por donde pasa y te lo da al inventario. Quieto o patrullando lo guarda en un cofre cercano. Montado, click derecho: cosecha todo alrededor.'
   plus-PESCA: 'Línea Plus. Cerca del agua pesca solo para su dueño. Montado, click derecho: pesca ya.'
   plus-BUSCADOR: 'Línea Plus. Mientras te acompaña junta los ítems del suelo alrededor tuyo.'
   plus-CANTO: 'Línea Plus. Montado, click derecho: canto que te da velocidad y regeneración y cura a tus dinos cercanos.'
   plus-TURBO: 'Línea Plus. Montado, click derecho: en el suelo despega alto, en el aire turbo de vuelo.'
   plus-ARRANQUE: 'Línea Plus. Montado, click derecho: unos segundos de velocidad extra.'
-  plus-TALA: 'Línea Plus. Montado, click derecho: tala el árbol que tiene adelante.'
+  plus-TALA: 'Línea Plus. Montado, click derecho: se para de manos, embiste y tala de un golpe el árbol que tiene adelante.'
   escolta: 'Te sigue volando a tu lado (agachado + click derecho, vuela o camina) y chilla si hay monstruos cerca.'
   puas: 'Coletazo con púas al que le pega por atrás.'
   maza: 'Maza en la cola que tira lejos, las flechas casi no le hacen daño.'
@@ -228,7 +228,7 @@ especies:
   triceratops_plus:
     nombre: 'Triceratops Cosechador'
     tamano: '2,2 × 5,3 bloques'
-    descripcion: 'Triceratops de la línea Plus. Cosecha y replanta los cultivos de tu granja.'
+    descripcion: 'Triceratops de la línea Plus. Un tractor: cosecha y replanta tu granja a su paso.'
     colores:
       carmesi: 'Carmesí'
   spinosaurus_plus:

@@ -265,5 +265,12 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   comunes y del agua), y un dia que quedo sin misiones se vuelve a armar solo (como mucho una vez por minuto).
 - 2026-10-19: Angeloww confirmo que el spawn natural ya funciona en el server de prueba. Pendiente para la apertura:
   medir con spark con jugadores reales (rendimiento del spawn, las poses y los nidos con gente).
+- v0.20.0 **sin probar en el juego**: Ankylosaurus Leñador con animacion al talar (`Dino.chop`/`animateChop`: se
+  para de manos girando sobre las patas de atras con `model.extra()`, cabezazo y latigazo de la maza; el arbol cae en
+  `Dino.CHOP_IMPACT` = tick 10, revisado con el mismo calculo en Python). Triceratops Cosechador = tractor
+  (`PlusAbilities.tractor`, cada `plus.cosecha.tractor-every-ticks`): montado o siguiendo al dueño cosecha y replanta
+  en 3x3 (`tractor-radius`) y lo da al inventario del jinete/dueño; tambien bayas; no pisotea la tierra arada
+  (`EntityInteractEvent` cancelado). Los textos nuevos de la Dinopedia no pisan los del textos.yml del server: si se
+  quieren, cambiarlos a mano (plus-COSECHA, plus-TALA, triceratops_plus.descripcion).
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).

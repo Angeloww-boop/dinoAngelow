@@ -72,6 +72,9 @@ public final class Dino {
     private static final int ROAR_COOLDOWN = 140;
     private static final int EAT_TICKS = 40;
     private static final int TAIL_TICKS = 10;
+    /** Golpe de la tala (ankylosaurus Plus): se para de manos, embiste y el arbol cae en el tick CHOP_IMPACT. */
+    private static final int CHOP_TICKS = 24;
+    public static final int CHOP_IMPACT = 10;
 
     private final Wolf wolf;
     private final Species species;
@@ -148,6 +151,7 @@ public final class Dino {
     private Location fleeFrom;
     private Location lastAttacker;   // de donde vino el ultimo golpe
     private int tailSwing = -1;
+    private int chop = -1;
     private int tailCooldown;
     private float tailSide = 1;
     private Player escort;           // dueño al que acompaña volando (dimorphodon)
@@ -465,6 +469,12 @@ public final class Dino {
     public void boost(double mul, int ticks) {
         boostMul = mul;
         boostTicks = ticks;
+    }
+
+    /** Animacion de talar: se levanta de manos, baja de golpe con un cabezazo y la cola hace contrapeso. */
+    public void chop() {
+        chop = 0;
+        play("attack", 1f, 0.8f);
     }
 
     /** Volador en el suelo: despega alto de un salto. */
@@ -1215,6 +1225,7 @@ public final class Dino {
         tickHunger(rider);
         if (rider != null && rider() == null) rider = null;   // lo bajo el hambre
         if (tailSwing >= 0 && ++tailSwing > TAIL_TICKS) tailSwing = -1;
+        if (chop >= 0 && ++chop > CHOP_TICKS) chop = -1;
         if (tailCooldown > 0) tailCooldown--;
         maybeEscort(rider);
         if (species.swims) updateSwim(rider);
@@ -1314,7 +1325,8 @@ public final class Dino {
     /** Sin jinete, sin caminar y sin ninguna animacion en curso (ataque, rugido, comer, sentarse...). */
     private boolean isStill(Player rider) {
         if (rider != null || escort != null || flying || swimming || isDying()) return false;
-        if (speed > 0.04f || attack >= 0 || roar >= 0 || spit >= 0 || eating >= 0 || hurt > 0 || tailSwing >= 0) {
+        if (speed > 0.04f || attack >= 0 || roar >= 0 || spit >= 0 || eating >= 0 || hurt > 0 || tailSwing >= 0
+                || chop >= 0) {
             return false;
         }
         float sitTarget = wolf.isSitting() ? 1f : 0f;
@@ -1947,6 +1959,41 @@ public final class Dino {
         if (age % 60 == 0 && f > 0) play("swim", 0.6f, 1f);
     }
 
+    /**
+     * Tala: se levanta de manos (sube la parte de adelante girando sobre las patas de atras), baja de golpe con la
+     * cabeza contra el tronco en el tick CHOP_IMPACT (un poco hacia adelante, rebota) y vuelve. La cola hace
+     * contrapeso y al final da un latigazo con la maza.
+     */
+    private void animateChop(DinoModel.BonePose pHead, DinoModel.BonePose pT1, DinoModel.BonePose pT2,
+                             DinoModel.BonePose fr, DinoModel.BonePose fl, float k) {
+        float t = chop;
+        float rear;   // 1 = de manos, negativo = el golpe (pasa de largo y rebota)
+        if (t < CHOP_IMPACT - 3) {
+            float u = t / (CHOP_IMPACT - 3);
+            rear = u * u * (3 - 2 * u);
+        } else if (t < CHOP_IMPACT) {
+            float u = (t - (CHOP_IMPACT - 3)) / 3f;
+            rear = 1 - 1.5f * u * u;
+        } else {
+            float u = Math.min(1f, (t - CHOP_IMPACT) / (CHOP_TICKS - CHOP_IMPACT));
+            rear = -0.5f * (1 - u) * (float) Math.cos(u * Math.PI * 1.5);
+        }
+        float up = Math.max(rear, 0), down = Math.max(-rear, 0);
+        pHead.rx += -16 * up + 34 * down;
+        fr.rx -= 38 * up;
+        fl.rx -= 38 * up;
+        pT1.rx += 10 * up - 6 * down;
+        float whip = t > CHOP_IMPACT ? (float) Math.sin((t - CHOP_IMPACT) / (CHOP_TICKS - CHOP_IMPACT) * Math.PI * 2) : 0;
+        pT1.ry += 22 * whip;
+        pT2.ry += 34 * whip;
+        DinoRig.BoneDef back = form.bones().get(legBR);
+        float py = back.jy() / 16f, pz = back.jz() / 16f;
+        model.extra().translate(0, py, pz)
+                .rotateX((float) Math.toRadians(-18 * rear))
+                .translate(0, -py, -pz)
+                .translate(0, 0, 0.3f * k * down);
+    }
+
     /** Mosasaurus: ondula la cola, rema con las aletas y se inclina con la subida y bajada. Varado se arrastra. */
     private void animateSwimmer() {
         float t = age;
@@ -2174,6 +2221,7 @@ public final class Dino {
             pT1.ry += 35 * sw * tailSide;
             pT2.ry += 45 * sw * tailSide;
         }
+        if (chop >= 0) animateChop(pHead, pT1, pT2, fr, fl, k);
 
         if (attack >= 0) {
             // cabezazo: baja y levanta la cabeza

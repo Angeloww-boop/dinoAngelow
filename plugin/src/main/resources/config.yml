@@ -131,11 +131,16 @@ plus:
     multiplier: 1.6
   turbo:
     multiplier: 1.8
-  # cosecha pasiva (quieto o patrullando) y activa (montado)
+  # cosecha pasiva (quieto o patrullando, va a un cofre) y activa (montado, click derecho)
   cosecha:
     radius: 3
     active-radius: 5
     every-seconds: 3
+    # tractor: montado (o siguiendo al dueño) cosecha y replanta en un cuadrado alrededor de sus patas
+    # (1 = 3x3) y lo manda al inventario del jinete o del dueño. Nunca pisotea la tierra arada.
+    tractor-radius: 1
+    tractor-every-ticks: 4
+    tractor-follow-distance: 24
   pesca:
     every-seconds: 45
   buscador:

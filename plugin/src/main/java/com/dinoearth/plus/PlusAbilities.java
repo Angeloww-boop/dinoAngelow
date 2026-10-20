@@ -25,6 +25,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -51,25 +52,30 @@ import java.util.concurrent.ThreadLocalRandom;
  *       le llega al server) o tecla de cambiar de mano (F). Raptor Sombra = dash; Tricera = cosecha alrededor;
  *       Spino = pesca ya; Para = canto (velocidad y regeneracion); Ptera = turbo de vuelo / despegue alto;
  *       Galli = arranque; Anky = tala el arbol de adelante.</li>
- *   <li>Pasivas (dueño conectado): Tricera quieto o patrullando cosecha y replanta; Spino cerca del agua pesca;
- *       Dimorphodon junta los items del suelo alrededor del dueño.</li>
+ *   <li>Pasivas (dueño conectado): Tricera quieto o patrullando cosecha y replanta (a un cofre); montado o
+ *       siguiendo al dueño es un tractor: cosecha y replanta en 3x3 por donde pasa y lo manda al inventario del
+ *       jinete (o del dueño); Spino cerca del agua pesca; Dimorphodon junta los items del suelo alrededor del dueño.</li>
  * </ul>
  * Todo lo que rompe o cosecha respeta Towny/WorldGuard (Protection.canBuild con el dueño). Tiempos en config plus.*.
  */
 public final class PlusAbilities implements Listener {
 
     private static final Set<Material> CROPS = Set.of(Material.WHEAT, Material.CARROTS, Material.POTATOES,
-            Material.BEETROOTS, Material.NETHER_WART);
+            Material.BEETROOTS, Material.NETHER_WART, Material.SWEET_BERRY_BUSH);
 
     private final JavaPlugin plugin;
     private final DinoManager dinos;
     private final Map<UUID, Long> cooldown = new HashMap<>();
     private final Map<UUID, Long> nextPassive = new HashMap<>();
-    private long tick;
+    // tractor: cuanto lleva cosechado cada triceratops con el jinete (o dueño) actual
+    private final Map<UUID, UUID> tractorWho = new HashMap<>();
+    private final Map<UUID, Integer> tractorCount = new HashMap<>();
+    private long tick, tractorTick;
 
     // config
     private final Map<Species.Ability, Integer> cooldownSeconds = new HashMap<>();
     private int harvestRadius, harvestActiveRadius, harvestEvery, fishEvery, magnetRadius, maxLogs;
+    private int tractorRadius, tractorEvery, tractorFollowDistance;
     private double dashSpeed, sprintBoost, flyBoost;
 
     public PlusAbilities(JavaPlugin plugin, DinoManager dinos) {
@@ -77,6 +83,7 @@ public final class PlusAbilities implements Listener {
         this.dinos = dinos;
         loadConfig();
         Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 20L);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::tractor, 4L, 1L);
     }
 
     public void loadConfig() {
@@ -103,6 +110,9 @@ public final class PlusAbilities implements Listener {
         fishEvery = Math.max(5, c.getInt("pesca.every-seconds", 45));
         magnetRadius = Math.max(1, Math.min(12, c.getInt("buscador.radius", 6)));
         maxLogs = Math.max(8, Math.min(256, c.getInt("tala.max-blocks", 96)));
+        tractorRadius = Math.max(0, Math.min(3, c.getInt("cosecha.tractor-radius", 1)));
+        tractorEvery = Math.max(1, Math.min(40, c.getInt("cosecha.tractor-every-ticks", 4)));
+        tractorFollowDistance = Math.max(0, c.getInt("cosecha.tractor-follow-distance", 24));
     }
 
     // ------------------------------------------------------------ activar montado
@@ -124,6 +134,14 @@ public final class PlusAbilities implements Listener {
         event.setCancelled(true);
         if (event.getHand() != EquipmentSlot.HAND) return;
         use(event.getPlayer(), d);
+    }
+
+    /** El tractor no pisotea la tierra arada (ni montado ni caminando). */
+    @EventHandler(ignoreCancelled = true)
+    public void onTrample(EntityInteractEvent event) {
+        if (event.getBlock().getType() != Material.FARMLAND) return;
+        Dino d = dinos.get(event.getEntity());
+        if (d != null && d.species().ability == Species.Ability.COSECHA) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -163,7 +181,7 @@ public final class PlusAbilities implements Listener {
             }
             case CANTO -> sing(p, d);
             case COSECHA -> {
-                int n = harvest(p, d, harvestActiveRadius);
+                int n = harvest(p, d, harvestActiveRadius, p);
                 lang.action(p, n > 0 ? "plus-cosecha" : "plus-sin-cultivos", "cantidad", n);
                 yield n > 0;
             }
@@ -175,7 +193,7 @@ public final class PlusAbilities implements Listener {
                 fish(p, d);
                 yield true;
             }
-            case TALA -> fell(p, d);
+            case TALA -> chop(p, d);
             case BUSCADOR -> false;
         };
         if (done) {
@@ -206,7 +224,7 @@ public final class PlusAbilities implements Listener {
                     if (d.rider() != null || d.order() == Dino.Order.FOLLOW) continue;
                     if (now < nextPassive.getOrDefault(id, 0L)) continue;
                     nextPassive.put(id, now + harvestEvery * 1000L);
-                    harvest(owner, d, harvestRadius);
+                    harvest(owner, d, harvestRadius, null);
                 }
                 case PESCA -> {
                     if (d.rider() != null || !nearWater(d.wolf().getLocation())) continue;
@@ -224,8 +242,45 @@ public final class PlusAbilities implements Listener {
     }
 
     // ------------------------------------------------------------ cosecha (triceratops)
-    /** Cosecha los cultivos maduros alrededor, los replanta y guarda lo cosechado (cofre cercano o al piso). */
-    private int harvest(Player owner, Dino d, int radius) {
+    // ------------------------------------------------------------ tractor (triceratops montado o siguiendo)
+    /**
+     * Cada tractor-every-ticks: el triceratops Plus montado (o siguiendo a su dueño cerca) cosecha y replanta en un
+     * cuadrado de (2 x tractor-radius + 1) alrededor de sus patas, y lo cosechado va al inventario del jinete (lo que
+     * no entra cae al piso). En la barra de accion cuenta lo cosechado desde que se subio.
+     */
+    private void tractor() {
+        if (++tractorTick % tractorEvery != 0) return;
+        for (Dino d : dinos.all()) {
+            Species s = d.species();
+            if (!s.isPlus() || s.ability != Species.Ability.COSECHA) continue;
+            if (d.isDying() || d.isRental() || !d.wolf().isTamed() || !d.isAdult()) continue;
+            Player to = d.rider();
+            if (to == null) {
+                if (d.order() != Dino.Order.FOLLOW) continue;   // sentado o patrullando: lo hace tick() (al cofre)
+                Player owner = d.wolf().getOwner() instanceof Player o && o.isOnline() ? o : null;
+                if (owner == null || owner.getWorld() != d.wolf().getWorld()) continue;
+                if (owner.getLocation().distanceSquared(d.wolf().getLocation())
+                        > (double) tractorFollowDistance * tractorFollowDistance) continue;
+                to = owner;
+            }
+            UUID id = d.wolf().getUniqueId();
+            if (!to.getUniqueId().equals(tractorWho.get(id))) {
+                tractorWho.put(id, to.getUniqueId());
+                tractorCount.put(id, 0);
+            }
+            int n = harvest(to, d, tractorRadius, to);
+            if (n > 0) {
+                int total = tractorCount.merge(id, n, Integer::sum);
+                if (d.rider() != null) Lang.get().action(to, "plus-cosecha", "cantidad", total);
+            }
+        }
+    }
+
+    /**
+     * Cosecha los cultivos maduros alrededor y los replanta. Lo cosechado va al inventario de {@code into} (lo que no
+     * entra cae al piso) o, si es null, al cofre o barril mas cerca.
+     */
+    private int harvest(Player owner, Dino d, int radius, Player into) {
         Location at = d.wolf().getLocation();
         World w = at.getWorld();
         List<ItemStack> loot = new ArrayList<>();
@@ -238,7 +293,8 @@ public final class PlusAbilities implements Listener {
                     if (age.getAge() < age.getMaximumAge()) continue;
                     if (!Protection.canBuild(owner, b)) continue;
                     Collection<ItemStack> drops = b.getDrops();
-                    age.setAge(0);
+                    // los arbustos de bayas quedan como al cosecharlos a mano; lo demas se replanta
+                    age.setAge(b.getType() == Material.SWEET_BERRY_BUSH ? 1 : 0);
                     b.setBlockData(age);
                     removeSeed(drops, b.getType());
                     loot.addAll(drops);
@@ -248,7 +304,8 @@ public final class PlusAbilities implements Listener {
             }
         }
         if (n > 0) {
-            deliver(owner, at, loot);
+            if (into != null) give(into, at, loot);
+            else deliver(owner, at, loot);
             w.playSound(at, "minecraft:item.crop.plant", SoundCategory.BLOCKS, 0.8f, 1f);
         }
         return n;
@@ -270,6 +327,14 @@ public final class PlusAbilities implements Listener {
                 it.setAmount(it.getAmount() - 1);
                 return;
             }
+        }
+    }
+
+    /** Al inventario del jugador; lo que no entra, al piso. */
+    private static void give(Player p, Location at, List<ItemStack> items) {
+        for (ItemStack it : items) {
+            if (it == null || it.getAmount() <= 0) continue;
+            for (ItemStack rest : p.getInventory().addItem(it).values()) at.getWorld().dropItemNaturally(at, rest);
         }
     }
 
@@ -384,8 +449,29 @@ public final class PlusAbilities implements Listener {
     }
 
     // ------------------------------------------------------------ tala (ankylosaurus)
-    /** Tira el arbol que tiene adelante (troncos conectados, hasta max-blocks) donde el jinete puede construir. */
-    private boolean fell(Player p, Dino d) {
+    /**
+     * Busca un tronco adelante; si hay, arranca la animacion (se para de manos y embiste) y el arbol cae justo en el
+     * golpe (Dino.CHOP_IMPACT ticks despues).
+     */
+    private boolean chop(Player p, Dino d) {
+        Block start = treeAhead(d);
+        if (start == null) {
+            Lang.get().action(p, "plus-sin-arbol");
+            return false;
+        }
+        if (!Protection.canBuild(p, start)) {
+            Lang.get().action(p, "plus-sin-permiso");
+            return false;
+        }
+        d.chop();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (d.isDying() || !Tag.LOGS.isTagged(start.getType())) return;
+            fell(p, d, start);
+        }, Dino.CHOP_IMPACT);
+        return true;
+    }
+
+    private static Block treeAhead(Dino d) {
         Location at = d.wolf().getLocation();
         double yaw = Math.toRadians(d.wolf().getBodyYaw());
         Block start = null;
@@ -396,10 +482,17 @@ public final class PlusAbilities implements Listener {
                 if (Tag.LOGS.isTagged(b.getType())) start = b;
             }
         }
-        if (start == null) {
-            Lang.get().action(p, "plus-sin-arbol");
-            return false;
-        }
+        return start;
+    }
+
+    /** Tira el arbol desde start (troncos conectados, hasta max-blocks) donde el jinete puede construir. */
+    private boolean fell(Player p, Dino d, Block start) {
+        Location at = d.wolf().getLocation();
+        // el golpe: astillas del tronco y un ruido seco antes de que caiga
+        at.getWorld().spawnParticle(Particle.BLOCK, start.getLocation().add(0.5, 0.8, 0.5), 40, 0.4, 0.6, 0.4,
+                start.getBlockData());
+        at.getWorld().playSound(start.getLocation(), "minecraft:entity.zombie.attack_wooden_door", SoundCategory.BLOCKS,
+                1f, 0.8f);
         Set<Block> seen = new HashSet<>();
         ArrayDeque<Block> queue = new ArrayDeque<>();
         queue.add(start);

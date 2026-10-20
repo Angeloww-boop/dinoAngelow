@@ -6,7 +6,7 @@
 
     <groupId>com.dinoearth</groupId>
     <artifactId>DinoEarth</artifactId>
-    <version>0.19.3</version>
+    <version>0.20.0</version>
     <packaging>jar</packaging>
 
     <properties>

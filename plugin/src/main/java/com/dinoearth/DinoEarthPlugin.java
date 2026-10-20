@@ -66,6 +66,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
     private MissionManager missions;
     private PlayerStats stats;
     private NestManager nests;
+    private com.dinoearth.bench.BenchManager bench;
 
     private static final int OFFER_TICKS = 60 * 20;
 
@@ -135,6 +136,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(paleoMap, this);
         getServer().getPluginManager().registerEvents(plusAbilities, this);
         getServer().getPluginManager().registerEvents(races, this);
+        bench = new com.dinoearth.bench.BenchManager(this, dinos);
         recall = new RecallManager(this, dinos, registry, keys, settings);
         getServer().getPluginManager().registerEvents(recall, this);
         getServer().getScheduler().runTaskTimer(this, registry::save, 600L, 600L);
@@ -174,6 +176,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (bench != null && bench.running()) bench.stop(getServer().getConsoleSender());
         if (dinos != null) dinos.shutdown();
         if (eggs != null) eggs.shutdown();
         if (nests != null) nests.shutdown();
@@ -312,6 +315,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
                 chat(sender, nests.forceNest(d) ? "nido-hecho" : "nido-no", "especie", d.species().name);
             }
             case "stats", "estadisticas" -> stats(sender);
+            case "bench", "carga" -> bench(sender, args);
             case "mapa", "region" -> {
                 if (!(sender instanceof Player player)) return chat(sender, "solo-jugadores");
                 if (args.length > 1 && args[1].equalsIgnoreCase("probar")) natural.probe(player, 30);
@@ -539,6 +543,29 @@ public final class DinoEarthPlugin extends JavaPlugin {
         return true;
     }
 
+    /**
+     * /dino bench &lt;dinos por jugador, por ejemplo 2,5,10&gt; [minutos por etapa] [radio] | /dino bench parar:
+     * prueba de carga con los jugadores (o bots) conectados. Ver docs/prueba-de-carga.md.
+     */
+    private void bench(CommandSender sender, String[] args) {
+        String first = args.length > 1 ? args[1].toLowerCase() : "";
+        if (first.equals("parar") || first.equals("stop")) {
+            bench.stop(sender);
+            return;
+        }
+        List<Integer> levels = new ArrayList<>();
+        for (String part : first.split(",")) {
+            if (!part.matches("\\d+")) {
+                chat(sender, "bench-uso");
+                return;
+            }
+            levels.add(Math.max(1, Math.min(50, Integer.parseInt(part))));
+        }
+        double minutes = Math.max(0.5, Math.min(30, args.length > 2 ? parse(args[2], 2) : 2));
+        double radius = Math.max(8, Math.min(64, args.length > 3 ? parse(args[3], 24) : 24));
+        bench.start(sender, levels, minutes, radius);
+    }
+
     /** /dino stats: cuanto consume el plugin ahora mismo. */
     private void stats(CommandSender sender) {
         List<Dino> all = dinos.all();
@@ -718,7 +745,7 @@ public final class DinoEarthPlugin extends JavaPlugin {
         boolean admin = sender.hasPermission(ADMIN);
         if (args.length == 1) {
             return filter(admin ? List.of("spawn", "egg", "grow", "tame", "nido", "item", "mis", "llamar", "misiones", "top", "carrera",
-                    "dar", "aceptar", "rechazar", "remove", "count", "stats", "mapa", "comedero", "dinopedia", "hambre", "pack", "reload")
+                    "dar", "aceptar", "rechazar", "remove", "count", "stats", "bench", "mapa", "comedero", "dinopedia", "hambre", "pack", "reload")
                     : List.of("mis", "llamar", "misiones", "top", "carrera", "dar", "aceptar", "rechazar", "pack"), args[0]);
         }
         String sub = args[0].toLowerCase();

@@ -29,6 +29,7 @@ chat:
     - '&8| &#ff00d9/dino remove &8[&fradio&8] [&fespecie&8] &8- &fBorra dinos cercanos.'
     - '&8| &#ff00d9/dino count &8- &fDinos cargados por especie.'
     - '&8| &#ff00d9/dino stats &8- &fCuánto consume el plugin.'
+    - '&8| &#ff00d9/dino bench &8<&fdinos por jugador&8> [&fminutos&8] [&fradio&8] &8- &fPrueba de carga con los jugadores conectados.'
     - '&8| &#ff00d9/dino mapa &8[&fprobar&8] &8- &fDónde estás, qué dinos aparecen y por qué no aparecen.'
     - '&8| &#ff00d9/dino comedero &8<&fdieta&8> [&fcantidad&8] &8- &fTe da comederos.'
     - '&8| &#ff00d9/dino dinopedia &8[&fjugador&8] &8- &fEntrega una Dinopedia.'
@@ -78,6 +79,18 @@ chat:
     - '&8| &fDomesticados &8» &#ff00d9%total%&f de &#ff00d9%jugadores%&f jugadores &8• &flímite &#ff00d9%limite%&f.'
     - '&8| &fLos que más tienen &8» &#ff00d9%top%&f.'
     - '&8| &fDistancia de vista &8» &#ff00d9%vista%&f chunks &8• &fsimulación &#ff00d9%simulacion%&f chunks.'
+
+  # ---------------------------------------------------------------- prueba de carga (/dino bench)
+  bench-uso: '&9&lDINOEARTH &8» &fUso&8: &#ff00d9/dino bench &8<&fdinos por jugador, por ejemplo &#ff00d92,5,10&8> [&fminutos por etapa&8] [&fradio&8] &fo &#ff00d9/dino bench parar&f.'
+  bench-ya: '&9&lDINOEARTH &8» &fYa hay una prueba de carga corriendo, parala con &#ff00d9/dino bench parar&f.'
+  bench-nada: '&9&lDINOEARTH &8» &fNo hay ninguna prueba de carga corriendo.'
+  bench-sin-jugadores: '&9&lDINOEARTH &8» &fNo hay jugadores conectados para poner dinos alrededor.'
+  bench-etapa: '&9&lDINOEARTH &8» &fEtapa &#ff00d9%etapa%&8/&#ff00d9%etapas% &8- &#ff00d9%por_jugador%&f dinos por jugador, &#ff00d9%total%&f en total. Mido &#ff00d9%minutos%&f min después de 10 s de arranque.'
+  bench-muestra: '&8| &#ff00d9%jugadores%&f jugadores &8• &#ff00d9%dinos%&f dinos &8• &fDinoEarth &#ff00d9%tick%&f ms &8(&fpeor &#ff00d9%tick_max%&8) • &fserver &#ff00d9%mspt%&f ms &8• &fTPS &#ff00d9%tps% &8• &#ff00d9%kb_jugador%&f KB/s por jugador.'
+  bench-resumen: '&9&lDINOEARTH &8» &fResultado de la prueba de carga &8(&fpromedio de cada etapa&8)&f.'
+  bench-resumen-etapa: '&8| &#ff00d9%por_jugador%&f por jugador, &#ff00d9%jugadores%&f jugadores, &#ff00d9%dinos%&f dinos &8» &fDinoEarth &#ff00d9%tick%&f ms &8(&fpeor &#ff00d9%tick_max%&8)&f, server &#ff00d9%mspt%&f ms, TPS &#ff00d9%tps%&f, red &#ff00d9%kb_jugador%&f KB/s por jugador &8(&#ff00d9%kb_total%&f KB/s en total&8)&f.'
+  bench-archivo: '&9&lDINOEARTH &8» &fTodas las muestras quedaron en &#ff00d9%archivo%&f.'
+  bench-parado: '&9&lDINOEARTH &8» &fPrueba de carga parada, borré &#ff00d9%cantidad%&f dinos.'
 
   # ---------------------------------------------------------------- regalar dinos
   dar-uso: '&9&lDINOEARTH &8» &fUso&8: &#ff00d9/dino dar &8<&fjugador&8>&f, mirando al dino que querés dar.'

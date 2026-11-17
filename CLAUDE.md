@@ -156,6 +156,7 @@ Proyecto de varios días: se van agregando especies y mejoras. **Hablar en espa�
 | `generator/geometry.py` | Cube/Bone/Rig, huevo y materiales de montura (`SADDLE_COLORS`, cada especie los pisa con `saddle_colors`) |
 | `generator/feeder.py`, `generator/nest.py`, `generator/icons.py` | Modelo del comedero y del nido; iconos de la Dinopedia (los llama build.py) |
 | `generator/gui.py`, `gui_preview.py`, `font_widths.py` | Menus dibujados de la Dinopedia (ver arriba) |
+| `generator/guia.py`, `servidor/deluxemenus/guiadino.yml` | Fondo del menu "Guia Dino" de DeluxeMenus (no es del plugin): como DeluxeMenus no elige fuente, va en `minecraft:default` con `\uEA00` (-8), `\uEA01` (fondo 176x222) y `\uEA02` (-169); el titulo es `"&f\uEA00\uEA01\uEA02&8Guía Dino"`. Items en los casilleros dibujados (10, 12, 14, 16, 34, 32, 30, 28) y cerrar en el 49 |
 | `generator/paleomap.py` | Imagen de la Tierra del Mapa del Paleontologo (`plugin/src/main/resources/mapa/tierra.png`, necesita Pillow de .venv) |
 | `generator/items.py` | Items propios: drops por especie, monturas como item, silbato, jaula. Dibuja sus iconos y escribe `plugin/src/main/resources/items.json` (el plugin lee todo de ahí) |
 | `generator/build.py` | Texturas + modelos + `DinoEarth-ResourcePack.zip` + rigs (`plugin/src/main/resources/rigs/*.json`) + copia del zip al jar |
@@ -279,3 +280,5 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
   `docs/prueba-de-carga.md` (bots con SoulFire en el server de prueba en offline + spark). Pendiente: correrla.
 - Pendiente: probar todo en el server; posible hook de Vulcan (VulcanFlagEvent) si salta Flight/Reach con los dinos; más especies
   (Brachiosaurus con varios jinetes).
+- 2026-11-17: menu Guia Dino para DeluxeMenus (`/guiadino`) con fondo dibujado en el pack (sha1 a121b89f…; solo se
+  agregaron `assets/minecraft/font/default.json` y `textures/font/dinoearth_guia.png`). Sin probar en el juego.

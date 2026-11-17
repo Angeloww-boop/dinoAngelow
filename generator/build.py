@@ -586,6 +586,8 @@ def build():
     items.build_items(ALL_SPECIES, all_sets, files)
     import gui  # menus con diseño de la Dinopedia (fondos, fotos, fuentes; escribe gui.json para el plugin)
     gui.build_gui(ALL_SPECIES, raws, files)
+    import guia  # fondo del menu Guia Dino de DeluxeMenus (fuente minecraft:default)
+    guia.build_guide(files)
 
     files["pack.mcmeta"] = json.dumps({
         # 46 = 1.21.4 (primera version con items/ y item_model), 69 = 1.21.9, 75 = 1.21.11.

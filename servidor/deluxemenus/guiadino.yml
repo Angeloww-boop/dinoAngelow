@@ -1,0 +1,123 @@
+# Guia Dino: fondo dibujado como la Dinopedia (necesita el resource pack nuevo de DinoEarth).
+# El titulo NO se toca: los tres caracteres raros son el fondo y los espacios que lo ubican.
+# Los items van en los casilleros dibujados (10, 12, 14, 16, 34, 32, 30, 28) y la barrera en el 49.
+menu_title: "&f&8Guía Dino"
+open_command: guiadino
+register_command: true
+size: 54
+items:
+  'dinopedia':
+    material: BOOK
+    slot: 10
+    display_name: '&#ff00d91. Dinopedia'
+    lore:
+      - '&f'
+      - '&8| &fTu libro de dinosaurios. Se compra'
+      - '&8| &fen el NPC de &#ff00d9Items&f.'
+      - '&f'
+      - '&8| &fClick derecho &8» &#ff00d9abrirla&f.'
+      - '&8| &fClick derecho a un dino &8» &#ff00d9su ficha&f.'
+      - '&f'
+      - '&8| &fAhí dice qué come y cómo se doma'
+      - '&8| &fcada especie.'
+      - '&8| &fEn la mano anotás dinos desde más'
+      - '&8| &flejos y una flecha te marca hacia'
+      - '&8| &fdónde ir.'
+      - '&f'
+  'aparecen':
+    material: MAP
+    slot: 12
+    display_name: '&#ff00d92. Dónde aparecen'
+    lore:
+      - '&f'
+      - '&8| &fCada especie vive en la región real'
+      - '&8| &fdonde se encontraron sus fósiles.'
+      - '&8| &fAparecen lejos de los pueblos.'
+      - '&f'
+      - '&8| &fEl &#ff00d9Mapa del Paleontólogo &fte muestra'
+      - '&8| &flas zonas y cuál tenés más cerca.'
+      - '&f'
+  'domesticar':
+    material: BEEF
+    slot: 14
+    display_name: '&#ff00d93. Domesticar'
+    lore:
+      - '&f'
+      - '&8| &fDale su comida hasta que te acepte:'
+      - '&8| &#ff00d9carne&f, &#ff00d9plantas &fo &#ff00d9pescado&f.'
+      - '&f'
+      - '&8| &fA los que huyen, acercate &#ff00d9agachado&f.'
+      - '&8| &fEl &#ff00d9T-Rex &fy el &#ff00d9Giganotosaurus &fsolo'
+      - '&8| &fse consiguen de huevo.'
+      - '&f'
+  'hambre':
+    material: HAY_BLOCK
+    slot: 16
+    display_name: '&#ff00d94. Hambre y comedero'
+    lore:
+      - '&f'
+      - '&8| &fTus dinos tienen hambre. Si llega a 0'
+      - '&8| &fse echan y no se pueden montar, pero'
+      - '&8| &#ff00d9nunca mueren&f.'
+      - '&f'
+      - '&8| &fPoné un &#ff00d9comedero &fy llenalo: los que'
+      - '&8| &ftienen hambre van a comer solos.'
+      - '&f'
+  'montura':
+    material: SADDLE
+    slot: 34
+    display_name: '&#ff00d95. Montura'
+    lore:
+      - '&f'
+      - '&8| &fCada especie usa &#ff00d9su propia montura&f.'
+      - '&8| &fSe canjea en el NPC de &#ff00d9Monturas &fcon'
+      - '&8| &fmonedas y drops de esa especie.'
+      - '&f'
+      - '&8| &fClick derecho sobre tu dino &#ff00d9adulto&f.'
+      - '&8| &fCon &#ff00d9tijeras &fse la sacás.'
+      - '&f'
+  'silbato':
+    material: BELL
+    slot: 32
+    display_name: '&#ff00d96. Silbato'
+    lore:
+      - '&f'
+      - '&8| &fClick derecho a tu dino &8» &#ff00d9órdenes&f:'
+      - '&8| &fseguir, quedarse, patrullar, pasivo,'
+      - '&8| &fdefensivo o agresivo.'
+      - '&f'
+      - '&8| &fAgachado al aire &8» &#ff00d9órdenes a todos&f.'
+      - '&8| &#ff00d9/dino llamar &8» &ftraer dinos lejanos.'
+      - '&f'
+  'jaula':
+    material: IRON_BARS
+    slot: 30
+    display_name: '&#ff00d97. Jaula'
+    lore:
+      - '&f'
+      - '&8| &fClick derecho a tu dino &8» &#ff00d9lo guarda&f.'
+      - '&8| &fClick derecho al piso &8» &#ff00d9lo suelta&f.'
+      - '&f'
+      - '&8| &fSirve para llevarlo lejos o regalarlo:'
+      - '&8| &#ff00d9quien lo suelta queda como dueño&f.'
+      - '&f'
+  'huevos':
+    material: TURTLE_EGG
+    slot: 28
+    display_name: '&#ff00d98. Huevos y nidos'
+    lore:
+      - '&f'
+      - '&8| &fUn macho y una hembra adultos tuyos'
+      - '&8| &fde la misma especie, con su comida,'
+      - '&8| &fponen un &#ff00d9huevo&f.'
+      - '&f'
+      - '&8| &fLas hembras salvajes arman &#ff00d9nidos&f:'
+      - '&8| &fpegale al nido para sacar un huevo,'
+      - '&8| &fpero cuidado con la &#ff00d9madre&f.'
+      - '&f'
+  'cerrar':
+    material: BARRIER
+    slot: 49
+    display_name: '&#EE193BCerrar'
+    click_commands:
+      - '[close]'

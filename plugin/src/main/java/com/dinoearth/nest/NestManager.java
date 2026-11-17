@@ -60,6 +60,8 @@ public final class NestManager implements Listener {
     private final DinoManager dinos;
     private final EggManager eggs;
     private final Map<UUID, Nest> nests = new HashMap<>();
+    private static final long TAKE_COOLDOWN_MS = 1000;
+    private final Map<UUID, Long> lastTake = new HashMap<>();
     private int ticks;
 
     private final class Nest {
@@ -206,21 +208,53 @@ public final class NestManager implements Listener {
     }
 
     // ------------------------------------------------------------ jugadores
-    /** Click derecho: cuantos huevos tiene y si la madre anda cerca. */
+    /**
+     * Click derecho: con la herramienta del config (pincel) saca un huevo; si no, dice cuantos huevos tiene y si
+     * la madre anda cerca.
+     */
     public void inspect(Player p, Interaction box) {
         Nest n = nests.get(box.getUniqueId());
         if (n == null) return;
+        boolean holdsTool = settings.nestTool != null && p.getInventory().getItemInMainHand().getType() == settings.nestTool;
+        if (holdsTool) {
+            takeEgg(p, n, true);
+            return;
+        }
         Dino mother = n.motherDino();
         boolean near = mother != null && mother.wolf().getWorld() == box.getWorld()
                 && mother.wolf().getLocation().distanceSquared(box.getLocation()) < 24 * 24;
-        Lang.get().action(p, near ? "nido-madre-cerca" : "nido", "especie", n.species.name, "huevos", n.count);
+        String key = near ? "nido-madre-cerca" : settings.nestTool != null ? "nido-sin-pincel" : "nido";
+        Lang.get().action(p, key, "especie", n.species.name, "huevos", n.count);
     }
 
-    /** Click izquierdo: saca un huevo. La madre (si esta cargada y no muy lejos) se le tira encima al ladron. */
+    /** Click izquierdo: sin herramienta configurada saca un huevo (como antes); con herramienta, avisa que hace falta. */
     public void take(Player p, Interaction box) {
         Nest n = nests.get(box.getUniqueId());
-        if (n == null || p.getGameMode() == GameMode.ADVENTURE || p.getGameMode() == GameMode.SPECTATOR) return;
+        if (n == null) return;
+        if (settings.nestTool != null) {
+            Lang.get().action(p, "nido-pincel", "especie", n.species.name);
+            return;
+        }
+        takeEgg(p, n, false);
+    }
+
+    /** Saca un huevo. La madre (si esta cargada y no muy lejos) se le tira encima al ladron. */
+    private void takeEgg(Player p, Nest n, boolean withTool) {
+        Interaction box = n.box;
+        if (p.getGameMode() == GameMode.ADVENTURE || p.getGameMode() == GameMode.SPECTATOR) return;
         if (n.count <= 0) return;
+        // el click derecho sostenido se repite cada 4 ticks: un huevo por segundo como mucho
+        long now = System.currentTimeMillis();
+        Long last = lastTake.get(p.getUniqueId());
+        if (last != null && now - last < TAKE_COOLDOWN_MS) return;
+        lastTake.put(p.getUniqueId(), now);
+        if (withTool) {
+            p.swingMainHand();
+            box.getWorld().playSound(box.getLocation(), "minecraft:item.brush.brushing.generic", SoundCategory.PLAYERS, 1f, 1f);
+            if (settings.nestToolDamage > 0 && p.getGameMode() != GameMode.CREATIVE) {
+                p.damageItemStack(org.bukkit.inventory.EquipmentSlot.HAND, settings.nestToolDamage);
+            }
+        }
         n.count--;
         PersistentDataContainer pdc = box.getPersistentDataContainer();
         pdc.set(keys.nestEggs, PersistentDataType.INTEGER, n.count);
@@ -265,6 +299,7 @@ public final class NestManager implements Listener {
     private void tick() {
         ticks++;
         long now = System.currentTimeMillis();
+        lastTake.values().removeIf(t -> now - t > TAKE_COOLDOWN_MS);
         Iterator<Nest> it = nests.values().iterator();
         while (it.hasNext()) {
             Nest n = it.next();

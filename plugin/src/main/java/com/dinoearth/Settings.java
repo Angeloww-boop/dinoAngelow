@@ -46,6 +46,9 @@ public final class Settings {
     public final double nestGuardRange;
     public final boolean nestOnlyWild;
     public final List<String> nestSpecies;
+    /** Item para sacar huevos de un nido (click derecho); null = cualquiera, con click izquierdo como antes. */
+    public final org.bukkit.Material nestTool;
+    public final int nestToolDamage;
     // dinero (Vault)
     public final double moneyStamp;
     public final double moneySpecies;
@@ -87,6 +90,11 @@ public final class Settings {
         nestGuardRange = Math.max(4, c.getDouble("nests.guard-range", 10));
         nestOnlyWild = c.getBoolean("nests.only-wilderness", true);
         nestSpecies = c.getStringList("nests.species");
+        String tool = c.getString("nests.tool", "BRUSH");
+        org.bukkit.Material toolMat = tool == null ? null : org.bukkit.Material.matchMaterial(tool.trim());
+        nestTool = tool == null || tool.isBlank() || tool.equalsIgnoreCase("ANY") ? null
+                : toolMat != null ? toolMat : org.bukkit.Material.BRUSH;
+        nestToolDamage = Math.max(0, c.getInt("nests.tool-damage", 1));
         moneyStamp = Math.max(0, c.getDouble("dinopedia.money-per-stamp", 0));
         moneySpecies = Math.max(0, c.getDouble("dinopedia.money-species-complete", 0));
     }

@@ -427,6 +427,12 @@ carrera:
   estamina-cansado: '&#EE193B■'
   estamina-vacio: '&8■'
 
+# ---------------------------------------------------------------- nidos
+# barra de progreso al sacar un huevo con el pincel (10 cuadraditos)
+nido-barra:
+  lleno: '&#ff00d9■'
+  vacio: '&8■'
+
 # ---------------------------------------------------------------- linea Plus
 plus:
   habilidades:

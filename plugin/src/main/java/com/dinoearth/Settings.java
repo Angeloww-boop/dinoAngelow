@@ -49,6 +49,8 @@ public final class Settings {
     /** Item para sacar huevos de un nido (click derecho); null = cualquiera, con click izquierdo como antes. */
     public final org.bukkit.Material nestTool;
     public final int nestToolDamage;
+    /** Cuanto hay que mantener el click derecho con el pincel para sacar un huevo. */
+    public final long nestBrushMs;
     // dinero (Vault)
     public final double moneyStamp;
     public final double moneySpecies;
@@ -95,6 +97,7 @@ public final class Settings {
         nestTool = tool == null || tool.isBlank() || tool.equalsIgnoreCase("ANY") ? null
                 : toolMat != null ? toolMat : org.bukkit.Material.BRUSH;
         nestToolDamage = Math.max(0, c.getInt("nests.tool-damage", 1));
+        nestBrushMs = Math.round(Math.max(0, c.getDouble("nests.brush-seconds", 7)) * 1000);
         moneyStamp = Math.max(0, c.getDouble("dinopedia.money-per-stamp", 0));
         moneySpecies = Math.max(0, c.getDouble("dinopedia.money-species-complete", 0));
     }

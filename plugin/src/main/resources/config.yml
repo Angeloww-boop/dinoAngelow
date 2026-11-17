@@ -442,11 +442,12 @@ nests:
   guard-range: 10            # a cuantos bloques del nido la madre ataca (agachado: la mitad)
   only-wilderness: true      # solo fuera de pueblos de Towny y regiones de WorldGuard
   species: []                # vacio = todas las que ponen huevos; si no, ej. [trex, giganotosaurus, raptor]
-  # Para sacar un huevo hay que hacer click derecho al nido con esto en la mano (un huevo por segundo).
+  # Para sacar un huevo hay que mantener click derecho al nido con esto en la mano (brush-seconds segundos).
   # ANY = con cualquier cosa y click izquierdo, como antes. Si cambias el item, cambia tambien el texto
   # nido-pincel / nido-sin-pincel de messages.yml.
   tool: BRUSH
   tool-damage: 1             # durabilidad que gasta el pincel por huevo (0 = nada)
+  brush-seconds: 7           # cuanto hay que mantener el click derecho; si se suelta, vuelve a empezar
 
 # Dinopedia: cada especie tiene sellos de investigacion (verla, sus colores, el color raro, domesticarla,
 # criarla, montarla...). Cada sello da experiencia y completar una especie da mas. Los comandos se corren

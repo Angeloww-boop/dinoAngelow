@@ -11,6 +11,7 @@ import com.dinoearth.model.DinoModel;
 import com.dinoearth.model.DinoRig;
 import com.dinoearth.species.Species;
 import com.dinoearth.text.Lang;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -60,8 +61,26 @@ public final class NestManager implements Listener {
     private final DinoManager dinos;
     private final EggManager eggs;
     private final Map<UUID, Nest> nests = new HashMap<>();
-    private static final long TAKE_COOLDOWN_MS = 1000;
-    private final Map<UUID, Long> lastTake = new HashMap<>();
+    /**
+     * Click derecho sostenido con el pincel: el cliente lo repite cada 4 ticks (200 ms). Si pasa mas que esto sin
+     * otro click, se solto y se pierde el progreso.
+     */
+    private static final long BRUSH_GAP_MS = 600;
+    private static final int BAR = 10;
+    private final Map<UUID, Brushing> brushing = new HashMap<>();
+
+    private static final class Brushing {
+        final UUID nest;
+        final long start;
+        long last;
+        long lastSound;
+
+        Brushing(UUID nest, long now) {
+            this.nest = nest;
+            this.start = now;
+            this.last = now;
+        }
+    }
     private int ticks;
 
     private final class Nest {
@@ -217,7 +236,7 @@ public final class NestManager implements Listener {
         if (n == null) return;
         boolean holdsTool = settings.nestTool != null && p.getInventory().getItemInMainHand().getType() == settings.nestTool;
         if (holdsTool) {
-            takeEgg(p, n, true);
+            brush(p, n);
             return;
         }
         Dino mother = n.motherDino();
@@ -238,19 +257,48 @@ public final class NestManager implements Listener {
         takeEgg(p, n, false);
     }
 
+    /**
+     * Un click derecho con el pincel (llegan cada 200 ms mientras se mantiene apretado). Junta tiempo y, al llegar a
+     * nests.brush-seconds sin soltar, saca el huevo.
+     */
+    private void brush(Player p, Nest n) {
+        if (p.getGameMode() == GameMode.ADVENTURE || p.getGameMode() == GameMode.SPECTATOR || n.count <= 0) return;
+        long now = System.currentTimeMillis();
+        UUID nestId = n.box.getUniqueId();
+        Brushing b = brushing.get(p.getUniqueId());
+        if (b == null || !b.nest.equals(nestId) || now - b.last > BRUSH_GAP_MS) {
+            b = new Brushing(nestId, now);
+            brushing.put(p.getUniqueId(), b);
+        }
+        b.last = now;
+        double progress = settings.nestBrushMs <= 0 ? 1 : (double) (now - b.start) / settings.nestBrushMs;
+        if (progress >= 1) {
+            brushing.remove(p.getUniqueId());
+            takeEgg(p, n, true);
+            return;
+        }
+        Location at = n.box.getLocation();
+        if (now - b.lastSound >= 700) {
+            b.lastSound = now;
+            at.getWorld().playSound(at, "minecraft:item.brush.brushing.generic", SoundCategory.PLAYERS, 0.8f, 1f);
+            at.getWorld().spawnParticle(Particle.ITEM, at.clone().add(0, 0.3, 0), 4, 0.25, 0.05, 0.25, 0.02,
+                    new ItemStack(Material.TURTLE_EGG));
+        }
+        Lang lang = Lang.get();
+        int full = (int) Math.floor(progress * BAR);
+        Component bar = Lang.parse(lang.text("nido-barra.lleno").repeat(full) + lang.text("nido-barra.vacio").repeat(BAR - full));
+        lang.action(p, "nido-cepillando", "especie", n.species.name, "barra", bar,
+                "porcentaje", (int) Math.floor(progress * 100));
+    }
+
     /** Saca un huevo. La madre (si esta cargada y no muy lejos) se le tira encima al ladron. */
     private void takeEgg(Player p, Nest n, boolean withTool) {
         Interaction box = n.box;
         if (p.getGameMode() == GameMode.ADVENTURE || p.getGameMode() == GameMode.SPECTATOR) return;
         if (n.count <= 0) return;
-        // el click derecho sostenido se repite cada 4 ticks: un huevo por segundo como mucho
-        long now = System.currentTimeMillis();
-        Long last = lastTake.get(p.getUniqueId());
-        if (last != null && now - last < TAKE_COOLDOWN_MS) return;
-        lastTake.put(p.getUniqueId(), now);
         if (withTool) {
-            p.swingMainHand();
-            box.getWorld().playSound(box.getLocation(), "minecraft:item.brush.brushing.generic", SoundCategory.PLAYERS, 1f, 1f);
+            box.getWorld().playSound(box.getLocation(), "minecraft:item.brush.brushing.sand.complete",
+                    SoundCategory.PLAYERS, 1f, 1f);
             if (settings.nestToolDamage > 0 && p.getGameMode() != GameMode.CREATIVE) {
                 p.damageItemStack(org.bukkit.inventory.EquipmentSlot.HAND, settings.nestToolDamage);
             }
@@ -299,7 +347,7 @@ public final class NestManager implements Listener {
     private void tick() {
         ticks++;
         long now = System.currentTimeMillis();
-        lastTake.values().removeIf(t -> now - t > TAKE_COOLDOWN_MS);
+        brushing.values().removeIf(b -> now - b.last > 5000);
         Iterator<Nest> it = nests.values().iterator();
         while (it.hasNext()) {
             Nest n = it.next();

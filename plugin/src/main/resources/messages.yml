@@ -309,8 +309,9 @@ actionbar:
   nido-madre: '&8| &fLa &#ff00d9%especie%&f defiende su nido.'
   nido-robado: '&8| &fSacaste un huevo de &#ff00d9%especie%&f, quedan &#ff00d9%huevos%&f.'
   nido-robado-madre: '&8| &fSacaste un huevo de &#ff00d9%especie%&f y la madre te vio, corré.'
-  nido-sin-pincel: '&8| &fNido de &#ff00d9%especie%&f con &#ff00d9%huevos%&f huevo(s), sacalos con un &#ff00d9pincel&f.'
-  nido-pincel: '&8| &fNecesitás un &#ff00d9pincel&f para sacar el huevo sin romperlo, click derecho.'
+  nido-sin-pincel: '&8| &fNido de &#ff00d9%especie%&f con &#ff00d9%huevos%&f huevo(s), sacalos manteniendo click derecho con un &#ff00d9pincel&f.'
+  nido-pincel: '&8| &fNecesitás un &#ff00d9pincel&f para sacar el huevo sin romperlo, mantené click derecho.'
+  nido-cepillando: '&8| &fSacando el huevo de &#ff00d9%especie% %barra% &#ff00d9%porcentaje%%&f, no sueltes.'
   huellas: '&8| %huella% &fHuellas &#ff00d9%tamano%&f de algo que no conocés %flecha%&f.'
 
   carrera-esperando: '&8| &fCarrera de &#ff00d9%pista% &8- &#ff00d9%cantidad%&8/&#ff00d9%max% &fanotados, faltan para &#ff00d9%min%&f.'

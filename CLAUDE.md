@@ -283,6 +283,9 @@ Al cambiar el pack: el dueño sube el zip a mc-packs.net, cambia `resource-pack.
 - 2026-11-17: menu Guia Dino para DeluxeMenus (`/guiadino`) con fondo dibujado en el pack (sha1 a121b89f…; solo se
   agregaron `assets/minecraft/font/default.json` y `textures/font/dinoearth_guia.png`). Sin probar en el juego.
 - v0.20.1 **sin compilar ni probar en el juego** (escrito en la nube): los huevos del nido se sacan con **pincel y click
-  derecho** (`nests.tool`, `nests.tool-damage`; `ANY` = como antes, click izquierdo con cualquier cosa). Un huevo por
-  segundo como mucho (el click derecho sostenido se repite cada 4 ticks), sonido de pincel y gasta durabilidad.
-  Click derecho sin pincel = info del nido + aviso (`nido-sin-pincel`); click izquierdo = `nido-pincel`.
+  derecho sostenido** `nests.brush-seconds` (7 s): el click derecho sostenido sobre la Interaction se repite cada
+  4 ticks; si pasan mas de 600 ms sin otro (`BRUSH_GAP_MS`) se solto y el progreso vuelve a cero. Barra en la barra de
+  accion (`nido-cepillando`, cuadraditos `nido-barra.*` de textos.yml), sonido de pincel y gasta durabilidad
+  (`nests.tool-damage`). `nests.tool: ANY` = como antes (click izquierdo con cualquier cosa). Click derecho sin pincel =
+  info del nido + aviso (`nido-sin-pincel`); click izquierdo = `nido-pincel`. Falta confirmar en el juego que el
+  cliente repita el click sostenido sobre la Interaction (si no, igual sirve clickeando seguido).

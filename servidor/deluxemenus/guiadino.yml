@@ -112,8 +112,9 @@ items:
       - '&8| &fponen un &#ff00d9huevo&f.'
       - '&f'
       - '&8| &fLas hembras salvajes arman &#ff00d9nidos&f:'
-      - '&8| &fcon un &#ff00d9pincel &fy click derecho sacás'
-      - '&8| &fun huevo, pero cuidado con la &#ff00d9madre&f.'
+      - '&8| &fmantené click derecho con un &#ff00d9pincel'
+      - '&8| &fpara sacar un huevo, pero cuidado'
+      - '&8| &fcon la &#ff00d9madre&f.'
       - '&f'
   'cerrar':
     material: BARRIER
